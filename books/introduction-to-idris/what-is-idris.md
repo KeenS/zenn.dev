@@ -2,10 +2,8 @@
 title: "Idrisってどんな言語？"
 ---
 
-κeenです。
-Idrisのことを知らない人も多いと思うのでIdrisの紹介からはじめていきたいと思います。
+まずは肩肘張らずにIdrisがどんな言語か雰囲気を掴みましょう。
 
-<!--more-->
 # コード例
 
 ひとまずコードを見てみましょう。
@@ -13,21 +11,21 @@ Idrisのことを知らない人も多いと思うのでIdrisの紹介からは�
 
 ## Hello World
 
-```idris
+``` idris:HelloWorld.idr
 main : IO ()
 main = putStrLn "Hello World"
 ```
 
-``` text
-$ idris hello_world.idr -o hello_world
-$ ./hello_world
+``` shell-session:ターミナル
+$ idris HelloWorld.idr -o HelloWorld
+$ ./HelloWorld
 Hello World
 ```
 
 
 ## FizzBuzz
 
-``` idris
+``` idris:FizzBuzz.idr
 import Data.String
 
 data FizzBuzz = F | B | FB | I Integer
@@ -57,8 +55,8 @@ main = do
 ```
 
 
-``` text
-$ idris fizz_buzz.idr -o fizz_buzz
+``` shell-session:ターミナル
+$ idris FizzBuzz.idr -o FizzBuzz
 $ ./fizz_buzz 15
 1
 2
@@ -77,13 +75,32 @@ fizz
 fizzbuzz
 ```
 
+# REPL
+
+IdrisにはREPL（インタラクティブシェル）もあります。 `Idris>` で始まる行が入力で、続く行が出力です。
+
+``` shell-session
+$ idris
+     ____    __     _
+    /  _/___/ /____(_)____
+    / // __  / ___/ / ___/     Version 1.3.3
+  _/ // /_/ / /  / (__  )      https://www.idris-lang.org/
+ /___/\__,_/_/  /_/____/       Type :? for help
+
+Idris is free software with ABSOLUTELY NO WARRANTY.
+For details type :warranty.
+Idris> 1 + 1
+2 : Integer
+Idris> "Hello, " ++ "REPL"
+"Hello, REPL" : String
+```
+
 # Idrisとは
-[Idris](https://www.idris-lang.org/index.html)とは *型駆動開発* のために設計されたプログラミング言語です。
-静的型付きの関数型言語で、コンパイル方式の処理系を持ちます。
+[Idris](https://www.idris-lang.org/index.html)とは *型駆動開発* のために設計されたプログラミング言語です。静的型付きの関数型言語で、コンパイル方式の処理系を持ちます。
 
 大きな特徴としては型駆動開発のために強力な型、特にプログラミング言語としては珍しい依存型を持つこと、文法がHaskellに似ていることが挙げられます。
 
-色々キーワードが出てきましたがAdvent Calendarの続きで紹介するとして、ここでは依存型とは何かを紹介します。
+色々キーワードが出てきましたが本書の続きで追い追い紹介するとして、ここでは依存型とは何かを紹介します。
 
 # 依存型とは
 
@@ -98,8 +115,7 @@ foo True  = "True"
 foo False = 0
 ```
 
-引数が `True` のときに `String` 型の値を返して、 `False` のときに `Integer` 型の値を返しています。
-これは大抵の言語では型づけできません[^ts]。
+引数が `True` のときに `String` 型の値を返して、 `False` のときに `Integer` 型の値を返しています。これは大抵の言語では型づけできません[^ts]。
 
 [^ts]: TypeScriptのように型付けできる変態もいますが…
 
@@ -113,8 +129,7 @@ foo False = 0
 
 どうですか？面白くないですか？
 
-もうちょっとユースケースが分かりやすい例に[ベクタ型](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Vect.html)などもあります。
-リスト型のようですが、 `Vect n a` と型引数にその長さ `n` を保持できます。
+もうちょっとユースケースが分かりやすい例に[ベクタ型](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Vect.html)などもあります。リスト型のようですが、 `Vect n a` と型引数にその長さ `n` を保持できます。
 
 例えばそのベクタを結合する関数 `++` は以下のような型をしています。
 
@@ -132,10 +147,11 @@ take : (n : Nat) -> Vect (n + m) elem -> Vect n elem
 
 `n` 個取り出すからには `n` 個以上のベクタを渡さないといけないんですね。
 
-このように詳細な制約を書けるのが特徴です。
-もう一歩進めるとこの制約を使って数学的な証明を書いたりもできます。
-いつかそういった面も紹介していきたいですね。
+このように詳細な制約を書けるのが特徴です。もう一歩進めるとこの制約を使って数学的な証明を書いたりもできますし、プログラムにバグがないことも証明できます。
 
-# まとめ
+「え〜、バグがないことの証明？ウソくさ〜」って思ったかもしれません。普段のプログラミングでは頑張ってテストを書いてもせいぜいバグがなさそうと分かるだけで、証明なんてできませんよね。ですがIdrisのように理論的背景のある言語だとこれが大真面目にできるんです。原理とかを説明し始めると長くなってしまうので証明の章までとっておくことにしましょう。
 
-Idrisについてかるーく紹介しました。続く記事でもうちょっと色々紹介できたらなと思います。
+
+# 本章のまとめ
+
+Idrisについてかるーく紹介しました。

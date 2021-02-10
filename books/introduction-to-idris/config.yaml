@@ -20,10 +20,10 @@ topics: ["Idris", "関数型", "プログラミング言語", "入門"] # トピ
 published: false # falseだと下書き
 price: 0 # 有料の場合200〜5000
 chapters:
-  - Idristtedonnagengo_
-  - Idrisnoinsuto_ru
-  - Idrisnokihonbunpou
-  - Idrisnokatatode_takata
+  - what-is-idris
+  - installation
+  - syntax
+  - types-and-datatypes
   - REPLdeIdrisshouryokou
   - Idrisnointafe_sutomonadonadonado
   - Idristotakahashikun

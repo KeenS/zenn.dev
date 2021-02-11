@@ -2,9 +2,7 @@
 title: "モジュールとプレリュード、標準ライブラリ"
 ---
 
-κeenです。今回はIdrisの複数のファイルだとか標準ライブラリだとかを扱おうと思います。
-
-<!--more-->
+本章ではIdrisの複数のファイルだとか標準ライブラリだとかを学びます。
 
 # モジュール
 
@@ -18,8 +16,7 @@ module Hoge
 -- ...
 ```
 
-モジュールからアテムをエクスポートするには可視性の修飾子をつけます。
-可視性の修飾子（export modifiers）は以下の3つがあります。
+モジュールからアテムをエクスポートするには可視性の修飾子をつけます。可視性の修飾子（export modifiers）は以下の3つがあります。
 
 * `private`: エクスポートしない
 * `export`: 型をエクスポートする
@@ -29,37 +26,30 @@ module Hoge
 
 他のファイルをインポートするには `import ファイル名` を使います。
 
-例：他のファイルをインポートするコード
+例：他のファイル `Hoge.idr` をインポートするコード
 
 ```idris
 import Hoge
 ```
 
 
-すると `Hoge.idr` でエクスポートされたアイテムが全て見えるようになります。
-
-少し試してみましょう。
+すると `Hoge.idr` でエクスポートされたアイテムが全て見えるようになります。少し試してみましょう。
 
 `Hoge.idr` に以下の内容を書きます。
 
-例： `Hoge.idr` に書く内容
-
-```idris
+```idris:Hoge.idr
 module Hoge
 
 private
 privateHoge : String
 privateHoge = "private"
 
-
 export
 exportHoge : String
 exportHoge = "export"
 
-
 export
 data exportData = MkExportData String
-
 
 public export
 data publicData = MkPublicData String
@@ -69,9 +59,7 @@ data publicData = MkPublicData String
 
 次に `HogeMain.idr` という名前のファイルに以下の内容を書きます。
 
-例： `HogeMain.idr` に書く内容
-
-```idris
+```idris:HogeMain.idr
 module Main
 
 import Hoge
@@ -80,7 +68,6 @@ main : IO ()
 main = do
   putStrLn privateHoge
   putStrLn exportHoge
-
 
 ex: ExportData
 ex = MkExportData "export"
@@ -92,9 +79,7 @@ pub = MkPublicData "public"
 
 これをコンパイルしてみましょう。
 
-例： `HogeMain.idr` をコンパイルするコマンド
-
-```text
+```shell-session
 $ idris -o HogeMain HogeMain.idr
 HogeMain.idr:6:8-8:21:
   |
@@ -118,8 +103,6 @@ No such variable MkExportData
 
 2箇所エラーが出ました。1つ目はここ。
 
-例：エラーになるコード（1箇所目）
-
 ``` idris
   putStrLn privateHoge
 ```
@@ -128,16 +111,12 @@ No such variable MkExportData
 
 2つ目はここ。
 
-例：エラーになるコード（2箇所目）
-
 ``` idris
 ex: ExportData
 ex = MkExportData "export"
 ```
 
-この `MkExportData` の方です。
-`ExportData` は `export` 宣言されているので型はエクスポートされていますが、 `public export` でないので定義、すなわちコンストラクタがエクスポートされていません。
-こういう細かい制御ができるんですね。
+この `MkExportData` の方です。 `ExportData` は `export` 宣言されているので型はエクスポートされていますが、 `public export` でないので定義、すなわちコンストラクタがエクスポートされていません。 こういう細かい制御ができるんですね。
 
 # モジュールとパス
 
@@ -145,22 +124,19 @@ ex = MkExportData "export"
 
 例：HogeMain.idrをコンパイルするコマンド（再掲）
 
-``` text
+``` shell-sesion
 $ idris -o HogeMain HogeMain.idr
 ```
 
-`Hoge.idr` が登場してませんね。
-`HogeMain.idr` をコンパイルするときにどこから `Hoge.idr` を探す情報を得ているかというと、 `import Hoge` です。
+`Hoge.idr` が登場してませんね。 `HogeMain.idr` をコンパイルするときにどこから `Hoge.idr` を探す情報を得ているかというと、 `import Hoge` です。
 
-びっくりなことに、 `import` 文はインポートする **ファイル名** を指定する構文なのです。
-`import ディレクトリ名.ディレクトリ名.ファイル名` とパスを指定する構文になっています。
-ファイル内に書かれている `module` 文は一切関係ありません。
+びっくりなことに、 `import` 文はインポートする **ファイル名** を指定する構文なのです。 `import ディレクトリ名.ディレクトリ名.ファイル名` とパスを指定する構文になっています。 ファイル内に書かれている `module` 文は一切関係ありません。
 
 実験してみましょう。 `Hoge/Fuga/Piyo.idr` というファイルに `Foo` というモジュールを作ってみます。
 
 例： `Hoge/Fuga/Piyo.idr` を作成するコマンド
 
-``` text
+``` shell-session
 $ mkdir -p Hoge/Fuga
 $ cat > Hoge/Fuga/Piyo.idr <<EOF
 module Foo
@@ -174,29 +150,29 @@ EOF
 
 例： `Bar.idr` を作成するコマンド
 
-``` text
+``` shell-session
 $ cat > Bar.idr <<EOF
 module Main
 import Hoge.Fuga.Piyo
 
 main : IO ()
 main = putStrLn foo
+EOF
 ```
 
 コンパイル/実行してみましょう。
 
 例： `Bar.idr` をコンパイルするコマンド
 
-``` text
+``` shell-session
 $ idris -o Bar Bar.idr
 $ ./Bar
 foo
 ```
 
-動いてますね。
+動いてますね。 `import` はパス名のみ関係し、 `module` は関係ないことが分かりました。
 
-では `module` は何に使うかというと、名前空間
-
+では `module` は何に使うかというと、名前空間に使います。
 
 # モジュールと名前空間
 
@@ -212,16 +188,11 @@ main = putStrLn Foo.foo
 ```
 
 
-モジュール名は `.` で区切ることができるんですが、これで階層構造を作っているようです。
-例えば `module Hoge.Fuga.Piyo` に `foo` が定義されているとします。
-この場合 `foo` 、 `Piyo.foo` 、 `Fuga.Piyo.foo` 、 `Hoge.Fuga.Piyo.foo` が有効な修飾名です。
+モジュール名は `.` で区切ることができるんですが、これで階層構造を作っているようです。例えば `module Hoge.Fuga.Piyo` に `foo` が定義されているとします。この場合 `foo` 、 `Piyo.foo` 、 `Fuga.Piyo.foo` 、 `Hoge.Fuga.Piyo.foo` が有効な修飾名です。
 
-これも試してみましょう。
-先程の `Hoge/Fuga/Piyo.idr` を以下のように変更します。
+これも試してみましょう。先程の `Hoge/Fuga/Piyo.idr` を以下のように変更します。
 
-例： `Hoge/Fuga/Piyo.idr` に書くコード
-
-``` idris
+``` idris:Hoge/Fuga/Piyo.idr
 module Hoge.Fuga.Piyo
 export
 foo : String
@@ -230,9 +201,7 @@ foo = "foo"
 
 そして `Bar.idr` には以下のコードを書きます。
 
-例： `Bar.idr` に書くコード
-
-``` idris
+``` idris:Bar.idr
 module Main
 import Hoge.Fuga.Piyo
 
@@ -246,27 +215,23 @@ main = do
 
 これをコンパイルしてみると、正常に動くことが分かります。
 
-``` text
+``` shell-session
 $ idris -o Bar Bar.idr
 ```
 
 ## 名前空間とmain
 
-ところで、さっきから `main : IO ()` を書くモジュールに全て `Main` とつけていたのに気付きましたか？Idrisは `Main.main` を実行しようとするのです。なので `main` を置くモジュールは `Main` と名付ける必要があります。
-今までモジュール宣言がなくても動いたのは、宣言がなかったら自動で `Main` として扱ってくれるからです。
+ところで、さっきから `main : IO ()` を書くモジュールに全て `Main` とつけていたのに気付きましたか？Idrisは `Main.main` を実行しようとするのです。なので `main` を置くモジュールは `Main` と名付ける必要があります。今までモジュール宣言がなくても動いたのは、宣言がなかったら自動で `Main` として扱ってくれるからです。
 
 ## 再エクスポート
 
-インポートしたアイテムを再度エクスポートしたい場合は `import pubil パス` の構文を使います。
+インポートしたアイテムを再度エクスポートしたい場合は `import public パス` の構文を使います。
 
 ## デフォルト可視性
 
 可視性修飾子をつけなければデフォルトでは `private` です。ですが、ファイル内でこのデフォルトを変更できます。
 
-Idrisにはディレクティブというのがあるんですが、ひとまずその事実を受け入れて下さい。
-そして可視性を変更するには `access` ディレクティブを使って `%access 可視性` と書きます。
-すると以降のアイテムにはデフォルトでその可視性が適用されます。
-例えば以下のように書きます。
+Idrisにはディレクティブというのがあるんですが、ひとまずその事実を受け入れて下さい。そして可視性を変更するには `access` ディレクティブを使って `%access 可視性` と書きます。すると以降のアイテムにはデフォルトでその可視性が適用されます。例えば以下のように書きます。
 
 例： `access` ディレクティブを使った可視性の制御
 
@@ -287,9 +252,7 @@ exportItem2 = "export"
 
 Idrisの名前空間の特徴の1つとして名前空間さえ異なれば同じ名前のアイテムを定義できるという点にあります。すなわちオーバーロードできるんですね。
 
-これをもう一歩すすめると、オーバーロードのために名前空間を作りたくなります。
-そのための機能が `namespace` です。
-`namespace 名前 本体` の構文で使います。
+これをもう一歩すすめると、オーバーロードのために名前空間を作りたくなります。そのための機能が `namespace` です。 `namespace 名前 本体` の構文で使います。
 
 例えば以下のように書きます。
 
@@ -308,6 +271,7 @@ namespace Double
   add x y = x + y
 ```
 
+2つの `add` という関数が登場していますが、それぞれ在籍する名前空間が `Int` と `Double` で違うので共存できます。
 
 REPLにロードして少し遊んでみましょう。
 
@@ -380,19 +344,19 @@ Idris> name (MkGroup 1 "group")
 "group" : String
 ```
 
+細かいですが非常にありがたい機能です。Haskellではこの機能が標準ではなく、処理系拡張の機能 `DuplicateRecordFields` を使ってようやく扱えるという具合になっています。こういう痒いところに手が届くような改善点がIdrisが推されるポイントでもあります。
+
 # preludeとbase
 
 ようやくこのときがやってきました。プレリュードと標準ライブラリについて説明します。
 
-preludeとはコンパイラに付属してついてくるライブラリのうち、インポート状態のものです。
-`import` 文を書かなくても使えます。
+prelude（プレリュード）とはコンパイラに付属してついてくるライブラリのうち、インポート状態のものです。`import` 文を書かなくても使えます。
 
 baseはコンパイラに付属してついてくるライブラリのうち、インポートしないと使えないものです。
 
-普通の言語ではプレリュード相当のものは小さいか、クラスなどに小分けにされているんですがIdrisでは結構色々なものがプレリュードに入っています。
-baseはデータ型などが入っています。
+普通の言語ではプレリュード相当のものは小さいか、クラスなどに小分けにされているんですがIdrisでは結構色々なものがプレリュードに入っています。 baseはデータ型などが入っています。
 
-preludeとbaseに何が定義されているかは以下から見れます。
+プレリュードとbaseに何が定義されているかは以下から見れます。
 
 * [prelude](https://www.idris-lang.org/docs/current/prelude_doc/)
 * [base](https://www.idris-lang.org/docs/current/base_doc/)
@@ -404,12 +368,11 @@ preludeとbaseに何が定義されているかは以下から見れます。
 
 折角なのでbaseを使ってみましょう。
 
-[`Data.Comple`](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Complex.html) あたりが手頃ですかね。
-`BaseExample.idr` に以下のコードを書きます。
+[`Data.Complex`](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Complex.html) あたりが手頃ですかね。 `BaseExample.idr` に以下のコードを書きます。
 
 例：複素数ライブラリを使ったコード
 
-``` idris
+``` idris:BaseExample.idr
 module Main
 
 import Data.Complex
@@ -427,9 +390,7 @@ main = do
 
 これをコンパイル/実行するとこうなります。
 
-例：複素数ライブラリを使ったコードをコンパイル/実行するコマンド
-
-``` text
+``` shell-session
 $ idris -o BaseExample BaseExample.idr
 $ ./BaseExample
 3 :+ 2
@@ -438,8 +399,10 @@ $ ./BaseExample
 
 使えているようですね。
 
-preludeには今までさんざん使ってきた [`putStrLn`](https://www.idris-lang.org/docs/current/prelude_doc/docs/Prelude.Interactive.html)や [`+`](https://www.idris-lang.org/docs/current/prelude_doc/docs/Prelude.Interfaces.html)、baseには初日で紹介した [`Vect`](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Vect.html)などが入っています。
+preludeには今までさんざん使ってきた [`putStrLn`](https://www.idris-lang.org/docs/current/prelude_doc/docs/Prelude.Interactive.html)や [`+`](https://www.idris-lang.org/docs/current/prelude_doc/docs/Prelude.Interfaces.html)、baseには最初の章で学んだ [`Vect`](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Vect.html)などが入っています。
 
-# まとめ
+# 本章のまとめ
 
-Idrisのモジュールとインポート、エクスポート、名前空間、オーバーロード、ライブラリなどを紹介しました。
+Idrisのモジュールとインポート、エクスポート、名前空間、オーバーロード、ライブラリなどを学びました。
+
+次回は手を動かすパートとしてビットマップ画像の書き出しをやってみます。

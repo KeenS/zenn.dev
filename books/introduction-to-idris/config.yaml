@@ -24,12 +24,12 @@ chapters:
   - installation
   - syntax
   - types-and-datatypes
-  - REPLdeIdrisshouryokou
-  - Idrisnointafe_sutomonadonadonado
-  - Idristotakahashikun
-  - Idrisnomoju_rutopureryu_do_hyoujunraiburari
-  - Idristenarai__bitsuttomappugazounokakidashi
-  - Idrisnonamaetsukiparame_tatoGADT
+  - repl
+  - interface-monad-and-more
+  - try-competitive-programming-in-idris
+  - module-prelude-and-standard-library
+  - writing-bitmap-writer
+  - named-parameters-and-gadts
   - Idrisnopakke_jitoipkg
   - Idrisdocnotsukaikata
   - IdrisnotesutotoCI

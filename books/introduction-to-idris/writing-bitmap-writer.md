@@ -1,10 +1,9 @@
 ---
-title: "Idris手習い: ビッットマップ画像の書き出し"
+title: "ビットマップ画像の書き出し"
 ---
 
 
-κeenです。今回は手を動かすパートとしてビットマップ画像の書き出しをIdrisでやってみます。
-依存型やIdrisの標準ライブラリ、ファイルの扱いなどの練習になればなと思ってます。
+今回は手を動かすパートとしてビットマップ画像の書き出しをやります。依存型やIdrisの標準ライブラリ、ファイルの扱いなどの練習になればなと思ってます。
 
 <!--more-->
 
@@ -12,8 +11,7 @@ title: "Idris手習い: ビッットマップ画像の書き出し"
 
 ビットマップ画像（正確にはBMP、Windows bitmap）とはほぼ色のデータをそのまま持っていることで有名なシンプルな画像フォーマットですね。[Wikipedia](https://ja.wikipedia.org/wiki/Windows_bitmap)なんかに画像フォーマットが載っています。
 
-フォーマットにはいくつか変種があるのですが、その中で一番簡単なフォーマットを書き出してみようと思います。
-具体的には画像フォーマットにはいくつかパラメータがあるのですが、以下の設定に固定して書き出します。
+フォーマットにはいくつか変種があるのですが、その中で一番簡単なフォーマットを書き出してみようと思います。具体的には画像フォーマットにはいくつかパラメータがあるのですが、以下の設定に固定して書き出します。
 
 * 1ピクセルあたりのビット数：24
   + こうすることでカラーパレットが不要になる
@@ -24,19 +22,21 @@ title: "Idris手習い: ビッットマップ画像の書き出し"
 
 ```text
 +-------------------+
-| ファイルヘッダ     | (BITMAPFILEHEADER)
+| ファイルヘッダ      | (BITMAPFILEHEADER)
 +-------------------+
-| 情報ヘッダ        | (BITMAPINFOHEADER)
+| 情報ヘッダ          | (BITMAPINFOHEADER)
 +-------------------+
-| ビットマップデータ |
+| ビットマップデータ   |
 +-------------------+
 ```
 
 特筆すべきはカラーパレットが不要になる点です。
 
-それぞれ見ていきましょう。
+それぞれのセクションの詳細を見ていきましょう。
 
 ## BITMAPFILEHEADER
+
+BITMAPFILEHEADERは以下の構造をしています。
 
 | オフセット | サイズ  | 格納する情報   | 値・備考                                                                                           |
 |------------|---------|----------------|----------------------------------------------------------------------------------------------------|
@@ -51,7 +51,18 @@ title: "Idris手習い: ビッットマップ画像の書き出し"
 
 今回の形式だとカラーパレットがないのでオフセットが固定値になります。
 
+``` text
+       0      1      2      3      4      5      6      7
+     +-------------+---------------------------+-------------+
+0x00 | 0x42   0x4d |           size            | 0x00   0x00 |
+     +-------------+---------------------------+-------------+
+0x08 | 0x00   0x00 |       offset = 0x36       | ....
+     +-------------+---------------------------+
+```
+
 ## BITMAPINFOHEADER
+
+BITMAPINFOHEADERは以下の構造をしています。
 
 | オフセット | サイズ  | 格納する情報              | 値・備考                                                               |
 |-----------|---------|---------------------------|------------------------------------------------------------------------|
@@ -69,16 +80,33 @@ title: "Idris手習い: ビッットマップ画像の書き出し"
 
 引用元: [Windows bitmap - Wikipedia](https://ja.wikipedia.org/wiki/Windows_bitmap)
 
-1ピクセルあたりのビット数は24bit、圧縮形式は0にするとしました。
-水平方向の解像度と垂直方向の解像度はよくわからない（設定しても表示に変わりがない）ので0にします。
-今回カラーパレットがないので使用する色数と重要な色数は0にできます。
+1ピクセルあたりのビット数は24bit、圧縮形式は0にするとしました。水平方向の解像度と垂直方向の解像度はよくわからない（設定しても表示に変わりがない）ので0にします。今回カラーパレットがないので使用する色数と重要な色数は0にできます。
 
 すると残るパラメータはビットマップの横幅、ビットマップの縦幅、画像データサイズです。
 
+``` text
+       0      1      2      3      4      5      6      7
+                                               +--------------
+0x08                                      ...  | 0x00   0x00
+     --------------+---------------------------+--------------
+0x10   0x00   0x28 |           width           |  height
+     --------------+-------------+-------------+--------------
+0x18               | 0x00   0x01 | 0x00   0x18 | 0x00   0x00
+     --------------+-------------+-------------+--------------
+0x20   0x00   0x00 |           size            | 0x00   0x00
+     --------------+---------------------------+--------------
+0x28   0x00   0x00 | 0x00   0x00   0x00   0x00 | 0x00   0x00
+     --------------+---------------------------+--------------
+0x30   0x00   0x00 | 0x00   0x00   0x00   0x00 | ...
+     --------------+---------------------------+
+```
+
+
 ## ビットマップデータ
 
-1ピクセルあたり24bitならばBGR形式でデータを置いていきます。
-ただし1行のデータが4の倍数でない場合は4の倍数になるように末尾に `0x00` を詰めてあげます。
+ビットマップデータには画像のデータを置きます。
+
+1ピクセルあたり24bitならばBGR形式でデータを置いていきます。ただし1行のデータが4の倍数でない場合は4の倍数になるように末尾に `0x00` を詰めてあげます。
 
 例えば3x3の画像だとこんな感じですかね。
 
@@ -93,16 +121,13 @@ title: "Idris手習い: ビッットマップ画像の書き出し"
 +------------+
 ```
 
-因みにBMPは座標系が数学と一緒で0行目が一番下、最終行が一番上です。
-他のよくある画像フォーマットと天地が逆になってるので注意して下さい。
-
+因みにBMPは座標系が数学と一緒で0行目が一番下、最終行が一番上です。他のよくある画像フォーマットと天地が逆になってるので注意して下さい。
 
 イメージ掴めましたか？
 
 # やってみよう
 
-ビットマップデータを受け取ってそれをBMP形式として書き出すプログラムを書いてみます。
-ほとんどのパラメータは固定なので、ビットマップデータから以下の4つのパラメータさえ計算できればあとは簡単に書き出せます。
+ビットマップデータを受け取ってそれをBMP形式として書き出すプログラムを書いてみます。ほとんどのパラメータは固定なので、ビットマップデータから以下の4つのパラメータさえ計算できればあとは簡単に書き出せます。
 
 * ファイルサイズ
 * ビットマップの横幅
@@ -111,11 +136,9 @@ title: "Idris手習い: ビッットマップ画像の書き出し"
 
 ## `Vect`
 
-今回は依存型に触れてみるというテーマもあるので `Vect` 型を使います。
-アドベントカレンダー初日でも紹介しましたが、`Vect` は長さ情報を型に持つリストです。
-baseの [`Data.Vect`](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Vect.html) に定義されています。
+今回は依存型に触れてみるというテーマもあるので `Vect` 型を使います。最初の章でも紹介しましたが、`Vect` は長さ情報を型に持つリストです。baseの [`Data.Vect`](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Vect.html) に定義されています。
 
-少しだけREPLで `Vect` を使ってみましょう。
+少しだけREPLで `Vect` を使ってみましょう。 `Vect` もリストと同じく `[要素1, 要素2, ...]` の記法で作ることができます。
 
 ```text
 Idris> :module Data.Vect
@@ -127,33 +150,31 @@ Idris> :module Data.Vect
 [1, 2, 3, 4, 1, 2, 3] : Vect 7 Integer
 ```
 
-このようにちゃんと要素数と型の `Vect n Integer` の `n` の部分が対応しています。
-しかも `(++)` で結合しても正しく要素数が保持されています。
+このようにちゃんと要素数と型の `Vect n Integer` の `n` の部分が対応しています。しかも `(++)` で結合しても正しく要素数が保持されています。
 
 これを使えば入力画像のデータを表現できそうです。
 
 
 ## 画像のデータ型
 
-画像のデータ型 `BitMap` を定義しましょう。
+画像のデータ型 `BitMap` を定義します。
 
 …とその前に色を表わす型、 `Color` を定義しておきます。
 
-``` idris
+``` idris:EasyBitMap.idr
 public export
 Color : Type
 Color = (Bits8, Bits8, Bits8)
 ```
 
-復習するとIdrisでは型も値として扱えるので、グローバル変数の定義でもって型エイリアスが作れるのでした。
-ここで登場する `Bits8` は（あんまりドキュメントに載っていない）Idrisのプリミティブで、8bitの数を表わします。符号があるかないかは分かりません。
+復習するとIdrisでは型も値として扱えるので、グローバル変数の定義でもって型エイリアスが作れるのでした。ここで登場する `Bits8` は（あんまりドキュメントに載っていない）Idrisのプリミティブで、8bitの数を表わします。符号があるかないかは分かりませんが多分ないです。
 
-可視性に `public export` がついています。
-外部とのやりとりにも `Color` を使いたいので `export` が、中身が `(Bits8, Bits8, Bits8)` であることも公開したいので `public` がついています。
+可視性に `public export` がついています。外部とのやりとりにも `Color` を使いたいので `export` が、中身が `(Bits8, Bits8, Bits8)` であることも公開したいので `public` がついています。
 
 さて、色も定義し終わって `BitMap` レコードを定義します。
 
-``` idris
+``` idris:EasyBitMap.idr
+-- importはファイルの先頭に書かないといけないので注意。 `Color` より前に置く。
 import Data.Vect
 
 export
@@ -168,24 +189,21 @@ where
 
 レコードの定義部分が `record BitMap (x : Nat) (y : Nat)` と、パラメータ `x` 、 `y` が `(x : Nat)` の形になっています。レコードのパラメータは無言でパラメータを書くと型として扱われるのですが、今回は `Vect` に渡す数値をパラメータとしたいのでその宣言です。
 
-画像データの定義に `Vect` を使っているので入力は正確に横幅 `x` 高さ `y` であることが保証できます。
-リストのリストや可変長ベクトルの可変長ベクトルのようなデータ型だとサイズを正確に表現することができません。こういったところで正確になれるのは依存型の利点かなと思います。
+画像データの定義に `Vect` を使っているので入力は正確に横幅 `x` 高さ `y` であることが保証できます。リストのリストや可変長ベクトルの可変長ベクトルのようなデータ型だとサイズを正確に表現することができません。こういったところで正確になれるのは依存型の利点かなと思います。
 
 `BitMap` の定義から直ちに `fromData` のような関数は書けますね。
 
-``` idris
+``` idris:EasyBitMap.idr
 export
 fromData : Vect y (Vect x Color) -> BitMap x y
 fromData img = MkBitMap img
 ```
 
-`MkBitMap` そのまま公開するよりもあとで他の操作を加える余地が残ります。
-実際、BitMapの複雑なフォーマットに対応しようと思ったらカラーパレットの計算などの処理が挟まります。
+`MkBitMap` そのまま公開するよりもあとで他の操作を加える余地が残ります。実際、BitMapの複雑なフォーマットに対応しようと思ったらカラーパレットの計算などの処理が挟まります。
 
-因みに、Idrisは関数型言語なので関数は一級市民です。
-上記の関数は仮引数を取らずに以下のようにも書けます。
+ところで、Idrisは関数型言語なので関数は一級市民です。上記の関数は仮引数を取らずに以下のようにも書けます。
 
-``` idris
+``` idris:EasyBitMap.idr
 export
 fromData : Vect y (Vect x Color) -> BitMap x y
 fromData = MkBitMap
@@ -207,8 +225,7 @@ fromData = MkBitMap
 
 ### Type reification
 
-正確な用語は分からないのですが、Idrisでは型を実行時に取り出すことができます。これをひとまずtype reificationと呼ぶことにします。
-どういうことかというと、普通の言語で上記 `BitMap x y` から `y` を取り出そうとすると以下のようなコードを書くことになるかと思います。
+正確な用語は分からないのですが、Idrisでは型を実行時に取り出すことができます。これをひとまずtype reificationと呼ぶことにします。どういうことかというと、普通の言語で上記 `BitMap x y` から縦幅を取り出そうとすると以下のようなコードを書くことになるかと思います。
 
 ``` idris
 getY : BitMap x y -> Int
@@ -217,8 +234,7 @@ getY b = cast $ length $ imgData b
 
 `Vect` のデータの長さを計算していますね。これが普通です。
 
-ですが、Idrisは `Vect y _` のようにデータの長さを型に持っています。
-これを取り出せないでしょうか。結論を言うと取り出せます。
+ですが、Idrisは `Vect y _` のようにデータの長さを型に持っています。これを直接取り出せるのです。
 
 以下のようなコードで取り出せます。
 
@@ -227,21 +243,18 @@ getY : BitMap x y -> Int
 getY {y} _ = cast y
 ```
 
-`getY` の仮引数の前に `{y}` を置くことで型にある `y` を取り出せるのです。
-すごいですね。
+`getY` の仮引数の前に `{y}` を置くことで型にある `y` を取り出せます。すごいですね。
 
 この記法はいくつかの機能が混ざってるのでちょっとほぐしましょう。
 
-まず、 `{y}` と書いてあるのは `{y = y}` の省略形です。 `{パラメータ名 = 変数名}` の構文です。
-型にある変数 `y` を値にある変数 `length` に束縛するには以下のように書きます。
+まず、 `{y}` と書いてあるのは `{y = y}` の省略形です。 `{パラメータ名 = 変数名}` の構文です。型にある変数 `y` を値にある変数 `length` に束縛するには以下のように書きます。
 
 ``` idris
 getY : BitMap x y -> Int
 getY {y = length} _ = cast length
 ```
 
-さらに、 `{y = ...}` で取り出せるのは暗黙のパラメータ（implicit parameter）という機能のおかげです。
-`BitMap x y` と無言で書くと `x` 、 `y` が自然数の型パラメータであることが宣言されるのが不思議に思った方はいませんか？これはコンパイラが裏でパラメータを追加しているからです。
+さらに、 `{y = ...}` で取り出せるのは暗黙のパラメータ（implicit parameter）という機能のおかげです。`BitMap x y` と無言で書くと `x` 、 `y` が自然数の型パラメータであることが宣言されるのが不思議に思った方はいませんか？これはコンパイラが裏でパラメータを追加しているからです。
 
 暗黙のパラメータを省略せずに書くとこうなります。
 
@@ -250,8 +263,7 @@ getY : {x: Nat} -> {y: Nat} -> BitMap x y -> Int
 getY {y = length} _ = cast length
 ```
 
-暗黙のパラメータは `{変数名: 型}` の構文で定義します。複数ある場合は上記のように1つづつ書くか、
-型が同じなら `{変数名1, 変数名2...: 型}` とカンマで区切って書いてもよいです。
+暗黙のパラメータは `{変数名: 型}` の構文で定義します。複数ある場合は上記のように1つづつ書くか、型が同じなら `{変数名1, 変数名2...: 型}` とカンマで区切って書いてもよいです。
 
 ``` idris
 getY : {x, y: Nat} -> BitMap x y -> Int
@@ -267,11 +279,9 @@ Idris> :t getY {x = 1} {y = 1}
 getY : BitMap 1 1 -> Int
 ```
 
+さて、ちょっと色々情報を詰め込みすぎましたかね。さしあたっては `getX` と `getY` は以下のように定義できるとだけ了解しておいて下さい。
 
-さて、ちょっと色々情報を詰め込みすぎましたかね。
-さしあたっては `getX` と `getY` は以下のように定義できるとだけ了解しておいて下さい。
-
-``` idris
+``` idris:EasyBitMap.idr
 getX : {x: Nat} -> BitMap x y -> Int
 getX {x} _ = cast x
 
@@ -279,10 +289,7 @@ getY : {y: Nat} -> BitMap x y -> Int
 getY {y} _ = cast y
 ```
 
-計算せずにサイズがとれる！ついでにいうと `getX` 行のサイズを計算するために1行目の要素を取り出すけど値がなかったら場合は…とかを考えなくてすみます。
-
-Idris2からは暗黙のパラメータは `{...} ->` で明示的に書かないと取り出せないようになってるらしいので今のうちにその書き方をすることにします。
-
+計算せずにサイズがとれて便利ですね。ついでにいうと `getX` で行のサイズを計算するときの複雑性も抑えられています。行のサイズを計算するために1行目の要素を取り出すけど値がなかったら場合は…とかを考えなくてすみますからね。
 
 ### ファイルサイズとデータサイズ
 
@@ -292,27 +299,27 @@ Idris2からは暗黙のパラメータは `{...} ->` で明示的に書かな�
 
 まず、切り上げるときのパディングサイズの計算はこうできますね。
 
-``` idris
+``` idris:EasyBitMap.idr
 padSize: Nat -> Int
 padSize x = (4 - ((cast $ x * 3) `mod` 4)) `mod` 4
 ```
 
-`` `mod` 4`` が2回挟まってますが、2回目の `` `mod` 4`` は4を0にするための計算です。
+`` d `mod` m`` で「 `d` を `m` で割った余り」を計算します。他言語でいう `%` 演算子に相当します。`` `mod` 4`` が2回挟まってますが、2回目の `` `mod` 4`` は4を0にするための計算です。
 
 これを使って `BitMap x y` からデータサイズを計算する関数は以下のように書けます。
 
-``` idris
+``` idris:EasyBitMap.idr
 dataSize : {x, y: Nat} -> BitMap x y-> Int
 dataSize {x} {y} _ =
   let rowSize = (cast $ x * 3) + (padSize x) in
   rowSize * (cast y)
 ```
 
-ここでもtype reification（？）を使ってます。
+`padSize` で1行あたりのサイズを計算し、それを列の数だけ掛けてあげればよいです。ここでもtype reification（？）を使ってます。
 
-ヘッダサイズが54でそれ以外にはビットマップデータしかないのでファイルサイズは簡単に計算できます。
+ファイルサイズは簡単に計算できます。
 
-``` idris
+``` idris:EasyBitMap.idr
 offset : Int
 offset = 14 + 40
 
@@ -320,30 +327,27 @@ fileSize : BitMap x y -> Int
 fileSize bitmap = offset + (dataSize bitmap)
 ```
 
+ヘッダサイズが54でそれ以外にはビットマップデータしかないので54とデータサイズを足すだけです。
+
 これで必要なパラメータが揃ったのでデータを書き出していきます。
 
 
 ## ファイルとバッファ
 
-これからBMPフォーマットのファイルを作ります。
-最終的にはファイルに書き出すんですが、プログラム内では一旦バッファに書き出して、それをあとでまとめてファイルに書き出しましょう。
-その方がファイル関連のエラーを1まとめにできますからね。（あとIdrisのファイルAPIに欠陥があってバイトを書き出す手段がないというのもあります。）
+これからBMPフォーマットのファイルを作ります。最終的にはファイルに書き出すんですが、プログラム内では一旦バッファに書き出して、それをあとでまとめてファイルに書き出しましょう。その方がファイル関連のエラーを1まとめにできますからね（あとIdrisのファイルAPIに欠陥があってバイトを書き出す手段がないというのもあります。）。
 
 ファイルに書き出せるバッファは [`Data.Buffer`](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Buffer.html) に定義されているのでインポートします。
 
 
-``` idris
+``` idris:EasyBitMap.idr
 import Data.Buffer
 ```
 
 `import` 文はファイルの先頭の方で書かないといけないので注意して下さいね。
 
-さて、 `Buffer` のAPIなんですが、主に使うのは `setByte : Buffer -> (loc : Int) -> (val : Bits8) -> IO ()` と `setInt : Buffer -> (loc : Int) -> (val : Int) -> IO ()` です。
-これらは書き込む場所を引数にとりますね。
-我々の用途では1バイトずつずらしながら書き込んでいくので `loc` を持って回らないといけません。
-それはちょっと面倒なので `Buffer` と `loc` をまとめたデータ型を定義しておきましょう。
+さて、 `Buffer` のAPIなんですが、主に使うのは `setByte : Buffer -> Int -> Bits8 -> IO ()` と `setInt : Buffer -> Int -> Int -> IO ()` です。これらは書き込む場所を引数にとりますね。我々の用途では1バイトずつずらしながら書き込んでいくので `loc` を持って回らないといけません。それはちょっと面倒なので `Buffer` と `loc` をまとめたデータ型を定義しておきましょう。
 
-``` idris
+``` idris:EasyBitMap.idr
 data Output = MkOutput Buffer Int
 ```
 
@@ -351,7 +355,7 @@ data Output = MkOutput Buffer Int
 
 まずは `Output` に `Int` を書き込んでくれる関数 `writeInt` です。
 
-```idris
+```idris:EasyBitMap.idr
 ||| Write int in little endian
 writeInt : Output -> Int -> IO Output
 writeInt (MkOutput buffer loc) int = do
@@ -360,15 +364,12 @@ writeInt (MkOutput buffer loc) int = do
 ```
 
 
-返り値に `loc` が更新された `Output` を返します。
-`|||` ではじまる行はドキュメントコメントです。いつか解説します。
-ドキュメントでは明示されてませんが実装を読む限り `setInt` はリトルエンディアンで4バイト書くAPIのようです。
-今回の目的に適ってるのでそれを使います。
+返り値に `loc` が更新された `Output` を返します。ドキュメントでは明示されてませんが実装を読む限り `setInt` はリトルエンディアンで4バイト書くAPIのようです。今回の目的に適ってるのでそれを使います。
 
 
 複数のバイトを受け取って書き出す `writeBytes` も定義しましょう。
 
-``` idris
+``` idris:EasyBitMap.idr
 writeBytes : Output -> List Bits8 -> IO Output
 writeBytes o []            = pure o
 writeBytes (MkOutput buffer loc) (b::bs) = do
@@ -384,18 +385,18 @@ writeBytes (MkOutput buffer loc) (b::bs) = do
 
 ```text
 +-------------------+
-| ファイルヘッダ     | (BITMAPFILEHEADER)
+| ファイルヘッダ      | (BITMAPFILEHEADER)
 +-------------------+
-| 情報ヘッダ        | (BITMAPINFOHEADER)
+| 情報ヘッダ          | (BITMAPINFOHEADER)
 +-------------------+
-| ビットマップデータ |
+| ビットマップデータ   |
 +-------------------+
 ```
 
 これに対応して、画像フォーマットを書き出すAPIは以下のような見た目になります。
 
 
-``` idris
+``` idris:EasyBitMap.idr
 export
 writeBitMap : File -> BitMap x y -> IO ()
 writeBitMap f bitmap = do
@@ -407,15 +408,14 @@ writeBitMap f bitmap = do
   -- ...
 ```
 
-前後にバッファを用意する作業やファイルに書き出す作業が挟まりますがイメージは掴めるでしょう。
-こうやって使うことを想定して、 `writeHeader` 、 `writeInfoHeader` 、 `writeImgData` を定義します。
+前後にバッファを用意する作業やファイルに書き出す作業が挟まりますがイメージは掴めるでしょう。こうやって使うことを想定して、 `writeHeader` 、 `writeInfoHeader` 、 `writeImgData` を定義します。
 
 ### writeHeader
 
 `writeHeader` はパラメータはファイルサイズしかなかったので直線的なコードになります。
 
 
-``` idris
+``` idris:EasyBitMap.idr
 writeHeader : Output -> BitMap x y -> IO Output
 writeHeader o bitmap = do
   -- file type
@@ -435,10 +435,9 @@ writeHeader o bitmap = do
 
 ### writeInfoHeader
 
-`writeInfoHeader` も `writeHeader` に続いて直線的なコードです。
-パラメータが横幅、高さ、データサイズだけです。
+`writeInfoHeader` も `writeHeader` に続いて直線的なコードです。パラメータが横幅、高さ、データサイズだけです。
 
-``` idris
+``` idris:EasyBitMap.idr
 writeInfoHeader : Output -> BitMap x y -> IO Output
 writeInfoHeader o bitmap = do
   -- header size
@@ -466,16 +465,16 @@ writeInfoHeader o bitmap = do
   pure o
 ```
 
+横幅、高さ、データサイズは全て `BitMap x y` から計算できるので引数では `BitMap x y` のみ受け取って関数内でそれぞれの値を計算しています。
+
 ### writeImgData
 
-`writeImgData` だけはちょびっとだけ複雑です。
-画像を書き出す処理は2重ループになるからです。
-とはいえ、ループを分けて書けばそんなに難しくありません。
+`writeImgData` だけはちょびっとだけ複雑です。画像を書き出す処理は2重ループになるからです。とはいえ、ループを分けて書けばそんなに難しくありません。
 
 1行を（パディングをせずに）書き出す処理はこう書けます。
 
 
-``` idris
+``` idris:EasyBitMap.idr
 writeRow : Output -> Vect m Color -> IO Output
 writeRow o []      = pure o
 writeRow o ((r, g, b)::ds) = do
@@ -483,12 +482,12 @@ writeRow o ((r, g, b)::ds) = do
   writeRow o ds
 ```
 
-BMPが画像をRGBではなくBGRで期待することを思い出して下さい。
+1行のベクタが空になるまでループしていますね。BMPが画像をRGBではなくBGRで期待することを思い出して下さい。
 
 `writeRow` を使って全ての画像データを書き出す処理はこう書けます。
 
 
-``` idris
+``` idris:EasyBitMap.idr
 writeImgData : Output -> BitMap x y -> IO Output
 writeImgData o bitmap = loop o $ imgData bitmap
 where
@@ -500,8 +499,7 @@ where
     loop o rs
 ```
 
-普通にループを回しているだけですね。
-1行書き出したあとでパディングをする処理が入っている程度です。
+普通にループを回しているだけですね。1行書き出したあとでパディングをする処理が入っている程度です。
 
 ここで使った `replicate: Nat -> a -> List a` は [`Prelude.List`](https://www.idris-lang.org/docs/current/base_doc/docs/Prelude.List.html)で定義されている関数で、`x` が `n` 個あるリストを作ります。
 
@@ -522,6 +520,7 @@ Idris> replicate 3 "hoge"
 ```
 
 
+ここまでで準備が整いました。
 
 ### writeBitMap
 
@@ -529,7 +528,7 @@ Idris> replicate 3 "hoge"
 
 一気に全体を載せてしまうとこうなります。
 
-``` idris
+``` idris:EasyBitMap.idr
 export
 writeBitMap : File -> BitMap x y -> IO ()
 writeBitMap f bitmap = do
@@ -545,15 +544,13 @@ writeBitMap f bitmap = do
 ```
 
 
-`Buffer` は `newBuffer` で作成します。そしてファイルに書き出すのは `writeBufferToFile` を使います。
-ここまで読んできた方には解説は不要でしょう。
+`Buffer` は `newBuffer` で作成します。そしてファイルに書き出すのは `writeBufferToFile` を使います。ここまで読んできた方にはこれ以上の解説は不要でしょう。
 
 # 使ってみよう
 
-先程のコードを `EasyBitMap.idr` に保存していたとします。
-`EasyBitMapMain.idr` を作成して呼び出してみましょう。
+先程のコードを `EasyBitMap.idr` に保存していたとします。`EasyBitMapMain.idr` を作成して呼び出してみましょう。
 
-``` idris
+``` idris:EasyBitMapMain.idr
 module Main
 
 import Data.Vect
@@ -564,7 +561,7 @@ import EasyBitMap
 
 画像データは手書きします。
 
-``` idris
+``` idris:EasyBitMapMain.idr
 bitMapData : Vect 16 (Vect 16 Color)
 bitMapData = [
     [w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w],
@@ -595,7 +592,7 @@ where
 
 さて、データはこれを使うとして、 `main` はこう書きます。
 
-``` idris
+``` idris:EasyBitMapMain.idr
 main : IO ()
 main = do
   [_, file] <- getArgs
@@ -607,34 +604,33 @@ main = do
   closeFile file
 ```
 
-`openFile` 、 `WriteTruncate` 、 `fflush` 、 `closeFile` などは [`Prelude.File`](https://www.idris-lang.org/docs/current/prelude_doc/docs/Prelude.File.html)で定義されたAPIです。
-`getArgs` は [`Prelude.Interactive`](https://www.idris-lang.org/docs/current/prelude_doc/docs/Prelude.Interactive.html)で定義されています。
+`openFile` 、 `WriteTruncate` 、 `fflush` 、 `closeFile` などは [`Prelude.File`](https://www.idris-lang.org/docs/current/prelude_doc/docs/Prelude.File.html)で定義されたAPIです。 `getArgs` は [`Prelude.Interactive`](https://www.idris-lang.org/docs/current/prelude_doc/docs/Prelude.Interactive.html)で定義されています。
 
 それではこれをコンパイル・実行してみましょう。
 
-``` text
+``` shell-session
 $ idris -o EasyBitMapMain EasyBitMapMain.idr
 $ ./EasyBitMapMain test.bmp
 ```
 
-私は `test.bmp` にBMP形式のデータが書き出されました。
-適当に開いてみて下さい。Linuxなら `eog test.bmp` とかで開けます。macOSだと `open test.bmp` かな？あるいはファイラーでディレクトリを開いてダブルクリックしてみて下さい。
-こんな感じの画像が見れるはずです。
+私は `test.bmp` にBMP形式のデータが書き出されました。適当に開いてみて下さい。Linuxなら `eog test.bmp` とかで開けます。macOSだと `open test.bmp` かな？あるいはファイラーでディレクトリを開いてダブルクリックしてみて下さい。こんな感じの画像が見れるはずです。
 
-<img src="data:image/bmp;base64,Qk02AwAAAAAAADYAAAAoAAAAEAAAABAAAAABABgAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////////////////////////////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAA////////////////////////////////////////////////AAAA////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////////////////////////////////////////">
+![](https://storage.googleapis.com/zenn-user-upload/8ycxib1yv4wlcwg9fm9ko13ojtsc)
+
 
 サイズが小さいので豆粒みたいですが、白地に黒い正方形が描かれています。これが表示されたら成功です。
 
-# まとめ
+# 本章のまとめ
 
-IdrisでBMP画像を書き出してみました。
-その過程で依存型やType Reification、BufferやFileなどの操作を学びました。
+IdrisでBMP画像を書き出してみました。その過程で依存型やType Reification、BufferやFileなどの操作を学びました。
 
-実はColor Bitsを24に限定すると実装を簡略化できるというのに気付かず、一度任意のColor Bitsに対応したプログラムも作っています。そちらは今回のものよりも踏み込んだ依存型の使い方をしているのでいつか紹介できたらなと思ってます。
+余談ですがColor Bitsを24に限定すると実装を簡略化できるというのに気付かず、一度任意のColor Bitsに対応したプログラムも作っています。そちらは今回のものよりも踏み込んだ依存型の使い方をしているのでそのまま解説を書いてしまうと初学者には少し厳しい内容になったかもしれません。
+
+次回は座学パートとしてGADTと名前つきパラメータを学びます。
 
 # 参考文献
 
-今回の記事は一度以下の記事を参考にBMPフォーマットを書き出すプログラムを書いてみたのがベースになっています。
+本章は一度以下の記事を参考にBMPフォーマットを書き出すプログラムを書いてみたのがベースになっています。
 
 [【バイナリファイル入門】Bitmapファイルを手書きで作って遊んでみる - Qiita](https://qiita.com/chooyan_eng/items/151e67684e5ef8d1a695)
 
@@ -644,7 +640,7 @@ IdrisでBMP画像を書き出してみました。
 
 # 付録A: 今回のコード
 
-<script src="https://gitlab.com/-/snippets/2050741.js"></script>
+https://gitlab.com/-/snippets/2050741
 
 
 # 付録B: 生成されるBMP画像のバイナリデータ

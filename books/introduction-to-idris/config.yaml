@@ -32,9 +32,8 @@ chapters:
   - theorem-prooving
   - literate-idris
   - dependent-avl-tree
-  - IdrisnoFFItoCodegen_C_JavaScript_
-  - IdrisnoElaboratorderifurekushon
-  - Idrisdetadashiimonoidowoteigishitai
-  - Idrisnohyoujunraiburaiwokaisetsushiteikuyo
-  - Idrismonadoaso_to
+  - codegen-and-ffi
+  - elaborator-reflection
+  - standard-library
+  - monads
 

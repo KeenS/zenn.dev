@@ -1,8 +1,8 @@
 ---
-title: "FFIとCodegen（C、JavaScript）"
+title: "CodegenとFFI"
 ---
 
-κeenです。今回はIdrisのFFIとCodegenについて触れたいと思います。
+本章ではあまり触れてこなかったIdrisコンパイラの裏側と、FFIについて学習します。
 
 <!--more-->
 
@@ -10,17 +10,16 @@ title: "FFIとCodegen（C、JavaScript）"
 
 いままであまり触れてきませんでしたが、Idrisは裏でCのコードを生成し、Cコンパイラがバイナリを作っています。コンパイラオプションをいじることでそれを垣間見ることができます。
 
-簡単なコードを書いて実験してみましょう。
-`codegen.idr` という名前でファイルを保存します。
+簡単なコードを書いて実験してみましょう。以下のコードを `codegen.idr` という名前で保存します。
 
-```idris
+```idris:codegen.idr
 main : IO ()
 main = putStrLn "Hello"
 ```
 
-コンパイラに `-S` （`--codegenonly`）オプションを渡すことで生成したCコードがみれます。
+コンパイラに `-S` （`--codegenonly`）オプションを渡すことで、コンパイラが生成したCコードがみれます。
 
-```text
+```shell-session
 $ idris -S codegen.idr -o codegen.c
 $ ls codegen.c
 codegen.c
@@ -28,7 +27,7 @@ codegen.c
 
 中身を覗いてみましょう。長いので一部省略します。
 
-```c
+```c:codegen.c
 #include "math.h"
 #include "idris_rts.h"
 #include "idris_bitstring.h"
@@ -98,7 +97,12 @@ loop:
 // ...
 ```
 
-典型的なCコードジェネレータですね。
+典型的なCコードジェネレータの吐いたコードです。`RESERVE` や `LOC` などはCのマクロになっています。恐らくですがIdrisのコンパイラが内部で `RESERVE` や `LOC` のような命令を持っており、それに対応するコードを生成するようなCのマクロが定義されているのです。例えば `ADDTOP` であれば以下のように定義されます。
+
+```c
+#define ADDTOP(x) vm->valstack_top += (x)
+```
+
 
 因みにここで使われている `idris_writeStr` は `idris_stdfgn.c` で定義されていて、以下のような実装になっています。
 
@@ -114,27 +118,21 @@ int idris_writeStr(void* h, char* str) {
 ```
 
 意外と素直な実装です。
-その他大文字のものはマクロ（や関数）で定義されています。
-
-```c
-#define ADDTOP(x) vm->valstack_top += (x)
-```
 
 
 # JavaScript Codegen
 
-Cのコードを吐くのがデフォルトの挙動ですが、別のコードジェネレータを使うこともできます。
-コードジェネレータ自体はプラグインとして作れるのでサードパーティも含めれば色々あるのですが、コンパイラに同梱されているものにJavaScriptがあります。
+Cのコードを吐くのがデフォルトの挙動ですが、別のコードジェネレータを使うこともできます。コードジェネレータ自体はプラグインとして作れるのでサードパーティも含めれば色々あるのですが、コンパイラに同梱されているものにJavaScriptがあります。
 
 こちらもコード生成してみましょう。 `--codegen javascript` をつけるとJavaScriptのコードを吐いてくれます。
 
-```text
+```shell-session
 $ idris --codegen javascript -S codegen.idr -o codegen.js
 ```
 
 JavaScriptのバックエンドの方は比較的小さいのでそのまま貼ってみます。
 
-```javascript
+```javascript:codegen.js
 "use strict";
 
 (function(){
@@ -207,8 +205,7 @@ Hello
 
 試してないですがブラウザでも動くはずです。
 
-因みにNode専用ならNodeバックエンドもあるので `--codegen node` という書き方もできます。
-未確認ですがこっちの方が標準出入力の扱いが上手そうです。
+因みにNode専用ならNodeバックエンドもあるので `--codegen node` という書き方もできます。未確認ですがこっちの方が標準出入力の扱いが上手そうです。
 
 ``` javascript
 // Node codegenのランタイムのコード抜粋
@@ -237,9 +234,7 @@ $JSRTS.prim_readStr = function () {
 
 # C FFI
 
-IdrisにはFFIの仕組みがあります。
-特にデフォルトのcodegenバックエンドであるCのFFIは重要です。
-例えばプレリュードの `File` は以下のようにFFIをベースに組み立てられています。
+IdrisにはFFIの仕組みがあります。特にデフォルトのcodegenバックエンドであるCのFFIは重要です。例えばプレリュードの `File` は以下のようにFFIをベースに組み立てられています。
 
 
 ``` idris
@@ -277,15 +272,9 @@ Constructors:
 
 C FFIに限っていえば `foreign C_FFI "関数名" (対応するIdrisの型)` という使い方になるでしょうか。
 
-C FFIを使うにあたって、Cのオブジェクトファイルをリンクする必要がありますよね？
-それ専用のIdrisのディレクティブもあります。
-実例で確かめてみましょう。
+C FFIを使うにあたって、Cのオブジェクトファイルをリンクする必要がありますよね？それ専用のIdrisのディレクティブもあります。実例で確かめてみましょう。まずはリンクするCのオブジェクトファイルを用意しておきましょう。一番シンプルな内容でいきます。以下の内容を `ffi.h` に保存しておきます。
 
-まずはリンクするCのオブジェクトファイルを用意しておきましょう。
-一番シンプルな内容でいきます。
-以下の内容を `ffi.h` に保存しておきます。
-
-``` c
+``` c:ffi.h
 int
 add(int, int);
 ```
@@ -293,7 +282,7 @@ add(int, int);
 
 そして `ffi.c` に以下を記述します。
 
-```c
+```c:ffi.c
 #include "ffi.h"
 
 int
@@ -304,35 +293,32 @@ add(int x, int y) {
 
 これは一旦コンパイルしておきましょう。
 
-``` text
+``` shell-session
 $ gcc -c -o ffi.o ffi.c
 ```
 
 
 これを使うIdrisのコードを書きます。
 
-Cのオブジェクトファイルを使う手段として、2つのディレクティブがあります。
-`%include` と `%link` です。それぞれ `%include バックエンド "インクルードするファイル名"` 、 `%link バックエンド "リンクするファイル名"` の構文です。
-ちゃんとドキュメントには載ってないのですが、CにおいてはそれぞれCPPの `#include`  、コンパイラの引数へと変換されると思っていてよさそうです。
+Cのオブジェクトファイルを使う手段として、2つのディレクティブがあります。 `%include` と `%link` です。それぞれ `%include バックエンド "インクルードするファイル名"` 、 `%link バックエンド "リンクするファイル名"` の構文です。ドキュメントにはちゃんと載ってないのですが、CにおいてはそれぞれCPPの `#include`  、コンパイラの引数へと変換されると思っていてよさそうです。
 
 これをふまえて、まず `ffi.idr` の先頭に以下を書きます。
 
-``` idris
+``` idris:ffi.idr
 %include C "ffi.h"
 %link C "ffi.o"
 ```
 
-`int add(int, int);` を呼び出すコードを書きましょう。
-FFIをした返り値は `IO` でないといけないようなので以下のコードを書きます。
+`int add(int, int);` を呼び出すコードを書きましょう。FFIをした返り値は `IO` でないといけないようなので以下のコードを書きます。
 
-``` idris
+``` idris:ffi.idr
 ffiAdd : Int -> Int -> IO Int
 ffiAdd = foreign FFI_C "add" (Int -> Int -> IO Int)
 ```
 
 これを使う `main` はこう書きましょう。
 
-``` idris
+``` idris:ffi.idr
 main : IO ()
 main = do
   ret <- ffiAdd 1 2
@@ -342,7 +328,7 @@ main = do
 
 これをコンパイル・実行します。
 
-``` text
+``` shell-session
 $ idris ffi.idr -o ffi
 $ ./ffi
 3
@@ -350,10 +336,10 @@ $ ./ffi
 
 簡単にではありますがC FFIを実行できました。
 
-因みに `%include` は本当に `#include "..."` しているだけのようです。
-試しに `%include` してcodegenしてみたらファイルの先頭に `#include` が足されてました。
+因みに `%include` は本当に `#include "..."` しているだけのようです。試しに `%include` してcodegenしてみたらファイルの先頭に `#include` が足されてました。
 
-``` idris
+``` c
+// ↓これ
 #include "ffi.h"
 #include "math.h"
 #include "idris_rts.h"
@@ -365,26 +351,23 @@ void* _idris_Prelude_46_Bool_46__38__38_(VM*, VAL*);
 
 # JavaScript FFI
 
-Cと同様にJavaScrptバックエンドでもFFIができます。
+Cと同様にJavaScrptバックエンドでもFFIができます。Cと同じように `add` 関数を定義した `ffi.js` を用意します。
 
-Cと同じように `add` 関数を定義した `ffi.js` を用意します。
-
-``` javascript
+``` javascript:ffi.js
 function add(x, y) {
     return x + y;
 }
 ```
 
-`%include` はCと同様です。
-`%link` はどうも意味を成さないようです。
+`%include` はCと同様です。`%link` はどうも意味を成さないようです。
 
-``` idris
+``` idris:ffi_js.idr
 %include JavaScript "ffi.js"
 ```
 
 C FFIと同じようなコードを書くと、このような書き方になります。
 
-``` idris
+``` idris:ffi_js.idr
 ffiAdd : Int -> Int -> JS_IO Int
 ffiAdd = foreign FFI_JS "add(%0, %1)" (Int -> Int -> JS_IO Int)
 ```
@@ -395,7 +378,7 @@ ffiAdd = foreign FFI_JS "add(%0, %1)" (Int -> Int -> JS_IO Int)
 
 これを使う `main`も以下のようになります。
 
-```idris
+```idris:ffi_js.idr
 main : JS_IO ()
 main = do
   ret <- ffiAdd 1 2
@@ -406,32 +389,29 @@ main = do
 
 このコードをコンパイル・実行してみましょう。
 
-``` text
-$ idris --codegen javascript ffi.idr -o ffi_gen.js
+``` shell-session
+$ idris --codegen javascript ffi_js.idr -o ffi_gen.js
 $ node ffi_gen.js
 3
-
 ```
 
 動いているようです。
 
-因みに `Node` バックエンドを使うときは `%include` の第一引数が `JavaScript` ではなく `Node` になります。それ以外は共通です。
-両方とも同じファイルをインクルードするなら2つともまとめて書いてしまえばよいでしょう。
+因みに `Node` バックエンドを使うときは `%include` の第一引数が `JavaScript` ではなく `Node` になります。それ以外は共通です。両方とも同じファイルをインクルードするなら2つともまとめて書いてしまえばよいでしょう。
 
 ``` idris
 %include JavaScript "ffi.js"
 %include Node       "ffi.js"
 ```
 
-JavaScriptバックエンドに関しては興味のある方が多いかと思いますが、申し訳ないことに私がそこまで詳しくないのであんまり詳細な内容が書けません。
-参考リンクを貼っておくので各自で試行錯誤してみて下さい。
+JavaScriptバックエンドに関しては興味のある方が多いかと思いますが、申し訳ないことに私がそこまで詳しくないのであんまり詳細な内容が書けません。参考リンクを貼っておくので各自で試行錯誤してみて下さい。
 
 * [IdrisでWebアプリを書く](https://www.slideshare.net/tanakh/idrisweb)
 * [New Foreign Function Interface — Idris 1.3.3 documentation](http://docs.idris-lang.org/en/latest/reference/ffi.html#javascript-ffi-descriptor)
 
 因みにCと同様、 `%include` は本当にファイルの中身を展開しているだけのようです。
 
-``` javascript
+``` javascript:ffi_gen.js
 // ...
 
 $JSRTS.prim_writeStr = function (x) { return console.log(x) };
@@ -443,6 +423,7 @@ $JSRTS.jsbn = (function () {
   // ...
 }).call(this);
 
+// ↓ ここ
 function add(x, y) {
     return x + y;
 }
@@ -451,4 +432,7 @@ function add(x, y) {
 ```
 
 # まとめ
-Idrisがバックエンドを複数持つこと、それぞれのバックエンドにFFIがあることを紹介しました。
+
+Idrisがバックエンドを複数持つこと、それぞれのバックエンドにFFIがあることを学びました。バックエンドの切り替えはコンパイラオプションででき、FFIは専用のディレクティブや関数を使うことで実現できました。
+
+本章もそれなりにドキュメントの薄い部分でしたが次章はさらにドキュメントがほとんどなく手探りでしか使えない機能、Elaboratorリフレクションについて学びます。

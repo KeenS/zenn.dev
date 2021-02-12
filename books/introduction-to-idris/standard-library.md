@@ -1,28 +1,19 @@
 ---
-title: "標準ライブラリを解説していくよ"
+title: "標準ライブラリざっと見"
 ---
 
-κeenです。俺たちのAdvent Calendarはまだまだ続くぜ！
-Idrisの標準ライブラリ、preludeとbaseをサクっと解説していきます。
+Idrisの標準ライブラリであるプレリュードとbaseをサクっと解説していきます。
 
-<!--more-->
-# prelude
+# プレリュード
 ## `Builtins`
 
-コンパイラから特別扱いされている型などが入っています。
-
-例えば `()` に対応する `Unit` 型や `(A, B)` に対応する `Pair` 型など。
+コンパイラから特別扱いされている型などが入っています。例えば `()` に対応する `Unit` 型や `(A, B)` に対応する `Pair` 型など。
 
 まだ紹介していないものをいくつか紹介しましょう。
 
-`replace : {a:_} -> {x:_} -> {y:_} -> {P : a -> Type} -> x = y -> P x -> P y`
-: `x = y`ならば `P x` を `P y` に書き換えられるよね。
-
-`sym : {left:a} -> {right:b} -> left = right -> right = left`
-: 等式の左右を入れ替える。 `rewrite sym $ ... in ...` の形で使うことが多い
-
-`Inf : Type -> Type`
-: （遅延した）無限の計算を表わす。`Stream` ででてくる。
+`Inf : Type -> Type`: （遅延した）無限の計算を表わす。`Stream` ででてくる。
+`replace : {a:_} -> {x:_} -> {y:_} -> {P : a -> Type} -> x = y -> P x -> P y`: `x = y`ならば `P x` を `P y` に書き換えられる。証明向け。
+`sym : {left:a} -> {right:b} -> left = right -> right = left`: 等式の左右を入れ替える。 `rewrite sym $ ... in ...` の形で使うことが多い。証明向け。
 
 ## `IO`
 
@@ -181,7 +172,6 @@ choice x = foldr (<|>) empty x
 
 choiceMap : (Foldable t, Alternative f) => (a -> f b) -> t a -> f b
 choiceMap f x = foldr (\elt, acc => f elt <|> acc) empty x
-
 ```
 
 これは最初の成功した値を取り出します。
@@ -226,8 +216,7 @@ infixr 9 .
 (.) f g = \x => f (g x)
 ```
 
-`flip` は2引数関数の引数の順序を入れ替えます。
-`(.)` と組み合わせて使うときなんかに便利ですね。
+`flip` は2引数関数の引数の順序を入れ替えます。`(.)` と組み合わせて使うときなんかに便利ですね。
 
 ``` idris
 flip : (f : a -> b -> c) -> b -> a -> c
@@ -248,9 +237,7 @@ data Dec : Type -> Type where
   No  : (contra : prop -> Void) -> Dec prop
 ```
 
-気持としては `Bool` に近いんですが、「なぜTrueなのか」、「なぜFalse」なのかの証明つきです。
-
-`the (Dec 1 = 1) (Yes Refl)` や `the (Dec (1 = 0)) (No SIsNotZ)` など。
+気持としては `Bool` に近いんですが、「なぜTrueなのか」、「なぜFalse」なのかの証明つきです。`the (Dec 1 = 1) (Yes Refl)` や `the (Dec (1 = 0)) (No SIsNotZ)` など。
 
 ## `Prelude.Bits`
 
@@ -277,8 +264,7 @@ Cast Double String where
 ## データ型
 `Prelude.Bool`, `Prelude.Chars` `Prelude.Either`, `Prelude.Double`, `Prelude.List`, `Prelude.Maybe`, `Prelude.Nat`, `Prelude.Stream`, `Prelude.String`
 
-それぞれのデータ型や関連するコードが定義されています。
-このうち `Stream` だけ触れてないので紹介します。
+それぞれのデータ型や関連するコードが定義されています。このうち `Stream` だけ触れてないので紹介します。
 
 ### `Stream`
 
@@ -291,15 +277,13 @@ data Stream : Type -> Type where
 
 例えば無限に1が続くデータ型なんかを作れます。
 
-``` idris
+``` text
 Idris> :let ones = the (Stream Int) $ repeat 1
 Idris> take 10 ones
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] : List Int
 ```
 
-素数一覧みたいに無限に続くデータ型をひとまず作っておいて、必要になったら `take` や `index` などで取り出すのが主な使い方ですかね。
-
-それこそFizzBuzzなんかもそうですね。
+素数一覧みたいに無限に続くデータ型をひとまず作っておいて、必要になったら `take` や `index` などで取り出すのが主な使い方ですかね。それこそFizzBuzzなんかもそうですね。
 
 ## `Prelude.File`
 
@@ -319,7 +303,7 @@ Idris> take 10 ones
 
 ## `Prelude.Providers`
 
-まだ紹介していないIdris面白機能の1つ、Type Providerで使うデータ型が入っています。
+Idris面白機能の1つ、Type Providerで使うデータ型が入っています。Type Providerは本書では扱わないので気にしなくてよいでしょう。
 
 ## `Prelude.Show`
 
@@ -422,8 +406,7 @@ record Kleislimorphism (f : Type -> Type) a b where
   applyKleisli : a -> f b
 ```
 
-射、自己準同型、クライスリ射です。
-まあ、これは射に色々便利なインタフェースを定義するためのデータ型ですね。
+射、自己準同型、クライスリ射です。まあ、これは射に色々便利なインタフェースを定義するためのデータ型ですね。
 
 
 ## `Control.Category`
@@ -457,8 +440,7 @@ f >>> g = g . f
 
 ## `Control.Arrow`
 
-arrow系の定義がいっぱいあります。
-arrowは矢印のことで、要するに射の合成とかその辺を担当します。
+arrow系の定義がいっぱいあります。arrowは矢印のことで、要するに射の合成とかその辺を担当します。
 
 ``` idris
 infixr 5 <++>
@@ -509,10 +491,7 @@ interface Arrow arr => ArrowLoop (arr : Type -> Type -> Type) where
 
 記号だらけで、個人的にこれを本当に全部覚えてつかいこなしている人がいるのかは疑問に思ってます。
 
-`Category` と `Arrow` は関数の抽象化を提供しています。
-関数の抽象化しているというのは「普通じゃない」関数とかを定義してもそれを他の関数と同じように扱えるということです。
-
-例えばCPS変換した関数とかですね。
+`Category` と `Arrow` は関数の抽象化を提供しています。関数の抽象化しているというのは「普通じゃない」関数とかを定義してもそれを他の関数と同じように扱えるということです。例えばCPS変換した関数とかですね。
 
 ``` idris
 import Control.Category
@@ -549,10 +528,11 @@ ArrowApply (CpsMorphism r) where
   app = Cps $ \(Cps f, x) => f x
 ```
 
+Arrowを使って関数を組み合わせるとIdrisのローカル変数などを経なくても部品を合成できるので、DSLなんかでたまに使われています。
+
 ## `Control.Isomorphism`
 
-同型を表わすデータ型です。
-ちゃんと証明オブジェクトもついていてえらいですね。
+同型を表わすデータ型です。ちゃんと証明オブジェクトもついていてえらいですね。
 
 ``` idris
 record Iso a b where
@@ -563,8 +543,7 @@ record Iso a b where
   fromTo : (x : a) -> from (to x) = x
 ```
 
-`Category` などいくつかのインタフェースも実装されています。
-基本は証明用かな？
+`Category` などいくつかのインタフェースも実装されています。基本は証明用かな？
 
 ## `Control.Catchable`
 
@@ -574,7 +553,6 @@ record Iso a b where
 interface Catchable (m : Type -> Type) t | m where
     throw : t -> m a
     catch : m a -> (t -> m a) -> m a
-
 ```
 
 `catch` を 中置記法で使うとそれっぽいですかね。
@@ -627,12 +605,12 @@ do
 -- 55
 ```
 
+純粋関数型言語の中でどうしても変更可能な値が欲しくなったときに使います。とはいっても `IO` でしか動かないのでIdris自体の純粋性は保たれます。
+
+
 ## `Data.Buffer`
 
-バッファが定義されています。
-主にファイルとの一括IOで使うのが用途のよう。
-
-IdrisでバイナリIOをしたくなると使うことになると思います。
+バッファが定義されています。主にファイルとの一括IOで使うのが用途のようです。IdrisでバイナリIOをしたくなると使うことになると思います。
 
 ## `Data.Complex`
 
@@ -697,7 +675,7 @@ data HVect : Vect k Type -> Type where
   (::) : t -> HVect ts -> HVect (t::ts)
 ```
 
-以下のように異なる型の値を格納できます。
+ヘテロジーニアスとはつまり、以下のように異なる型の値を格納できるということです。
 
 ``` text
 *Data/HVect> the (HVect [Integer, Bool, String]) [1, False, "hetero"]
@@ -710,8 +688,7 @@ data HVect : Vect k Type -> Type where
 
 ## `Data.List`
 
-`Preldhude.List` に加えてもう少し操作を定義しています。
-`intersect` などもありますが、主に証明用ですね。
+`Preldhude.List` に加えてもう少し操作を定義しています。プログラム用に `intersect` などもありますが、主に証明用ですね。
 
 ## `Data.String`
 
@@ -766,7 +743,7 @@ data Mod2 : Nat -> Type where
 
 ## `Data.So`
 
-型レベル `Bool` 相当の機能を提供します。
+条件式が成り立つことの証明オブジェクトです。
 
 ``` idris
 data So : Bool -> Type where
@@ -779,12 +756,10 @@ data So : Bool -> Type where
 usleep : (i : Int) -> { auto prf : So (i >= 0) } -> IO ()
 ```
 
-`=` なら型にあるんですが、 `>=` はありません。
-こういう計算で結果を求めるタイプの証明に便利ですね。
+`=` なら型にあるんですが、 `>=` はありません。こういう計算で結果を求めるタイプの証明に便利ですね。
 
 ## `Debug.*`
-`Debug.Error` と `Debug.Trace`はそれぞれデバッグ用に使います。
-`IO` 文脈でなくてもIO処理ができてしまう魔法の関数です。
+`Debug.Error` と `Debug.Trace`はそれぞれデバッグ用に使います。 `IO` 文脈でなくてもIO処理ができてしまう魔法の関数です。
 
 
 ``` idris
@@ -798,7 +773,7 @@ main = printLn $ 3 * (add 1 2)
 ```
 
 
-``` idris
+``` shell-session
 $ idris -o add add.idr
 $ ./add
 debbuging
@@ -809,8 +784,7 @@ debbuging
 
 ## `Language.Reflection.Utils`
 
-証明とかに便利そうな関数がちょこっと実装されています。
-他はElabに色々なインタフェースを実装する役割。
+証明とかに便利そうな関数がちょこっと実装されています。他はElabに色々なインタフェースを実装する役割があります。
 
 ## `System`
 
@@ -822,10 +796,9 @@ debbuging
 
 ## `System.Concurrency.*`
 
-`System.Concurrency.Raw` と `System.Concurrency.Channels` プロセスとチャネルを使ったコミュニケーションを提供します。 `Raw` は低レベルで型安全でないAPIなので `Channels` の方を使いましょう。
+`System.Concurrency.Raw` と `System.Concurrency.Channels` はプロセスとチャネルを使ったコミュニケーションを提供します。 `Raw` は低レベルで型安全でないAPIなので `Channels` の方を使いましょう。
 
-`"PING"` を送ったら `"PONG"` を返してくれるプロセスを立ち上げてみます。
-`spawn` に `IO ()` の値を渡すとプロセスをスタートしてくれます。その他チャネルのAPIはドキュメントとか見て下さい。
+`"PING"` を送ったら `"PONG"` を返してくれるプロセスを立ち上げてみます。 `spawn` に `IO ()` の値を渡すとプロセスをスタートしてくれます。その他チャネルのAPIはドキュメントとか見て下さい。
 
 
 ``` idris
@@ -891,7 +864,8 @@ main = do
 
 これは実行時に処理系が落ちました。
 
-``` text
+``` shell-session
+$ channel_ioref
 channel_ioref: idris_rts.c:912: doCopyTo: Assertion `0' failed.
 zsh: abort (core dumped)  ./channel_ioref
 ```
@@ -940,7 +914,7 @@ main = do
 
 コンパイル時に防げる仕組みがあったらよかったんですが残念ですね。
 
-# まとめ
+# 本章のまとめ
 
 Idrisの標準ライブラリをさっくり解説しました。
 

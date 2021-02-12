@@ -2,18 +2,15 @@
 title: "テストとCI"
 ---
 
-κeenです。今回はipkgを使ったIdrisのテストとCIを紹介していきます。CIはGitLab CIとGitHub Actions両方の設定を紹介します。
-
-<!--more-->
+本章ではipkgを使ったIdrisのテストとCIを学びます。CIはGitLab CIとGitHub Actions両方の設定を紹介します。
 
 # Idrisのテストフレームワーク
 
-フレームワークというほど大層なものではないですが、テストができる仕組みがあります。
-contribに `Test.Unit` というモジュールがあり [^1]、それらを使ってテストが書けるのです。
+フレームワークというほど大層なものではないですが、テストができる仕組みがあります。contribに `Test.Unit` というモジュールがあり [^1]、それらを使ってテストが書けるのです。
 
 [^1]: [contribのdoc](https://www.idris-lang.org/docs/current/contrib_doc/)には載っていません。更新が追い付いてないようです。
 
-テストの本体となるのは `genericTest` です。
+テストの本体となるのは `genericTest` です。REPLでドキュメントを読んでみましょう。
 
 ```text
 *Test/Unit> :doc genericTest
@@ -44,7 +41,7 @@ assertRight : Show a => Show b => Either a b -> IO Bool
 assertTrue : Bool -> IO Bool
 ```
 
-例えば `assertTrue` であれば以下のように動作します。
+REPLで動作を確認してみましょう。例えば `assertTrue` であれば以下のように動作します。
 
 ``` text
 *Test/Unit> :exec assertTrue True
@@ -66,8 +63,7 @@ False
 
 # ipkgとテスト
 
-ipkgにもテストのサポートがあります。
-`tests =` に `IO ()` の値を書き連ねておけば、 `idris --testpkg IPKG` でテストしてくれます。
+ipkgにもテストのサポートがあります。.ipkgファイルの `tests =` に `IO ()` の値を書き連ねておけば、 `idris --testpkg IPKG` でテストしてくれます。
 
 例えばipkgに以下を書いたとします。
 
@@ -95,11 +91,9 @@ namespace Main
 
 # テストを書く
 
-先日のanagramにテストを書いてみましょう。
+先日のanagramにテストを書いてみましょう。anagramパッケージは以下のようなディレクトリ構成なのでした。
 
-anagramパッケージは以下のようなディレクトリ構成なのでした。
-
-``` text
+``` shell-session
 $ tree
 .
 ├── anagram.ipkg
@@ -124,38 +118,36 @@ executable = anagram
 pkgs = contrib
 ```
 
-これにテストを加えてみましょう。
+ここをスタートとしてテストを加えてみましょう。
 
 ## 失敗するテスト
 
-まずは失敗するテストを書いてみます。
+まずは失敗するテストを書いてみます。anagram.ipkgを以下のように書き換えます。
 
-anagram.ipkgを以下のように書き換えます。
-
-``` text
-package anagram
-
-version = "0.1.0"
-author = Your name
-
-sourcedir = src
-modules = Anagram
-        , AnagramMain
-        , Tests.Anagram
-
-main = AnagramMain
-executable = anagram
-
-tests = Tests.Anagram.test
-
-pkgs = contrib
+``` diff text:anagram.ipkg
+ package anagram
+ 
+ version = "0.1.0"
+ author = Your name
+ 
+ sourcedir = src
+ modules = Anagram
+         , AnagramMain
++        , Tests.Anagram
+ 
+ main = AnagramMain
+ executable = anagram
++
++tests = Tests.Anagram.test
++
+ pkgs = contrib
 ```
 
 `modules` に `Tests.Anagram` が増えたのと、 `tests = Tests.Anagram.test` の行が増えました。
 
 これに対応して `src/Tests/Anagram.idr` に以下の内容を書きます。
 
-``` idris
+``` idris:src/Tests/Anagram.idr
 module Tests.Anagram
 
 import Test.Unit
@@ -166,7 +158,7 @@ test : IO ()
 test = runTests [ assertTrue False ]
 ```
 
-ここで、 `runTests` は以下のような関数です。
+ここで `runTests` という関数が出てきました。REPLでドキュメントを読んでみましょう。
 
 ``` text
 *Test/Unit> :doc runTests
@@ -174,10 +166,9 @@ Test.Unit.Runners.NonReporting.runTests : List (IO Bool) -> IO ()
     Run the given set of tests, but don't return the results.
 ```
 
+これを走らせてみましょう。コマンドは `idris --testpkg` です。
 
-これを走らせてみましょう。 `idris --testpkg` です。
-
-``` text
+``` shell-session
 $ idris --testpkg anagram.ipkg
 Entering directory `./src'
 Type checking /tmp/idris192645-0.idr
@@ -197,13 +188,11 @@ $ echo $?
 
 期待通りテストが失敗しましたね。
 
-しかし終了ステータスが0です。
-実装を読んだところ、どうやら `runTests` は終了ステータスには無関心のようです。
-人間が目で確認する分にはこれでもいいのですが、今回はCIでテストをしたいので失敗したら終了ステータスも0以外になってほしいです。ちょっとだけ工夫しましょう。
+しかし終了ステータスが0です。実装を読んだところ、どうやら `runTests` は終了ステータスには無関心のようです。人間が目で確認する分にはこれでもいいのですが、今回はCIでテストをしたいので少々不都合です。CIサービスは大抵コマンドの終了ステータスが0以外で終わったときにテストが失敗したと判断するからです。なのでテストに失敗したら終了ステータスも0以外になってほしいです。ちょっとだけ工夫しましょう。
 
 ### 失敗するテストを失敗させる
 
-実は `runTests` にはもう1つの（オーバーロードされた）実装があります。
+実は `runTests` にはもう1つの（オーバーロードされた）実装があります。REPLでドキュメントを確認します。
 
 ``` text
 *Test/Unit> :doc runTests
@@ -212,12 +201,11 @@ Test.Unit.Runners.Reporting.runTests : List (IO Bool) -> IO (List Bool)
 ```
 
 
-こちらは返り値が `IO (List Bool)` とテストの成否を返すようになっています。
-これを利用して1つでも失敗したテストがあれば異常終了するようにしてみましょう。
+こちらは返り値が `IO (List Bool)` とテストの成否を返すようになっています。これを利用して1つでも失敗したテストがあれば異常終了するようにしてみましょう。
 
 まずはこのようなヘルパ関数を用意します。
 
-``` idris
+``` idris:src/Tests/Anagram.idr
 -- exitをインポートする
 import System
 
@@ -233,17 +221,16 @@ exitIfFail action = do
 
 `test` 側もこれを使うようにしましょう。
 
-``` idris
-export
-test : IO ()
-test = exitIfFail $ runTests [ assertTrue False ]
+``` diff idris:src/Tests/Anagram.idr
+ export
+ test : IO ()
+-test = runTests [ assertTrue False ]
++test = exitIfFail $ runTests [ assertTrue False ]
 ```
-
 
 再度これで走らせてみます。
 
-
-``` text
+``` shell-session
 $ idris --testpkg anagram.ipkg
 Entering directory `./src'
 Type checking ./Tests/Anagram.idr
@@ -264,15 +251,13 @@ $ echo $?
 1
 ```
 
-今度はちゃんと終了ステータスが1になりましたね。
-それではこれを使ってテストを書いていきます。
+今度はちゃんと終了ステータスが1になりましたね。このまま書き進めてよさそうです。それではこれを使ってテストを書いていきます。
 
 ## anagramのテスト
 
 準備が整ったのでテストを書いていきましょう。こんな感じになるんじゃないでしょうか。
 
-
-``` idris
+``` idris:src/Tests/Anagram.idr
 import Data.SortedSet
 
 testEmptyQuery : IO Bool
@@ -294,11 +279,11 @@ test = exitIfFail $ runTests [
 ]
 ```
 
-ベストプラクティスがある訳ではないので難しいんですが、ipkgの `tests` に書くのは1ファイル1テストにして1ファイル内のテストは `runTests` で1まとめにすることにします。
+ipkgの `tests` に書くのは1ファイル1テストにして1ファイル内のテストは `runTests` で1まとめにすることにします。ベストプラクティスがある訳ではないので難しいんですが、1ファイルあたり1エントリポイントくらいにするのが煩雑にならずに丁度いいんじゃないかなと思っています。他には複数のファイルのテストをまとめたファイルを作ってしまって.ipkgファイルには1つしかエントリポイントを書かないだとか、1つ1つのテストを.ipkgファイルに書いてしまうなどもやろうと思えば可能です。もし自身で良いと思う方法が見つかったならばそれを試してみて下さい。
 
 テストを走らせてみましょう。
 
-``` text
+``` shell-session
 $ idris --testpkg anagram.ipkg
 Entering directory `./src'
 Type checking ./Tests/Anagram.idr
@@ -320,8 +305,7 @@ Leaving directory `./src'
 
 CIでテストを走らせつつmasterにpushするときはIdrisdocで生成したドキュメントを更新するようにしましょう。
 
-多様性に配慮してGitLab CIとGitHub Actionsの両方を紹介します。
-設定の簡潔さではGitLab CIの方が勝るので個人的にはGitLab CIをおすすめします。
+多様性に配慮してGitLab CIとGitHub Actionsの両方を紹介します。設定の簡潔さではGitLab CIの方が勝るので個人的にはGitLab CIをおすすめします。
 
 ## Gitリポジトリの準備
 
@@ -329,7 +313,7 @@ CIでテストを走らせつつmasterにpushするときはIdrisdocで生成し
 
 こんな感じで初期化します。
 
-``` text
+``` shell-session
 $ git init .
 $ cat <<EOF > .gitignore
 *.ibc
@@ -339,15 +323,15 @@ $ git add .
 $ git commit -m'inital commit'
 ```
 
-## 余談: CIで使えるIdrisのDockerイメージ
+:::message
+余談: CIで使えるIdrisのDockerイメージ
 
-GitLab CIでもGitHubActionsでもIdrisコンパイラが入ったDockerイメージを使うことになります。
-IdrisのDockerイメージは公式配布のものがないので個人で配布しているものを使うか、自分でビルドすることになります。
+GitLab CIでもGitHubActionsでもIdrisコンパイラが入ったDockerイメージを使うことになります。IdrisのDockerイメージは公式配布のものがないので個人で配布しているものを使うか、自分でビルドすることになります。
 
-私は[mmhelloworld/docker-idris](https://github.com/mmhelloworld/docker-idris)を使っていますが、残念ながら現時点では1.3.2までしか対応しておらず、最新版の1.3.3がありません。
-自分でビルドする手もあるのですが話がややこしくなるので一旦1.3.2に甘んじて設定を書きます。
+私は[mmhelloworld/docker-idris](https://github.com/mmhelloworld/docker-idris)を使っていますが、残念ながら現時点では1.3.2までしか対応しておらず、最新版の1.3.3がありません。自分でビルドする手もあるのですが話がややこしくなるので一旦1.3.2に甘んじて設定を書きます。
 
-Dockerイメージの設定はどのみち1行だけなので、別のイメージを使うのも特段難しいことはないでしょう。
+Dockerイメージの設定はどのみち1行だけなので、最新のイメージを使うときに別のイメージを使うのも特段難しいことはないでしょう。
+:::
 
 ## GitLab CI
 
@@ -355,7 +339,7 @@ GitLab CIは `.gitlab-ci.yml` に設定ファイルを置くだけで勝手に�
 
 `.gitlab-ci.yml` に以下のファイルを置きます。
 
-``` yaml
+``` yaml:.gitlab-ci.yml
 # インターネットに転がっていたイメージ
 # 気にする人は自分でイメージを作ると良い
 image: mmhelloworld/idris:1.3.2
@@ -381,7 +365,6 @@ pages:
 
 pushすると私が作ったリポジトリの[GitLabのパイプライン](https://gitlab.com/blackenedgold/idris-anagram/-/pipelines/232417601)のようにジョブが走ります。[生成されたドキュメント](https://blackenedgold.gitlab.io/idris-anagram/)も確認できます。
 
-
 GitLab CIについて詳しくは[GitLab CIのドキュメント](https://docs.gitlab.com/ce/ci/)を参照して下さい。
 
 
@@ -394,7 +377,7 @@ Actionsではテストとドキュメントの生成でファイルが分かれ�
 
 まずはテストの方。名前はなんでもいいんですが、 `ci.yml` という名前で作りました。
 
-``` yaml
+``` yaml:.github/workflows/ci.yml
 name: Run tests
 
 on:
@@ -413,7 +396,7 @@ jobs:
 
 次はドキュメントの方。`doc.yml` という名前で作りました。
 
-``` yaml
+``` yaml:.github/workflows/doc.yml
 name: Generate doc
 
 on:
@@ -452,6 +435,8 @@ GitHub Pagesはもうちょっと設定が必要です。リポジトリのSetti
 
 GitHub Actionsについて詳しくは[GitHub Actionsのドキュメント](https://docs.github.com/actions/learn-github-actions)を参照して下さい。
 
-# まとめ
+# 本章のまとめ
 
-Idrisのテストの書きかた、テストの走らせかた、CIのセットアップ方法を紹介しました。
+Idrisのテストの書きかた、テストの走らせかた、CIのセットアップ方法を紹介しました。テストは `Test.Unit` を使って書き、 `idris --testpkg IPKG` で走らせます。CIのセットアップ方法はGitLabとGitHubで異なります。
+
+ここまでである程度Idrisを自在に書けるようになってきたのでちょっと脱線してIdrisの高度な機能を眺めてみましょう。趣味で触る言語くらい、実用的な機能より面白い機能を優先してもいいですよね。

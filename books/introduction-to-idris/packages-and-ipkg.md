@@ -1,28 +1,26 @@
 ---
-title: "Idrisのパッケージとipkg"
+title: "パッケージとipkg"
 ---
 
-κeenです。今回はIdrisのパッケージ機能とipkgについて説明します。
+本章ではIdrisのパッケージ機能とipkgについて学びます。
 
 <!--more-->
 
-`idris` コマンドは単体でかなり高機能で、パッケージシステムも内包します。
+`idris` コマンドはかなり高機能で、パッケージシステムも内包します。
 
-標準ライブラリにpreludeとbaseがあるのは既に説明したとおりですが、他にもcontrib、effects、pruvilojというパッケージも添付されています。これらはパッケージシステムを使ってリンクしないと使えないようになっています。
+標準ライブラリにpreludeとbaseがあるのは既に学んだとおりですが、他にもcontrib、effects、pruvilojというパッケージも添付されています。これらはパッケージシステムを使ってリンクしないと使えないようになっています。
 
-これらの中でも[contrib](https://www.idris-lang.org/docs/current/contrib_doc/)は重要です。
-Idrisは標準ライブラリへの貢献に対してかなり保守的な態度を取っており、大抵のライブラリ強化の提案はcontribへとマージされることになっています。結果としてcontribがないとライブラリが貧弱な言語になってしまいます。
+これらの中でも[contrib](https://www.idris-lang.org/docs/current/contrib_doc/)は重要です。Idrisは標準ライブラリへの貢献に対してかなり保守的な態度を取っており、大抵のライブラリ強化の提案はcontribへとマージされることになっています。結果としてcontribがないとライブラリが貧弱な言語になってしまいます。
 
 # contribを使う：アナグラム
 
-
-まずはパッケージを使ってみましょう。[アナグラム](https://ja.wikipedia.org/wiki/アナグラム)を検知するプログラムです。例えば"eat"と"ate"は文字を並べ替えると互いに変換できるのでアナグラムの関係にあります。
+まずはプログラムを書きながらパッケージを使ってみましょう。題材に採るのは[アナグラム](https://ja.wikipedia.org/wiki/アナグラム)を検知するプログラムです。例えば"eat"と"ate"は文字を並べ替えると互いに変換できるのでアナグラムの関係にあります。
 
 実装方針としてはアナグラムの正規形、文字をアルファベット順に整列したものをキーとしてアナグラムの集合をバリューにもつマップを作ればよさそうです。上の例だと `"aet" -> ["eat", "ate"]` の関係を保持します。
 
 キーバリューペアはcontribの [`Data.SortedMap`](https://www.idris-lang.org/docs/current/contrib_doc/docs/Data.SortedMap.html) にあり、集合は [`Data.SortedSet`](https://www.idris-lang.org/docs/current/contrib_doc/docs/Data.SortedSet.html)にあります。早速使っていきましょう。
 
-```idris
+```idris:Anagram.idr
 module Anagram
 
 import Data.SortedMap
@@ -35,7 +33,7 @@ import Data.SortedSet
 
 空のDBも定義しておきましょう。
 
-```idris
+```idris:Anagram.idr
 export
 AnagramDB : Type
 AnagramDB = SortedMap String (SortedSet String)
@@ -49,16 +47,14 @@ emptyDB = empty
 
 新しい値を登録する処理 `register` は、まずは登録する単語の正規形を計算して、それをキーにDBにエントがあればリストにデータを加えなければ新たにデータを登録すればよさそうです。
 
-まずは正規形を計算する関数を。
+まずは正規形を計算する関数を定義します。
 
-```idris
+```idris:Anagram.idr
 normalize : String -> String
 normalize = pack . sort . unpack
-
 ```
 
-`normalize` は少し説明が必要でしょうか。ここで使っている `.` は関数の合成です。
-そして `unpack: String -> List Char` と `pack: List Char -> String` はそれぞれ `String` <-> `List Char` の変換を担当します。
+`normalize` は少し説明が必要でしょうか。ここで使っている `.` は関数を合成する演算子です。そして `unpack: String -> List Char` と `pack: List Char -> String` はそれぞれ `String` <-> `List Char` の変換を担当します。
 
 合成の様子を順番に見ると、以下のような動きをします。
 
@@ -71,9 +67,11 @@ Idris> (pack . sort . unpack) "eat"
 "aet" : String
 ```
 
+`(pack . sort . unpack) "eat"` が `pack (sort (unpack "eat"))` と同じ挙動をしていますね。
+
 あとの `register` は簡単に書けます。
 
-```idris
+```idris:Anagram.idr
 export
 register: AnagramDB -> String -> AnagramDB
 register db word =
@@ -87,13 +85,10 @@ register db word =
 
 ## 単語のクエリ
 
-ある単語のアナグラムを検索する関数 `query` も作っておきましょう。
-1つ注意しないといけないのが、その単語は自身のアナグラムなので必ずアナグラムは1つ以上あるということです。
-さらに、その単語自体は登録されてなくてもアナグラムが登録されていれば返す値に検索ワードもれないといけない点です。
-それに注意して実装すると以下のようになります。
+ある単語のアナグラムを検索する関数 `query` も作っておきましょう。1つ注意しないといけないのが登録されていない単語の扱いです。その単語は自身のアナグラムなので必ずアナグラムは1つ以上あります。さらに、その単語自体は登録されてなくてもアナグラムが登録されていれば返す値に検索ワードもいれないといけない点です。それに注意して実装すると以下のようになります。
 
 
-```idris
+```idris:Anagram.idr
 export
 query : AnagramDB -> String -> SortedSet String
 query db word =
@@ -106,10 +101,9 @@ query db word =
 
 ## パッケージのリンク
 
-一旦REPLで様子を見たいんですが、REPLでcontribを使えるようにしないといけませんね。
-`-p パッケージ名` でパッケージをロードした状態でREPLをはじめられます。
+一旦REPLで様子を見たいんですが、REPLでcontribを使えるようにしないといけませんね。パーーケージをロードするには `-p パッケージ名` のオプションを使います。 `-p パッケージ名` でパッケージをロードした状態でREPLをはじめられます。
 
-```text
+```shell-session
 $ idris -p contrib Anagram.idr
 ...
 Anagram*> 
@@ -123,31 +117,30 @@ Anagram*>
 SetWrapper (M 1 (Branch3 (Leaf "ate" ()) "ate" (Leaf "eat" ()) "eat" (Leaf "tea" ()))) : SortedSet String
 ```
 
-ちょっとみづらいですが  "ate" 、 "eat" 、 "tea" が含まれているのでよさそうです。
+ちょっと見づらいですが  "ate" 、 "eat" 、 "tea" が含まれているのでよさそうです。
 
 ## ファイルからの読み込み
 
 さっきまでの内容はライブラリとして、 `Main` を作っていきましょう
 
-```idris
+```idris:AnagramMain.idr
 module Main
 
 import Anagram
 ```
 
 
-さて、単語が沢山書かれているファイルから読み込んで、DBに登録してみましょう。
-UNIX系OSを使っているなら `/usr/share/dict/words` というファイルがあるはずです。ここに10万くらいの単語が入っています。
+さて、単語が沢山書かれているファイルから読み込んで、DBに登録してみましょう。UNIX系OSを使っているなら `/usr/share/dict/words` というファイルがあるはずです。ここに10万くらいの単語が入っています。
 
 
-```text
+```shell-session
 $ wc -l /usr/share/dict/words
 102774 /usr/share/dict/words
 ```
 
 1/5000くらいランダムサンプリングしてみましょう。
 
-```text
+```shell-session
 $ cat  /usr/share/dict/words | awk 'int(rand()*5000) == 1 { print $0 }'
 Chengdu's
 Edinburgh
@@ -175,15 +168,13 @@ temptation's
 wrapping's
 ```
 
-このように本当に単語が改行で並べられているだけのファイルです。
-ここからアナグラムDBを作りましょう。
-`/usr/share/dict/words` がなかった方は適当にファイルを用意して下さい。
+このように本当に単語が改行で並べられているだけのファイルです。ここからアナグラムDBを作りましょう。`/usr/share/dict/words` がなかった方は適当にファイルを用意して下さい。
 
 
-もうそろそろ解説がなくても読めるようになった頃ですかね。
+以下はアナグラムDBを構築するコードです。もうそろそろ解説がなくても読めるようになった頃ですかね。
 
 
-```idris
+```idris:AnagramMain.idr
 importFromFile : (filename: String) -> IO (Either FileError AnagramDB)
 importFromFile filename = do
   Right file <- openFile filename Read
@@ -202,20 +193,17 @@ where
       loop file db
 ```
 
-これも一旦REPLにロードして実行してみましょう。
-`-p contrib` を忘れずに。
+これも一旦REPLにロードして実行してみましょう。 `-p contrib` を忘れずに。
 
-ここで `/usr/share/dict/words` をロードしたいところですが問題があります。
-今まで説明してませんでしたがREPLだとコンパイラを通さずインタプリタで実行するので遅いです。
-そのREPLで10万語を読み込むのには不安があります。
+ここで `/usr/share/dict/words` をロードしたいところですが問題があります。今まで説明してませんでしたがREPLだとコンパイラを通さずインタプリタで実行するので遅いです。そのREPLで10万語を読み込むのには不安があります。
 
 ということで一旦100語くらいの辞書を作りましょう。
 
-```sh
+```shell-session
 $ cat  /usr/share/dict/words | awk 'int(rand()*1000) == 1 { print $0 }' > smalldict.txt
 ```
 
-これくらいだったらブログにも載るので付録に置いておきます。
+これくらいだったらページにも載るので章末の付録に置いておきます。
 
 では、これを実行してみましょう。
 
@@ -232,13 +220,13 @@ Can't convert handles back to TT after execution.
 
 `SortedSet` はそのままだと表示できないので加工する必要があります。 `Data.SortedSet` をいインポートしておきましょう。
 
-```idris
+```idris:AnagramMain.idr
 import Data.SortedSet
 ```
 
 表示、 `main` は以下です。
 
-```idris
+```idris:AnagramMain.idr
 showResult: AnagramDB -> String -> IO ()
 showResult db word =
   let anagrams = Anagram.query db word in
@@ -256,7 +244,7 @@ main = do
 以下のコマンドでコンパイル/実行します。
 
 
-```idris
+``` shell-session
 $ idris -o AnagramMain -p contrib AnagramMain.idr
 $ ./AnagramMain tea
 ["ate", "eat", "eta", "tea"]
@@ -266,14 +254,11 @@ $ ./AnagramMain tea
 
 # パッケージを作る
 
-さきほどのアナグラムをパッケージにしてみましょう。
-パッケージにすることでビルドが楽になります。
+さきほどのアナグラムをパッケージにしてみましょう。パッケージにすることでビルドが楽になります。
 
+新しくディレクトリを作り、さらにその下に `src/` を作ります。そして先程の `Anagram.idr` と `AnagramMain.idr` を `src` に入れます。
 
-新しくディレクトリを作り、さらにその下に `src/` を作ります。
-そして先程の `Anagram.idr` と `AnagramMain.idr` を `src` に入れます。
-
-```text
+```shell-session
 $ mkdir -p anagram/src
 $ mv Anagram.idr anagram/src
 $ mv AnagramMain.idr anagram/src
@@ -282,10 +267,9 @@ $ cd anagram
 
 ## ipkg
 
-Idrisにはパッケージ機構があるのは説明した通りです。そのためのファイルを書きましょう。
-`anagram.ipkg` に以下の内容を書きます。
+Idrisにはパッケージ機構があるのは説明した通りです。そのためのファイルを書きましょう。 `anagram.ipkg` に以下の内容を書きます。
 
-```text
+```text:anagram.ipkg
 package anagram
 
 version = "0.1.0"
@@ -299,8 +283,7 @@ executable = anagram
 pkgs = contrib
 ```
 
-少し解説しましょう。
-ipkgはIdrisの独自フォーマットで、パッケージのメタデータやビルド情報などを記述します。
+少し解説しましょう。ipkgはIdrisの独自フォーマットで、パッケージのメタデータやビルド情報などを記述します。
 
 中身は `package` から始まります。
 
@@ -341,7 +324,7 @@ pkgs = contrib
 
 これをビルドしてみましょう。
 
-```text
+```shell-session
 $ idris --build anagram.ipkg
 $ ls
 anagram  anagram.ipkg  src
@@ -349,20 +332,17 @@ anagram  anagram.ipkg  src
 
 カレントディレクトリに `anagram` ができました。実行してみましょう。
 
-```text
+```shell-session
 $ ./anagram ocean
 ["canoe", "ocean"]
 ```
 
-正しく動いていますね。
-
-このようにパッケージを作るとコマンド一発でビルドできるようになります。
+正しく動いていますね。このようにパッケージを作るとコマンド一発でビルドできるようになります。
 
 
 # パッケージをインストールする
 
-`idris --install IPKG` でライブラリをインストールすることもできます。
-IdrisのWikiにはサードパーティのライブラリが載っていて、それをダウンロードしてインストールできる仕組みになっています。
+`idris --install IPKG` でライブラリをインストールすることもできます。IdrisのWikiにはサードパーティのライブラリが載っていて、それをダウンロードしてインストールできる仕組みになっています。
 
 [Libraries · idris-lang/Idris-dev Wiki](https://github.com/idris-lang/Idris-dev/wiki/Libraries)
 
@@ -391,23 +371,23 @@ Installing Lightyear/Testing.ibc to /home/shun/.cabal/store/ghc-8.8.3/idris-1.3.
 Installing 00lightyear-idx.ibc to /home/shun/.cabal/store/ghc-8.8.3/idris-1.3.3-0851a67ad4b1dcdc142d91174b2e9b6104a6df9b6243943de3f9ab0e56756b9a/share/libs/lightyear
 ```
 
-このようにインストールできます。インストールが済んでしまえば `idris -p lightyear` やipkgの `pkgs` に書くと使えるようになります。
-シンプルながらも簡単に使えていいですね。
+このようにインストールできます。インストールが済んでしまえば `idris -p lightyear` やipkgの `pkgs` に書くと使えるようになります。シンプルながらも簡単に使えていいですね。
 
 # ipkgの他の機能
 
-`--build` や `--install` を紹介しましたが、REPLに読み込む `--repl` やドキュメントの作成などがあります。
-`idris --help` などで確認してみて下さい。
+`--build` や `--install` を紹介しましたが、REPLに読み込む `--repl` やドキュメントの作成などがあります。 `idris --help` などで確認してみて下さい。
 
-# まとめ
+# 本章のまとめ
 
-Idrisのパッケージやipkgの紹介をしました。
+Idrisのパッケージやipkgの紹介をしました。パッケージを使うには `-p パッケージ名` のオプションを `idris` コマンドに渡します。ipkgを使うには `.ipkg` ファイルを作って内容に従ったディレクトリを作ります。
 
 ipkgは便利ですが、コマンドが長いのといつも `.ipkg` の書き方を忘れるので私は便利コマンドを作っていたりします。
 
 [blackenedgold/ipkg](https://gitlab.com/blackenedgold/ipkg)
 
 もし興味があれば使ってみて下さい。
+
+次章はパッケージの続きということでドキュメントの使い方になります。
 
 # 付録
 

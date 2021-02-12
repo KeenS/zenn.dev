@@ -2,17 +2,13 @@
 title: "Idrisdocの使い方"
 ---
 
-κeenです。今回はIdrisのドキュメントコメントとそれを使ったドキュメント生成ツールの使い方を紹介します。
-
-<!--more-->
+本章ではIdrisのドキュメントコメントとそれを使ったドキュメント生成ツールの使い方を学びます。
 
 ベースになるのは [公式リファレンス](http://docs.idris-lang.org/en/latest/reference/documenting.html)です。簡素な説明しかないので少し補いながら説明していきます。
 
 # ドキュメントコメント
 
-トップレベルの宣言の前に `|||` ではじまる行を置くことでドキュメントコメントになります。
-
-例えば以下のように書けます。
+トップレベルの宣言の前に `|||` ではじまる行を置くことでドキュメントコメントになります。例えば以下のように書けます。
 
 ```idris
 ||| モジュールにドキュメントを書ける
@@ -27,8 +23,7 @@ Module Docs:
     モジュールにドキュメントを書ける
 ```
 
-ドキュメントコメントは連続して書けば複数行でも書けます。
-また、Javadocと同様の構文、 `@ パラメータ名 説明` でパラメータに説明を加えることもできます（要[名前つきパラメータ](https://keens.github.io/blog/2020/12/16/idrisnonamaetsukiparame_tatogadt/)）。
+ドキュメントコメントは連続して書けば複数行でも書けます。また、Javadocと同様の構文、 `@ パラメータ名 説明` でパラメータに説明を加えることもできます（要[名前つきパラメータ](named-parameters-and-gadts)）。
 
 ```idris
 import Data.Vect
@@ -113,7 +108,7 @@ Docs.add : (n : Nat) -> (m : Nat) -> Nat
 
 マークダウンエンジンは[cheapskate](https://hackage.haskell.org/package/cheapskate)が使われているようです。画像へのリンクなどもサポートしていますが、ターミナルでは表示できません。後述のidrisdocによるHTML生成などではできるようです。
 
-Overviewという用語が登場していますが、これは `:apropos` や `search` で検索したときに表示されます。
+Overviewという用語が登場していますが、これは `:apropos` や `:search` で検索したときに表示されます。
 
 ``` text
 Idris> :apropos add
@@ -253,11 +248,11 @@ Projections:
 
 ## REPLから
 
-`:mkdoc` コマンドでHTMLを生成できます。その際、 `doc/` 以下に生成します。
+REPLからは `:mkdoc` コマンドでHTMLを生成できます。その際、 `doc/` 以下に生成します。
 
 例えば `Docs.idr` を読み込みつつREPLを開き、 `:mkdoc Docs` でHTMLを生成するとこうなります。
 
-``` text
+``` shell-session
 $ idris Docs.idr
      ____    __     _
     /  _/___/ /____(_)____
@@ -275,17 +270,15 @@ $ ls doc
 IdrisDoc  docs  index.html  styles.css
 ```
 
-[これで生成されたドキュメント](/Idrisdocnotsukaikata/doc/index.html)を見るとpreludeなどに混じって[`Docs` モジュールのドキュメント](/Idrisdocnotsukaikata/doc/docs/Docs.html)があるのが確認できます。
-
+これで生成されたドキュメントを見るとpreludeなどに混じって `Docs` モジュールのドキュメントがあるのが確認できます。
 
 ## コマンドラインから
 
-残念ながら単一のファイルのドキュメントを生成するコマンドはなさそうでした
-（コンパイラの実装を見ましたが、 `--mkdoc` しかなかったです）。しかしパッケージのドキュメントを生成することはできます。
+残念ながらコマンドラインから単一のファイルのドキュメントを生成するコマンドはなさそうでした （コンパイラの実装を見ましたが、 `--mkdoc` しかなかったです）。しかしパッケージのドキュメントを生成することはできます。
 
 さっきの `Docs` をパッケージにしましょう。サクッと以下のようなディレクトリを作ります。
 
-``` text
+```shell-session
 $ tree
 .
 ├── Docs.ipkg
@@ -307,44 +300,41 @@ modules = Docs
 
 あとは `idris --mkdoc Docs.ipkg` を打つだけです。
 
-``` text
+``` shell-session
 $ idris --mkdoc Docs.ipkg
 Type checking src/Docs.idr
 $ ls
 Docs.ipkg  docs_doc  src
 ```
 
-こっちは `小文字のモジュール名_doc` にドキュメントが生成されます。
-内容はREPLのものと変わりません。
+こっちは `小文字のモジュール名_doc` にドキュメントが生成されます。内容はREPLのものと変わりません。
 
 ## インストールとdocdir
 
-ちょっと何に使うのか分かってないのですが、ドキュメントをインストールすることもできます。
-`--installdoc IPKG` のコマンドです。
+ちょっと何に使うのか分かってないのですが、ドキュメントをインストールすることもできます。 `--installdoc IPKG` のコマンドです。
 
-``` text
+``` shell-session
 $ idris --installdoc Docs.ipkg
 ```
 
 これは `idris --docdir` で表示される場所にドキュメントをインストールします。
 
-``` text
+``` shell-session
 $ ls $(idris --docdir)
 base  contrib  docs  effects  prelude  pruviloj
 ```
 
-`ls` の結果の中に `docs` がいますね。
-…ですがこれをどうしたらいいのかよく分かってません。Idris側ではこれらを表示するコマンドやサーバを立てる方法は用意してないようです。
+`ls` の結果の中に `docs` がいますね。…ですがこれをどうしたらいいのかよく分かってません。Idris側ではこれらを表示するコマンドやサーバを立てる方法は用意してないようです。
 
 強いていうなら以下のようにワンライナーサーバを立てるくらいでしょうか。
 
-``` text
+``` shell-session
 $ ruby -run  -e httpd $(idris --docdir)
 ```
 
+何か使い方を思い付く方は試してみて下さい。
 
-# まとめ
 
-Idrisdocの記法と生成ツールの使い方を紹介しました。
-Idrisdocにはマークダウンと引数の説明の文法がありました。
-生成ツールにはREPLから起動して名前空間を指定する方法とCLIから起動してパッケージのドキュメントを生成する方法がありました。
+# 本章のまとめ
+
+Idrisdocの記法と生成ツールの使い方を紹介しました。Idrisdocにはマークダウンと引数の説明の文法がありました。生成ツールにはREPLから起動して名前空間を指定する方法とCLIから起動してパッケージのドキュメントを生成する方法がありました。

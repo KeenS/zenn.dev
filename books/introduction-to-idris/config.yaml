@@ -1,5 +1,7 @@
 title: "プログラング言語Idrisに入門させたい"
 summary: |
+  　これは筆者（κeen）が[Idris Advent Calendar 2020](https://qiita.com/advent-calendar/2020/idris)に投稿した内容を土台とし、一冊の本になるように増補改訂を行なったものです。
+
   　本書では依存型のあるHaskellことIdrisについて紹介します。Idrisは純粋関数型言語であり構文もHaskellに似ていますが、大きな特徴として依存型があることが挙げられます。依存型があるとリストの長さを指定したり整数同士の割り算でゼロ除算が起きないことを保証したり、究極的には数学の証明をしたりもできます。また、依存型以外にもインタラクティブな開発環境を使った型駆動開発であったりElaborator Reflactionによるメタプログラミングだったりと注目に値する言語機能も揃っています。
   　総じてIdrisは非常に尖った言語です。作者がプログラミング言語理論の研究者ということもあり、かなり攻めた言語機能が入っています。依存型を搭載したプログラミング言語はほとんどみかけませんし、GADTや暗黙のパラメータなど使い慣れると手放せなくなるような機能も揃っています。明日仕事で使うかもというような言語ではないですが、その分月並な言語にはない新しい体験をさせてくれます。
   　本書は自在に使えるプログラミング言語が1つはある人を対象に、やIdrisの基本や関数型プログラミング、際立った機能などを紹介していきます。プログラミング言語の入門には「言葉で説明されても手を動かしながらじゃないと分からない」という人と「説明のない機能を使われると無理」という人がいます。両者の間をとって説明が多めの部分と手を動かす部分をほどほどに織り交ぜながら徐々にIdrisを深堀していく構成になっています。一緒にIdrisの世界を探訪し、刺激を受けてみませんか？面白そうと思った方は是非キーボードを手に取ってIdrisに入門して下さい。
@@ -8,7 +10,6 @@ topics: ["Idris", "関数型", "プログラミング言語", "入門"] # トピ
 published: false # falseだと下書き
 price: 0 # 有料の場合200〜5000
 chapters:
-  # - preface
   - what-is-idris
   - installation
   - syntax
@@ -18,8 +19,10 @@ chapters:
   - repl
   # IOモナドは分割した方がいいかも？
   - interface-monad-and-more
+  - standard-library
   # 二分探索木の例？
   - try-competitive-programming-in-idris
+  - monads
   - module-prelude-and-standard-library
   - writing-bitmap-writer
   - named-parameters-and-gadts
@@ -34,6 +37,4 @@ chapters:
   - dependent-avl-tree
   - codegen-and-ffi
   - elaborator-reflection
-  - standard-library
-  - monads
 

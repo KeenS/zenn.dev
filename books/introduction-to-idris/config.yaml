@@ -13,7 +13,7 @@ chapters:
   - what-is-idris
   - installation
   - syntax
-  # BMIの計算とか？
+  - bmi
   - types-and-datatypes
   # この辺りでList, Maybe, Eitherあたりを使いたい。
   - repl
@@ -30,7 +30,7 @@ chapters:
   - idrisdoc
   - test-and-ci
   - syntax-sugar-and-other-syntaxes
-  # この辺でもう1つくらい実例。
+  # この辺でもう1つくらい実例。 <- forth処理系じゃね？
   - with-notation-and-view
   - theorem-prooving
   - literate-idris

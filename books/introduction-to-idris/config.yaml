@@ -15,10 +15,10 @@ chapters:
   - syntax
   - bmi
   - types-and-datatypes
-  # この辺りでList, Maybe, Eitherあたりを使いたい。
+  - list-maybe-either
   - repl
-  # IOモナドは分割した方がいいかも？
   - interface-monad-and-more
+  - io-monad
   - standard-library
   # 二分探索木の例？
   - try-competitive-programming-in-idris

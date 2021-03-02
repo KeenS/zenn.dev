@@ -1,5 +1,5 @@
 * インストールのところでエディタサポートも書く
-* 早めにholeを紹介する
+* list-maybe-eitherを書く
 * GitLab snippetsの要望上げる
 * Idrisにある機能と紹介した機能のマトリックス作る
 * 「Idrisっぽいやつ」としてOXゲームか何かのAI作る

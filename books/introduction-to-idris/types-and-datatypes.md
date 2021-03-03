@@ -37,7 +37,7 @@ data Bool = True | False
 例：引数の2つあるコンストラクタのヴァリアントを1つ持つデータ型
 
 ``` idris
-data Person = MkPerson Int String
+data Person = MkPerson Integer String
 ```
 
 引数ありのコンストラクタのヴァリアントを1つ持つデータ型は頻出パターンで、構造体のように使えます。そのときのコンストラクタが構造体のコンストラクタのようになります。こういうときは `MkHoge` と `Mk` （makeの略）を前置するのが慣例です。
@@ -88,7 +88,7 @@ Cons
 例： `Person` 型から1つ目の引数、2つ目の引数の値を取り出す関数の定義
 
 ``` idris
-age : Person -> Int
+age : Person -> Integer
 age (MkPerson age _) = age
 
 name : Person -> String

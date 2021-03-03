@@ -12,7 +12,7 @@ published: true
 
 PinePhoneを雑に紹介するとLinuxで動くスマホです。まだまだ開発途上のものなので常用に耐えるものではありませんが、未来予想図的に夢があるよねーといって眺めていただけたら幸いです。
 
-世に出回っているスマートフォンはメーカーやプラットフォーマの権限が強くて安くはない金額で買っているのにも係らず誰のものか分かりませんよね。ハードウェアは自分で修理するのも禁止されていればソフトウェアはアカウントを停止されるとほとんどただのカマボコ板になってしまいます。それに気付いたらGPSデータをサーバに送られていたり、不意にカメラやマイクを起動されてプライバシーがだだ漏れになるリスクもあります。PinePhoneはそういった状況を憂慮する人のためにユーザに最大限の自由を与えたハードウェアの上にオープンソースのソフトウェアを動かすようになっています。また、マイクやカメラなどはハードウェアレベルでoffにできるのでプライバシーを心配する人にも安心です。因みに作っているのは[pine64](https://pine64.org)というところで、他にもSoCやラップトップ、タブレット、スマートウォッチなども出しています。
+世に出回っているスマートフォンはメーカーやプラットフォーマの権限が強くて安くはない金額で買っているのにも係らず誰のものか分かりませんよね。ハードウェアは自分で修理するのも禁止されていればソフトウェアはアカウントを停止されるとほとんどただのカマボコ板になってしまいます。それに、気付いたらGPSデータをサーバに送られていたり、不意にカメラやマイクを起動されてプライバシーがだだ漏れになるリスクもあります。PinePhoneはそういった状況を憂慮する人のためにユーザに最大限の自由を与えたハードウェアの上にオープンソースのソフトウェアを動かすようになっています。また、マイクやカメラなどはハードウェアレベルでoffにできるのでプライバシーを心配する人にも安心です。因みに作っているのは[pine64](https://pine64.org)というところで、他にもSoCやラップトップ、タブレット、スマートウォッチなども出しています。
 
 まあ、それとは別に普通にCPUとメモリのついたデバイスを持ち歩くならLinuxが動いていてほしいよね、という素朴な感情もあります。
 
@@ -20,39 +20,39 @@ PinePhoneを雑に紹介するとLinuxで動くスマホです。まだまだ開
 
 私が手にしたのはComunity EditionのMobian版です。MobianというのはDebianのモバイル向けのもので、要するに普通のLinuxです。
 
-Twitterで実況したのでそのときのツイート群を貼ります。Zennの仕様でリプライ元のツイートも表示されていますが、本体の方だけ見て下さい。
+Twitterで実況したのでそのときのツイート群を貼ります。 ~~Zennの仕様でリプライ元のツイートも表示されていますが、本体の方だけ見て下さい。~~ Zennに機能追加されたのでリプライ元を表示しないようにしました。ありがとうございます。
 
-https://twitter.com/blackenedgold/status/1366305418226532353
+https://twitter.com/blackenedgold/status/1366305418226532353?conversation=none
 
 開梱したら初手で裏蓋を開けてバッテリーの絶縁を剥がしたりmicroSDカードを挿したりする作業をします。
 
-https://twitter.com/blackenedgold/status/1366663694067789826
+https://twitter.com/blackenedgold/status/1366663694067789826?conversation=none
 
 このPinePhoneは日本では技適が通ってないので無線機能を使うとお巡りさんがやってきます。なので無線をoffにして使用しています。
 
 WiFiが使えなくてもUSB Type-Cのポートがあるのでコネクタを通して有線LANを挿せばインターネットに繋がります。
 
-https://twitter.com/blackenedgold/status/1366661949895835652
+https://twitter.com/blackenedgold/status/1366661949895835652?conversation=none
 
 起動するとセットアップがはじまります。
 
-https://twitter.com/blackenedgold/status/1366664127729393664
+https://twitter.com/blackenedgold/status/1366664127729393664?conversation=none
 
-https://twitter.com/blackenedgold/status/1366666374072868867
+https://twitter.com/blackenedgold/status/1366666374072868867?conversation=none
 
-https://twitter.com/blackenedgold/status/1366666930615058434
+https://twitter.com/blackenedgold/status/1366666930615058434?conversation=none
 
 ツイートの間隔を見てもらったら分かるかと思うんですが、10分ほどかかります。
 
 ハードウェアのところで触れますが、低スペックなSoCがベースなので動作は遅いです。スクロールするときも指の動きについてこれないので割と操作しづらいです。
 
-https://twitter.com/blackenedgold/status/1366672816804818953
+https://twitter.com/blackenedgold/status/1366672816804818953?conversation=none
 
 PinePhoneの大きな特徴の1つにConvergence、つまりてディスプレイやキーボードなどを繋げば普通のLinux PCとしても扱える点があります。
 
-https://twitter.com/blackenedgold/status/1366673379235794945
+https://twitter.com/blackenedgold/status/1366673379235794945?conversation=none
 
-https://twitter.com/blackenedgold/status/1366675647410544640
+https://twitter.com/blackenedgold/status/1366675647410544640?conversation=none
 
 正直Linux PCどころかスマホとしてもスペック不足でかなり扱いづらいものですが、こういう面白いことのできる実機があるのはいいですよね。
 
@@ -62,7 +62,11 @@ PinePhoneは普通のLinuxカーネルで動いているらしいです。Linux�
 
 Mobianは割と普通のDebianでした。SettingsとかSoftwareとかNautilusとか、普通にDebian（Ubuntu）でみかけるアプリが動いています。違いはデスクトップ環境とウィンドウマネージャがモバイルも意識してるな、くらいでした。UIはウィンドウサイズが小さいとスマホっぽい見た目になるだけで、アプリケーションは今までどおりっぽいです。アプリストアについても普通のDebianのパッケージがそのままのようです（SoftwareがそもそもDebianにある）。カメラや電話などいくつかの機能については専用アプリが用意されています。
 
-プリインストールこそされていないものの、Softwareからターミナルをインストールすれば普通にターミナルが使えるはずです。ですがSoftwareが不安定でインストールする前に落ちてしまうので試せませんでした。今後の課題とします。
+プリインストールこそされていないものの、Softwareからターミナルをインストールすれば普通にターミナルが使えるはずです。ですがSoftwareが不安定でインストールする前に落ちてしまうので試せませんでした。~~今後の課題とします。~~ 追記： デフォルトで入っているKing's Crossというアプリがターミナルでした（いつものクセでgnome-terminalを探してしまった）。
+
+![](https://storage.googleapis.com/zenn-user-upload/tx73m0hwmsqfoh4p90v71rj86swq)
+
+普通のLinuxとして使えそうですね。 /追記
 
 開発者に実機を届けるという目的がある程度達成されたのか、[Community Editionが終了する](https://www.pine64.org/2021/02/02/the-end-of-community-editions/)ことがアナウンスされました。色々なコミュニティエディションを出して感触を掴んだり資金繰りがどうこうとか色々な要因があったのだとは思いますが、現状から一歩前進できたという解釈でいいのかな？新機種のアナウンスがくるといいですね。
 

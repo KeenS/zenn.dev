@@ -4,7 +4,7 @@ title: List、Maybe、Eitherに親しむ
 
 本章ではIdrisを書く上で一番使う3つのデータ型、 `List` 、 `Maybe` 、 `Either` を使っていきます。
 
-前章で軽く標準ライブラリで定義された `List a` や `Maybe a` 、 `Either a b` を使ってみました。本章ではもう少し色々な操作を扱ってみます。
+前章では軽く標準ライブラリで定義された `List a` や `Maybe a` 、 `Either a b` を使ってみました。本章ではもう少し色々な操作を扱ってみます。これらのデータ型はIdrisに限らず関数型言語で非常によく使うデータ型なので関数型言語っぽさがでます。そういった点も踏まえてご覧下さい。
 
 # List型と再帰
 
@@ -207,8 +207,175 @@ reverse l = foldl (::) [] l
 
 `reverse` は `foldl` でしか書けないので明快でいいのですが、 `sum` のように `foldl` でも `foldr` でも書ける関数は `foldl` と `foldr` のどちらを使えばいいのでしょう。答えは `foldl` が使えるなら `foldl` を使います。これはパフォーマンス上の理由によります。
 
-`foldr` で実装した `sum` と `foldl` で実装した `sum` の挙動を追い掛けて確認しましょう。
+`foldr` で実装した `sum` と `foldl` で実装した `sum` の挙動を追い掛けて確認しましょう。`foldl (+) 0 [1, 2, 3]` と `foldr (+) 0 [1, 2, 3]`で比べます。
+
+```
+foldl (+) 0 [1, 2, 3]  | foldr (+) 0 [1, 2, 3]
+loop [1, 2, 3] 0       | (+) 1 (foldr (+) 0 [2, 3])
+loop [2, 3] ((+) 1 0)  | (+) 1 ((+) 2 (foldr (+) 0 [3]))
+loop [2, 3] 1          | (+) 1 ((+) 2 ((+) 3 (foldr (+) 0 [])))
+loop [3] ((+) 2 1)     | (+) 1 ((+) 2 ((+) 3 (0)))
+loop [3] 3             | (+) 1 ((+) 2 3)
+loop [] ((+) 3 3)      | (+) 1 5
+loop [] 6              | 6
+6                      |
+```
+
+注目してほしいのは途中で発生する式の大きさです。`foldl` の方は逐次 `+` を計算できるので式の大きさが一定です。一方で `foldr` はリストの最後にいくまで計算できないので途中式大きくなってしまいます。この途中式がスタックを消費するので効率が悪い上に、大きなリストを与えるとスタックオーバーフローが起きかねません。 `foldl` の方は途中式がないとコンパイラが見抜いてループに書き換えてくれます。なので `loop` 関数は本当にループなのです。どういう条件で書き換えてくれるかは **末尾再帰の最適化** などのワードで検索してみて下さい。
+
+## Foldを使わないとき
+
+`foldr` と `foldl` がリスト処理の基礎と説明しました。では、foldを使わないケースはあるのでしょうか。まあ、感覚で分かるかと思いますが、あります。foldはリストの全ての要素について繰り返すので、ループを途中で打ち切りたい場合なんかにはfoldを使えません。
+
+例えばリスト内に指定した条件を満たす要素があるか調べる関数 `any` はこう実装することになるでしょう。
+
+例：リスト内に指定した条件を満たす要素があるか調べる関数の定義
+
+``` idris
+any: List a -> (a -> Bool) -> Bool
+any []         _ = False
+any (hd :: tl) f = if f hd then True else any tl f
+```
+
+`::` のマッチのところで `f hd` が `True` かどうかで再帰をするかしないかを分岐しています。foldではこういう制御ができません。余談ですが分かりやすさのために `if` 式を使いましたがこの実装は `||` 演算子を使って `f hd || any tl f` と簡潔に書けます。
+
+# Maybeを使う
+
+さっきはあるかないかだけを返す関数でしたが、今度はそのインデックスを返す関数 `position` を定義してみましょう。この関数はIdrisの標準ライブラリにはないようでした。今度はインデックスを持ち回る必要があるので `loop` 補助関数を使います。
+
+例：リスト内に指定した条件を満たす最初の要素のインデックスを返す関数の定義（部分）
 
 
-index
-maybe
+``` idris
+position: List a -> (a -> Bool) -> Nat
+position l f = loop l 0
+where
+  loop : List a -> Nat -> Nat
+  -- ...
+```
+
+`List a` と要素が条件を満たすか判定する `a -> Bool` 関数を引数にとり、返り値は `Nat` 、自然数を返します（[#0は自然数](https://twitter.com/search?q=%230は自然数&src=typed_query&f=live)）。リストの長さは0以上で上限は存在しないのでそのインデックスも0以上で上限が存在しない `Nat` を返すのが適切です。
+
+`[]` と `::` で分岐しますが、 `::` の方は分かりやすいですね。こう実装します。
+
+``` idris
+  loop []         n = ?hole
+  loop (hd :: tl) n = if f hd then n else loop tl (1 + n)
+```
+
+問題は `[]` のときの処理です。再帰が `[]` まできたということは、そのリストに該当する要素がないということです。存在しないもののインデックスは返せませんね。どうしましょう。言語によっては `-1` を返すようなAPIもありますが、それを知らずに使ってしまうとエラーの元になります。さらに今回は0以上の値しかとらない `Nat` を使っているのでそもそも `-1` は返せません。どうしたもんでしょう。
+
+こういうときは `Maybe` を使います。`Maybe` 型を復習するとおおむね以下のように定義されているデータ型です。
+
+``` idris
+data Maybe a = Nothing | Just a
+```
+
+`Maybe` のときにデータがないことを表わし、 `Just` のときにデータがあることを表わします。ということで `Maybe` を使って `position` を実装するとこうなります。
+
+
+``` idris
+position: List a -> (a -> Bool) -> Maybe Nat
+position l f = loop l 0
+where
+  loop : List a -> Nat -> Maybe Nat
+  loop []         n = Nothing
+  loop (hd :: tl) n = if f hd then Just n else loop tl (1 + n)
+```
+
+これを使う側は `case` 式で `Maybe` が `Nothing` なのか `Just` なのかを場合分けすることになります。
+
+例： `position` の結果に対して `case` で場合分けするコード片
+
+``` idris
+let list = [1, 2, 3, 4] in
+case position list (\n => n `mod` 2 == 0) of
+  Nothing => "No evens"
+  Just i  => "Found an even at " ++ (show i)
+```
+
+
+これは `position` で `2` が `(\n => n `mod` 2 == 0)` を満たすので `Just 1` が返り、 `case` 式全体としては `"Found an even at 1"` が返ります。
+
+## Maybeを操作する
+
+`Maybe` を操作する関数も色々とあります。先の `case` を使った式を関数で書き直してみましょう。
+
+まずは `map` です。 `map` は `Nothing` には何もせず、 `Just` ならその値に関数を適用します。
+
+例： `map` の動作例
+
+``` text
+Idris> map (1+) Nothing
+Nothing : Maybe Integer
+Idris> map (1+) (Just 0)
+Just 1 : Maybe Integer
+```
+
+イメージとしては以下のような定義です。
+
+``` idris
+map : (a -> b) -> Maybe a -> Maybe b
+map _ Nothing  = Nothing
+map f (Just x) = Just (f x)
+```
+
+この `map` を使えば `Just` の方の値を制御できます。
+つ
+次は `fromMaybe` です。 `fromMaybe` は `Maybe a` が `Just x` なら `x` を、 `Nothing` なら引数で与えた `a` の値を返します。
+
+例： `fromMaybe` の動作例
+
+``` text
+Idris> fromMaybe True (Just False)
+False : Bool
+Idris> fromMaybe True Nothing
+True : Bool
+```
+
+イメージとしては以下の定義です。
+
+``` idris
+fromMaybe : a -> Maybe a -> a
+fromMaybe def Nothing  = def
+fromMaybe def (Just j) = j
+```
+
+さっきから「イメーイとしては」といっているのは実際には少しだけ複雑な定義をしているためです。複雑というよりまだ紹介していない機能を使った実装ですね。大枠としては変わらないので今はあまり気にしなくてよいです。
+
+さて、これらを組み合わせれば先程の `position` の返り値で条件分岐するコードは条件分岐なしに書き換えられます。
+
+``` text
+let list = [1, 2, 3, 4] in
+fromMaybe "No evens"
+          (map (\i => "Found an even at " ++ (show i))
+               (position list (\n => n `mod` 2 == 0)))
+```
+
+`map` と `fromMaybe` はよく使うのでえておいて下さい。因みにそんなによくは使わないんですが、今回のユースケースだとピタリとあてはまる関数に `maybe` があります。それを使えばもう少し短くなります。
+
+``` idris
+let list = [1, 2, 3, 4] in
+maybe "No evens"
+      (\i => "Found an even at " ++ (show i))
+      (position list (\n => n `mod` 2 == 0))
+```
+
+`maybe` は要するに `Maybe` の `Nothing` と `Just` を別のもので置き換える関数ですね。ほぼ `Maybe` への `case` 式を抽象化したようなものです。
+
+例： `maybe` 関数の定義イメージ
+
+``` idris
+maybe : b -> (a -> b) -> Maybe a -> b
+maybe n j Nothing  = n
+maybe n j (Just x) = j x
+```
+
+これも覚えておいて下さい。
+
+# Eitherでエラー処理
+
+maybeのcaseとかmapとかfromMaybeとか
+
+foldと*でreturn
+foldと/でeither とか？

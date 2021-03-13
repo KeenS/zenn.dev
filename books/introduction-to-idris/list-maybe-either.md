@@ -375,7 +375,76 @@ maybe n j (Just x) = j x
 
 # Eitherでエラー処理
 
-maybeのcaseとかmapとかfromMaybeとか
+正しく値を計算できない場合は `Maybe` で値がないかもしれないことを表わせばいいことが分かりました。しかし `Maybe` ではどうして値を計算できないのかを知る術がありません。そこで `Maybe` の `Nothing` の部分にも値を持たせてエラーを扱えるようにしたデータ型が考えられます。それが `Either` です。 `Either` について復習するとおおむね以下のように定義されているデータ型です。
 
-foldと*でreturn
-foldと/でeither とか？
+``` idris
+data Either a b = Left a | Right b
+```
+
+そして `Left` が失敗したときの値、 `Right` が正しく計算できたときの値を保持するのでした。
+
+`Either` 型を使ってみましょう。2つのリストのそれぞれ要素をペアにする関数 `zipE` を書いてみます。ただし左右のどちらかが短かったらどちらが短かったかを表わすエラーを返します。以下のように動作します。
+
+例：`zipE` の動作例
+
+``` text
+Idris> zipE [1, 2, 3] [4, 5, 6]
+Right [(1, 4), (2, 5), (3, 6)] : Either ZipError (List (Integer, Integer))
+Idris> zipE [1, 2, 3, 4] [4, 5, 6]
+Left ShortRight : Either ZipError (List (Integer, Integer))
+Idris> zipE [1, 2, 3] [4, 5, 6, 7]
+Left ShortLeft : Either ZipError (List (Integer, Integer))
+```
+
+それでは書いていきましょう。まずは失敗したときのエラー型 `ZipError` を定義します。
+
+``` idris
+data ZipError = ShortLeft | ShortRight
+```
+
+`ShortLeft` が左側の引数のリストが短いとき、 `ShortRight` が右側の引数のリストが短いときを表します。`zipE` の型は以下です。
+
+``` idris
+zipE : List a -> List b -> Either ZipError (List (a, b))
+```
+
+返り型の左に失敗したときの型 `ZipError` が、右に成功したときの型 `List (a, b)` が書かれていますね。これを実装します。両方とも空リストのときは正しく空リストが返ります。
+
+``` idris
+zipE []       []     = Right []
+```
+
+正しく計算できたので `Right` で返っています。左右どちらかが空リストで、他方が `::` の場合は長さが違うのでエラーを出します。
+
+
+``` idris
+zipE []      (_::_)  = Left ShortLeft
+zipE (_::_)  []      = Left ShortRight
+```
+
+正しく計算できないので `Left` が返っています。両方とも `::` の場合は計算を一歩進められます。ここで再帰を使うのですが、 `zipE` が `Either` を返すのでそれをちゃんと扱わないといけません。すなわち、 `zipE` がエラーのときはそのままエラーを返し、 `zipE` が正しく計算できたときはペアにする処理を進めます。以下のような実装になるでしょう。
+
+
+``` idris
+zipE (x::xs) (y::ys) = case zipE xs ys of
+                         Left e     => Left e
+                         Right list => Right ((x, y) :: list)
+```
+
+まずは `zipE xs ys` を呼び、それがエラーであれば `Left e =>` の節にいくので腕の部分で `Left e` を返しています。正しく計算できていれば `Right list =>` の節にいくので腕の部分で `(x, y) :: list` と計算しています。これでも正しく動作するのですが、ちょっと冗長な部分がありますよね。 `Left e => Left e` のことです。もうちょっと言うと `Right ... => Right ...` と `Right` でマッチして `Right` を再度作っているところもです。この処理は何もしていないのでいかにも無駄です。この無駄を避ける方法はあって、 `map` を使うとサッパリと書けます。
+
+``` idris
+zipE (x::xs) (y::ys) = map (\list => (x, y) :: list) (zipE xs ys)
+```
+
+`List` や `Maybe` にもあるのでなんとなく受け入れられるでしょう。`Either` の場合は引数が2つあるのでちょっと混乱しがちですが、 `Right` の値を正しいとしているので `Right` にのみ作用します（right-biasedなどと呼ばれます）。因みにセクションを思い出してもらうと上記はもっと短くも書けます。
+
+``` idris
+zipE (x::xs) (y::ys) = map ((x, y) ::) (zipE xs ys)
+```
+
+`Either` にも `Maybe` の `fromMaybe` や `maybe` などに相当する `fromEither` や `either` もありますが、それらはまた出てきたときに扱いましょう。
+
+# 本章のまとめ
+
+本章ではIdrisでよく使う3つのデータ型とその扱いについて学びました。`List`はコレクションを、`Maybe` はないかもしれないデータを、 `Either` は失敗するかもしれない計算を表わすのに使いました。これらのデータ型の扱いは基本は（再帰）関数や `case` 式ですが、既にIdrisに定義されている関数も多彩にあるのでそれらを組み合わせて使うことになります。

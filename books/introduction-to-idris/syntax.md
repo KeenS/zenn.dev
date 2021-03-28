@@ -81,7 +81,7 @@ add x y = x + y
 
 `let 変数 = 式 in 続く式` の構文で定義します。
 
-例： `x` と `y` の和をローカル変数 `tmp` に束縛したあと `tmp` と `z` の和を計算するコード
+例： `x` と `y` の和にローカル変数 `tmp` を束縛したあと `tmp` と `z` の和を計算するコード
 
 ``` idris
 add3 : Integer -> Integer -> Integer -> Integer
@@ -91,7 +91,7 @@ add3 x y z = let tmp = x + y in
 
 他にも式の後ろに `where` を続けて書く記法もあります。
 
-例： `where` を使って `x` と `y` の和をローカル変数 `tmp` に束縛したあと `tmp` と `z` の和を計算するコード
+例： `where` を使って `x` と `y` の和にローカル変数 `tmp` を束縛したあと `tmp` と `z` の和を計算するコード
 
 
 ``` idris

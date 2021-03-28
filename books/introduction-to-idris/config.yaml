@@ -25,6 +25,7 @@ chapters:
   - module-prelude-and-standard-library
   - writing-bitmap-writer
   - named-parameters-and-gadts
+  - type-driven-development
   - packages-and-ipkg
   - idrisdoc
   - test-and-ci

@@ -2,7 +2,6 @@
 * 型駆動開発
 * forthの処理系書く
 * あとがき書く
-* Agdaとの違い書く（AdgaはMartin LoefのITT、IdrisはCoqと同じCoC（CIC））
 
 https://forth-standard.org/standard/notation
 https://www.forth.com/starting-forth/1-forth-stacks-dictionary/

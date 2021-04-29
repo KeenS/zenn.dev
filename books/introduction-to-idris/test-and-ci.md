@@ -91,7 +91,7 @@ namespace Main
 
 # テストを書く
 
-先日のanagramにテストを書いてみましょう。anagramパッケージは以下のようなディレクトリ構成なのでした。
+パッケージの章で書いたanagramにテストを書いてみましょう。anagramパッケージは以下のようなディレクトリ構成なのでした。
 
 ``` shell-session
 $ tree
@@ -437,6 +437,6 @@ GitHub Actionsについて詳しくは[GitHub Actionsのドキュメント](http
 
 # 本章のまとめ
 
-Idrisのテストの書きかた、テストの走らせかた、CIのセットアップ方法を紹介しました。テストは `Test.Unit` を使って書き、 `idris --testpkg IPKG` で走らせます。CIのセットアップ方法はGitLabとGitHubで異なります。
+Idrisのテストの書きかた、テストの走らせかた、CIのセットアップ方法を学びました。テストは `Test.Unit` を使って書き、 `idris --testpkg IPKG` で走らせます。CIのセットアップ方法はGitLabとGitHubで異なります。
 
 ここまでである程度Idrisを自在に書けるようになってきたのでちょっと脱線してIdrisの高度な機能を眺めてみましょう。趣味で触る言語くらい、実用的な機能より面白い機能を優先してもいいですよね。

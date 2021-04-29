@@ -8,6 +8,7 @@ title: "with構文と依存型、View"
 
 関数を書くときに条件分岐したくなることがありますよね。データ型の構造に沿う条件であれば引数でのパターンマッチで済むんですが、もう少し複雑な条件だと `if` や `case` を使わざるを得なくなります。例えば「リストに値がなければ追加する」関数 `addToList` はこう書けるでしょう。
 
+例： `addToList` 関数
 ```idris
 addToList : Eq a => a -> List a -> List a
 addToList x xs =
@@ -20,7 +21,7 @@ addToList x xs =
 
 例えば先程の `addToList` だと以下の構文になります。
 
-
+例： `addToList` 関数を `with` 構文で書き直したコード
 ```idris
 addToList : Eq a => a -> List a -> List a
 addToList x xs with (elem x xs)
@@ -30,7 +31,7 @@ addToList x xs with (elem x xs)
 
 関数の本体が `= xs` と `= x :: xs` でサッパリしたので気持良いですね。
 
-ところで、上記の記述 `addToList x xs` が続いてちょっとくどいですよね。これは省略できます。以下のようにも書けるのです。
+ところで、上の記述は `addToList x xs` が続いてちょっとくどいですよね。これは省略できます。以下のようにも書けるのです。
 
 ```idris
 addToList : Eq a => a -> List a -> List a
@@ -77,7 +78,7 @@ showTime t with (toTime t)
 
 # 依存パターンマッチ
 
-Viewの話をする前に依存パターンマッチを紹介しましょう。Idrisでは型パラメータなども `{}` で取り出せることは説明しましたね？例えば `Vect n a` の `n` は以下のように取り出せます。
+これからViewという面白い機能に触れるんですが、その前に依存パターンマッチを紹介しましょう。Idrisでは型パラメータなども `{}` で取り出せることは説明しましたね？例えば `Vect n a` の `n` は以下のように取り出せます。
 
 ``` idris
 length : Vect n a -> Nat
@@ -152,7 +153,7 @@ Constructors:
 ```
 
 
-コンストラクタが `SplitNil` 、 `SplitOne` 、`SplitPair` の3つあって、それぞれの型が `Split []` 、 `Split [x]` 、 `Split (x :: xs ++ y :: ys)` ですね。特に3つ目の型 `Split (x :: xs ++ y :: ys)` に注目して下さい。引数のリストが `(x :: xs ++ y :: ys)` と計算式になっていますね。この型に連動して値の方も変わります。実際に使ってみた方が分かりやすいでしょうか。 `Split``Split` の値は `split` 関数で作れます。使ってみましょう。
+コンストラクタが `SplitNil` 、 `SplitOne` 、`SplitPair` の3つあって、それぞれの型が `Split []` 、 `Split [x]` 、 `Split (x :: xs ++ y :: ys)` ですね。特に3つ目の型 `Split (x :: xs ++ y :: ys)` に注目して下さい。引数のリストが `(x :: xs ++ y :: ys)` と計算式になっていますね。この型に連動して値の方も変わります。実際に使ってみた方が分かりやすいでしょうか。`Split` の値は `split` 関数で作れます。使ってみましょう。
 
 
 ``` idris

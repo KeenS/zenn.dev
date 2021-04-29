@@ -101,7 +101,7 @@ query db word =
 
 ## パッケージのリンク
 
-一旦REPLで様子を見たいんですが、REPLでcontribを使えるようにしないといけませんね。パーーケージをロードするには `-p パッケージ名` のオプションを使います。 `-p パッケージ名` でパッケージをロードした状態でREPLをはじめられます。
+一旦REPLで様子を見たいんですが、REPLでcontribを使えるようにしないといけませんね。パッケージをロードするには `-p パッケージ名` のオプションを使います。 `-p パッケージ名` でパッケージをロードした状態でREPLをはじめられます。 `contrib` をロードしつつ `Anagram.idr` を読み込みましょう。
 
 ```shell-session
 $ idris -p contrib Anagram.idr
@@ -109,7 +109,7 @@ $ idris -p contrib Anagram.idr
 Anagram*> 
 ```
 
-型チェックまで通ったら試してみましょう。
+型チェックまで通ったら試してみます。
 
 ```text
 *Anagram> :let db = register (register emptyDB "eat") "ate"
@@ -346,7 +346,7 @@ $ ./anagram ocean
 
 [Libraries · idris-lang/Idris-dev Wiki](https://github.com/idris-lang/Idris-dev/wiki/Libraries)
 
-ライブラリを使わないまでも、インストールだけでも試してみましょう。[lightyear](https://github.com/ziman/lightyear)をインストールしてみます。
+ライブラリを使わないまでも、インストールだけでも試してみましょう。ここでは[lightyear](https://github.com/ziman/lightyear)をインストールしてみます。
 
 ```text
 $ git clone https://github.com/ziman/lightyear.git

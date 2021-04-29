@@ -2,7 +2,7 @@
 title: "標準ライブラリざっと見"
 ---
 
-Idrisの標準ライブラリであるプレリュードとbaseをサクっと解説していきます。
+Idrisの標準ライブラリであるプレリュードとbaseをサクっと眺めていきます。名前空間についてはまだ学んでないのでそれぞれのタイトルにある名前空間はあまり気にせず進めていって下さい。
 
 # プレリュード
 ## `Builtins`
@@ -11,9 +11,9 @@ Idrisの標準ライブラリであるプレリュードとbaseをサクっと�
 
 まだ紹介していないものをいくつか紹介しましょう。
 
-`Inf : Type -> Type`: （遅延した）無限の計算を表わす。`Stream` ででてくる。
-`replace : {a:_} -> {x:_} -> {y:_} -> {P : a -> Type} -> x = y -> P x -> P y`: `x = y`ならば `P x` を `P y` に書き換えられる。証明向け。
-`sym : {left:a} -> {right:b} -> left = right -> right = left`: 等式の左右を入れ替える。 `rewrite sym $ ... in ...` の形で使うことが多い。証明向け。
+* `Inf : Type -> Type`: （遅延した）無限の計算を表わす。`Stream` ででてくる。
+* `replace : {a:_} -> {x:_} -> {y:_} -> {P : a -> Type} -> x = y -> P x -> P y`: `x = y`ならば `P x` を `P y` に書き換えられる。証明向け。
+* `sym : {left:a} -> {right:b} -> left = right -> right = left`: 等式の左右を入れ替える。 `rewrite sym $ ... in ...` の形で使うことが多い。証明向け。
 
 ## `IO`
 
@@ -124,7 +124,7 @@ interface Applicative m => Monad (m : Type -> Type) where
 
 ## `Prelude.Foldable`
 
-`foldl` と `foldr` 、他の言語でいうイテラブル相当のインタフェースを提供します。
+`foldl` と `foldr` 、他の言語でいうIterable相当のインタフェースを提供します。
 
 ```idris
 interface Foldable (t : Type -> Type) where
@@ -200,9 +200,11 @@ the _ = id
 const : a -> b -> a
 const x = \value => x
 
+-- タプルの左側を取り出す
 fst : (a, b) -> a
 fst (x, y) = x
 
+-- タプルの右側を取り出す
 snd : (a, b) -> b
 snd (x, y) = y
 ```
@@ -222,22 +224,6 @@ infixr 9 .
 flip : (f : a -> b -> c) -> b -> a -> c
 flip f x y = f y x
 ```
-
-ちょっと変わったものとしては証明用途のデータ型があります。
-
-``` idris
-||| Decidability. A decidable property either holds or is a contradiction.
-data Dec : Type -> Type where
-  ||| The case where the property holds
-  ||| @ prf the proof
-  Yes : (prf : prop) -> Dec prop
-
-  ||| The case where the property holding would be a contradiction
-  ||| @ contra a demonstration that prop would be a contradiction
-  No  : (contra : prop -> Void) -> Dec prop
-```
-
-気持としては `Bool` に近いんですが、「なぜTrueなのか」、「なぜFalse」なのかの証明つきです。`the (Dec 1 = 1) (Yes Refl)` や `the (Dec (1 = 0)) (No SIsNotZ)` など。
 
 ## `Prelude.Bits`
 
@@ -297,14 +283,6 @@ Idris> take 10 ones
 
 `Eq` などの基本的なインタフェースが入っています。
 
-## `Prelude.Pairs`
-
-タプル系の操作かと思いきや依存ペア系の補助データ構造が入っています。
-
-## `Prelude.Providers`
-
-Idris面白機能の1つ、Type Providerで使うデータ型が入っています。Type Providerは本書では扱わないので気にしなくてよいでしょう。
-
 ## `Prelude.Show`
 
 `Show` インタフェースが定義されています。
@@ -354,196 +332,10 @@ Idris> :exec for_ [1..10] $ \n => printLn n
 10
 ```
 
-## `Prelude.Uninhabited`
-
-証明で使うインタフェースが入っています。
-
-``` idris
-interface Uninhabited t where
-  total uninhabited : t -> Void
-```
-
-## `Prelude.WellFounded`
-
-[整礎帰納法](https://ja.wikipedia.org/wiki/数学的帰納法#整礎帰納法)をします。
-
-## `Decidable.Equality`
-
-等値関係に絞った `Dec` の補助パッケージですかね。
-
-``` idris
-interface DecEq t where
-  total decEq : (x1 : t) -> (x2 : t) -> Dec (x1 = x2)
-```
-
-
-## `Language`
-
-リフレクション系のAPIが揃っています。
 
 # base
 
 baseの方が複雑なんですが便利なライブラリがあるんですよね。頑張って紹介します。
-
-## `Data.Morphisms`
-
-モーフィズム（射）が定義されています。
-
-``` idris
-record Morphism a b where
-  constructor Mor
-  applyMor : a -> b
-infixr 1 ~>
-(~>) : Type -> Type -> Type
-(~>) = Morphism
-
-record Endomorphism a where
-  constructor Endo
-  applyEndo : a -> a
-
-record Kleislimorphism (f : Type -> Type) a b where
-  constructor Kleisli
-  applyKleisli : a -> f b
-```
-
-射、自己準同型、クライスリ射です。まあ、これは射に色々便利なインタフェースを定義するためのデータ型ですね。
-
-
-## `Control.Category`
-
-圏の定義があります。
-
-``` idris
-interface Category (cat : k -> k -> Type) where
-  id  : cat a a
-  (.) : cat b c -> cat a b -> cat a c
-```
-
-
-射は圏になりますね。
-
-``` idris
-implementation Category Morphism where
-  id                = Mor id
-  (Mor f) . (Mor g) = with Basics (Mor (f . g))
-```
-
-これは $\mathbf{Set}$ 圏であってるかな？
-
-射の合成の別記法も用意されています。
-
-``` idris
-infixr 1 >>>
-(>>>) : Category cat => cat a b -> cat b c -> cat a c
-f >>> g = g . f
-```
-
-## `Control.Arrow`
-
-arrow系の定義がいっぱいあります。arrowは矢印のことで、要するに射の合成とかその辺を担当します。
-
-``` idris
-infixr 5 <++>
-infixr 3 ***
-infixr 3 &&&
-infixr 2 +++
-infixr 2 \|/
-
-interface Category arr => Arrow (arr : Type -> Type -> Type) where
-  arrow  : (a -> b) -> arr a b
-  first  : arr a b -> arr (a, c) (b, c)
-
-  second : arr a b -> arr (c, a) (c, b)
-  second f = arrow swap >>> first f >>> arrow swap
-
-  (***)  : arr a b -> arr a' b' -> arr (a, a') (b, b')
-  f *** g = first f >>> second g
-
-  (&&&)  : arr a b -> arr a b' -> arr a (b, b')
-  f &&& g = arrow dup >>> f *** g where
-    dup : x -> (x,x)
-    dup x = (x,x)
-
-interface Arrow arr => ArrowZero (arr : Type -> Type -> Type) where
-  zeroArrow : arr a b
-
-interface ArrowZero arr => ArrowPlus (arr : Type -> Type -> Type) where
-  (<++>) : arr a b -> arr a b -> arr a b
-
-interface Arrow arr => ArrowChoice (arr : Type -> Type -> Type) where
-  left  : arr a b -> arr (Either a c) (Either b c)
-
-  right : arr a b -> arr (Either c a) (Either c b)
-  right f = arrow mirror >>> left f >>> arrow mirror
-
-  (+++) : arr a b -> arr c d -> arr (Either a c) (Either b d)
-  f +++ g = left f >>> right g
-
-  (\|/) : arr a b -> arr c b -> arr (Either a c) b
-  f \|/ g = f +++ g >>> arrow fromEither
-
-interface Arrow arr => ArrowApply (arr : Type -> Type -> Type) where
-  app : arr (arr a b, a) b
-
-interface Arrow arr => ArrowLoop (arr : Type -> Type -> Type) where
-  loop : arr (Pair a c) (Pair b c) -> arr a b
-```
-
-記号だらけで、個人的にこれを本当に全部覚えてつかいこなしている人がいるのかは疑問に思ってます。
-
-`Category` と `Arrow` は関数の抽象化を提供しています。関数の抽象化しているというのは「普通じゃない」関数とかを定義してもそれを他の関数と同じように扱えるということです。例えばCPS変換した関数とかですね。
-
-``` idris
-import Control.Category
-import Control.Arrow
-
-
-record CpsMorphism r a b where
-  constructor Cps
-  applyCps : a -> ((b -> r) -> r)
-
-cps : (a -> b) -> (a -> (b -> r) -> r)
-cps f a k = k $ f a
-
-cpsCompose : (b -> ((c -> r) -> r)) -> (a -> ((b -> r) -> r)) -> a -> ((c -> r) -> r)
-cpsCompose f g x k = g x $ \b => f b k
-
-Category (CpsMorphism r) where
-  id  = Cps $ cps id
-  (.) (Cps f) (Cps g) = Cps (cpsCompose f g)
-
-
-Arrow (CpsMorphism r) where
-  arrow f = Cps (\x, k => k $ f x)
-  first (Cps f) = Cps $ \(a, c), k => f a (\b => k (b, c))
-
-ArrowChoice (CpsMorphism r) where
-  left f                  = f          +++ (arrow id)
-  right f                 = (arrow id) +++ f
-  f           +++ g       = (f >>> (arrow Left)) \|/ (g >>> (arrow Right))
-  (Cps f)     \|/ (Cps g) =   Cps (either f g)
-
-
-ArrowApply (CpsMorphism r) where
-  app = Cps $ \(Cps f, x) => f x
-```
-
-Arrowを使って関数を組み合わせるとIdrisのローカル変数などを経なくても部品を合成できるので、DSLなんかでたまに使われています。
-
-## `Control.Isomorphism`
-
-同型を表わすデータ型です。ちゃんと証明オブジェクトもついていてえらいですね。
-
-``` idris
-record Iso a b where
-  constructor MkIso
-  to : a -> b
-  from : b -> a
-  toFrom : (y : b) -> to (from y) = y
-  fromTo : (x : a) -> from (to x) = x
-```
-
-`Category` などいくつかのインタフェースも実装されています。基本は証明用かな？
 
 ## `Control.Catchable`
 
@@ -665,98 +457,6 @@ index FZ     (x::xs) = x
 index (FS k) (x::xs) = index k xs
 ```
 
-## `Data.HVect`
-
-ヘテロジーニアスなベクタ型を定義しています。
-
-``` idris
-data HVect : Vect k Type -> Type where
-  Nil : HVect []
-  (::) : t -> HVect ts -> HVect (t::ts)
-```
-
-ヘテロジーニアスとはつまり、以下のように異なる型の値を格納できるということです。
-
-``` text
-*Data/HVect> the (HVect [Integer, Bool, String]) [1, False, "hetero"]
-[1, False, "hetero"] : HVect [Integer, Bool, String]
-```
-
-## `Data.Bits`
-
-`Prelude.Bits` に加えてもう少し操作を定義しています。
-
-## `Data.List`
-
-`Preldhude.List` に加えてもう少し操作を定義しています。プログラム用に `intersect` などもありますが、主に証明用ですね。
-
-## `Data.String`
-
-`Preldhude.String` に加えてもう少し操作を定義しています。
-
-## `Data.List.Quantifiers`
-`List` の証明に使えそうな量化子が定義されています。
-
-## `Data.List.Views`
-
-`List` に対するビューが定義されています。
-
-## `Data.Vect.Quantifiers`
-`Vect` の証明に使えそうな量化子が定義されています。
-
-## `Data.Vect.Views`
-
-`Vect` に対するビューが定義されています。
-
-
-## `Data.Nat.Views`
-
-`Nat` に対するビューが定義されています。
-
-## `Data.Primitives.Views`
-
-`Interger` などのプリミティブに対するビューが定義されています。
-
-
-## `Data.Erased`
-
-
-実行時に消去された値を表現できるデータ型を定義しています。
-
-``` idris
-data Erased : Type -> Type where
-    Erase : .(x : a) -> Erased a
-```
-
-Idrisでは引数の前に `.` があるとそれは消去されているようです。
-
-## `Data.Mod2`
-
-2^n で割った値を保持する `Mod2 n` が定義されています。
-
-``` idris
-public export
-data Mod2 : Nat -> Type where
-    MkMod2 : {n : Nat} -> Bits n -> Mod2 n
-```
-
-
-## `Data.So`
-
-条件式が成り立つことの証明オブジェクトです。
-
-``` idris
-data So : Bool -> Type where
-  Oh : So True
-```
-
-公式ライブラリだと `usleep` なんかで使われています。
-
-``` idris
-usleep : (i : Int) -> { auto prf : So (i >= 0) } -> IO ()
-```
-
-`=` なら型にあるんですが、 `>=` はありません。こういう計算で結果を求めるタイプの証明に便利ですね。
 
 ## `Debug.*`
 `Debug.Error` と `Debug.Trace`はそれぞれデバッグ用に使います。 `IO` 文脈でなくてもIO処理ができてしまう魔法の関数です。
@@ -782,10 +482,6 @@ debbuging
 
 中身は `unsafePerformIO` というヤバい機能で実装されているのでデバッグ用途以外では使わないようにしましょう。
 
-## `Language.Reflection.Utils`
-
-証明とかに便利そうな関数がちょこっと実装されています。他はElabに色々なインタフェースを実装する役割があります。
-
 ## `System`
 
 `getEnv` や  `exit` などのシステム関連の機能です。
@@ -794,127 +490,8 @@ debbuging
 
 `backend` などの処理系情報です。
 
-## `System.Concurrency.*`
-
-`System.Concurrency.Raw` と `System.Concurrency.Channels` はプロセスとチャネルを使ったコミュニケーションを提供します。 `Raw` は低レベルで型安全でないAPIなので `Channels` の方を使いましょう。
-
-`"PING"` を送ったら `"PONG"` を返してくれるプロセスを立ち上げてみます。 `spawn` に `IO ()` の値を渡すとプロセスをスタートしてくれます。その他チャネルのAPIはドキュメントとか見て下さい。
-
-
-``` idris
-import System.Concurrency.Channels
-
-pong : IO ()
-pong = do
-  Just channel <- listen 10
-  req <- unsafeRecv String channel
-  if req == Just "PING"
-  then ignore $ unsafeSend channel "PONG"
-  else pure ()
-
-ping : PID -> IO ()
-ping pid = do
-  Just channel <- connect pid
-  unsafeSend channel "PING"
-  Just resp <- unsafeRecv String channel
-  putStrLn resp
-
-main : IO ()
-main = do
-  -- spawnを呼ぶ
-  Just pongPid <- spawn pong
-  putStrLn "pong spawned"
-  ping pongPid
-  pure ()
-```
-
-`unsafeRecv` の引数に型をとるので1つのチャネルで任意の型の値をやりとりできるのがポイントですね。
-
-
-プロセス内部はCバックエンドではpthreadが立ち上がっているようです。
-ただしプロセスという名前だけあってメモリは共有していないようです。
-以下のようにクロージャに持たせた `IORef` を通じてメモリを共有するコードを書いてみました。
-
-``` idris
-import System.Concurrency.Channels
-import Data.IORef
-
-
-countDown : Nat -> IORef Int -> IO ()
-countDown Z     _ = pure ()
-countDown (S n) v = do
-  writeIORef v (cast n)
-  countDown n v
-
-polling : Nat -> IORef Int -> IO ()
-polling Z     _ = pure ()
-polling (S n) v = do
-  i <- readIORef v
-  printLn i
-  polling n v
-
-
-main : IO ()
-main = do
-  v <- newIORef 100
-  spawn $ countDown 100 v
-  polling 20 v
-```
-
-
-これは実行時に処理系が落ちました。
-
-``` shell-session
-$ channel_ioref
-channel_ioref: idris_rts.c:912: doCopyTo: Assertion `0' failed.
-zsh: abort (core dumped)  ./channel_ioref
-```
-
-同じくクロージャではなくチャネルを介しても同様でした。
-
-``` idris
-import System.Concurrency.Channels
-import Data.IORef
-
-
-countDown : Nat -> IO ()
-countDown n = do
-  Just channel <- listen 100
-  Just v <- unsafeRecv (IORef Int) channel
-  loop n v
-where
-  loop : Nat -> IORef Int -> IO ()
-  loop Z     _ = pure ()
-  loop (S n) v = do
-    writeIORef v (cast n)
-    loop n v
-
-polling : Nat -> PID -> IO ()
-polling n pid = do
-  v <- newIORef (the Int 100)
-  Just channel <- connect pid
-  unsafeSend channel v
-  loop n v
-where
-  loop : Nat -> IORef Int -> IO ()
-  loop Z     _ = pure ()
-  loop (S n) v = do
-    i <- readIORef v
-    printLn i
-    loop n v
-
-
-main : IO ()
-main = do
-  Just pid <- spawn $ countDown 100
-  polling 20 pid
-
-```
-
-
-コンパイル時に防げる仕組みがあったらよかったんですが残念ですね。
 
 # 本章のまとめ
 
-Idrisの標準ライブラリをさっくり解説しました。
+Idrisの標準ライブラリをそれぞれ軽く眺めました。いくつか細かいと思ったものは省いたので詳しくは[baseライブラリのドキュメント](https://www.idris-lang.org/docs/current/base_doc/)をあたって下さい。
 

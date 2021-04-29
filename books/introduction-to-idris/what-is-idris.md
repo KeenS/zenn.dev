@@ -33,8 +33,8 @@ data FizzBuzz = F | B | FB | I Integer
 Show FizzBuzz where
   show F     = "fizz"
   show B     = "buzz"
-  show FB = "fizzbuzz"
-  show (I n)  = show n
+  show FB    = "fizzbuzz"
+  show (I n) = show n
 
 fizzBuzz : Integer -> FizzBuzz
 fizzBuzz n = case (n `mod` 3, n `mod` 5) of
@@ -104,9 +104,7 @@ Idris> "Hello, " ++ "REPL"
 
 # 依存型とは
 
-依存型とは項でインデックス付けされた型です（TaPLより）。
-
-ざっくりと言うと型を書く場所に値を書けます。
+依存型とは「項でインデックス付けされた型」（TaPLより）です。ざっくりと言うと型を書く場所に値を書けます。
 
 例えばこういう関数の実装の型を考えてみましょう。
 
@@ -115,9 +113,9 @@ foo True  = "True"
 foo False = 0
 ```
 
-引数が `True` のときに `String` 型の値を返して、 `False` のときに `Integer` 型の値を返しています。これは大抵の言語では型づけできません[^ts]。
+引数が `True` のときに `String` 型の値を返して、 `False` のときに `Integer` 型の値を返しています。これは大抵の静的型付き言語では型づけできません[^ts]。
 
-[^ts]: TypeScriptのように型付けできる変態もいますが…
+[^ts]: TypeScriptのように型付けできる変態もいますが…。ですがTSは健全性を捨てているのでここでは「まともな型システムの中では」と条件をつけておきましょう。
 
 しかしIdrisなら簡単に型付けできます。まさしく「引数が `True` のときに `String` 型、 `False` のときに `Integer` 型」と記述するだけです。
 
@@ -145,7 +143,7 @@ foo False = 0
 take : (n : Nat) -> Vect (n + m) elem -> Vect n elem
 ```
 
-`n` 個取り出すからには `n` 個以上のベクタを渡さないといけないんですね。
+`n` 個取り出すからには `n` 個以上の要素（`n+m` 要素）のベクタを渡さないといけないんですね。
 
 このように詳細な制約を書けるのが特徴です。もう一歩進めるとこの制約を使って数学的な証明を書いたりもできますし、プログラムにバグがないことも証明できます。
 
@@ -153,11 +151,30 @@ take : (n : Nat) -> Vect (n + m) elem -> Vect n elem
 
 
 # 詳しい人向けの説明
+## Agdaとの違い
 
-依存型付きのHaskellといえばAgdaが思い浮かぶ方もいるかと思います。AgdaはMartin-Löfの型理論をベースにしていますが、IdrisはCoqと同じCoC（にInductionを入れたCIC）です。なのでどちらかというと「見た目がHaskell風のCoq」と紹介した方が正確かもしれません。CoqのVernacularとGallina相当が普通のIdrisのプログラムで、Ltacに相当するものは本書の後ろの方で紹介するElabがあります。歴史的にはTacticというDSLもあったのですがdeprecated扱いです。
+依存型付きのHaskellといえばAgdaが思い浮かぶ方もいるかと思います。AgdaはMartin-Löfの型理論をベースにしていますが、IdrisはCoqと同じCoC（にInductionを入れたCIC）です。つまり、依存型以外にも高階型やランクN多相などもあるということです。なのでどちらかというと「見た目がHaskell風のCoq」と紹介した方が正確かもしれません。CoqのVernacularとGallina相当が普通のIdrisのプログラムで、Ltacに相当するものは本書の後ろの方で紹介するElabがあります。歴史的にはTacticというDSLもあったのですがdeprecated扱いです。
 
 他には定理証明支援系とプログラミング言語の違いとして停止するか分からないプログラムを書ける、コンパイラが普通にバイナリを吐くことを想定して作られている、FFIなどが比較的楽に行えるなどが挙げられます。
 
+## Haskellとの違い
+
+一番の違いは型システムです。文法もちょくちょく違いますし、 `String` と `List Char` が別の型だったりします。また、評価戦略がHaskellでは非正格なのに対してIdrisでは正格です。非正格だと `_|_`（`undefined`）を上手く扱えるメリットがありますが、定理証明もやるIdrisではそもそも `_|_` を排除する方向に言語が設計されています（ない訳ではないですが）。であれば実行方法がシンプルな正格評価の方が嬉しいですよね。
+
+# Idrisの情報を得るには
+
+ほとんど公式のドキュメントに頼ることになります。
+
+* [公式サイト](https://www.idris-lang.org)
+* [公式ドキュメント](http://docs.idris-lang.org/en/latest/)
+* ライブラリのドキュメント
+  + [prelude](https://www.idris-lang.org/docs/current/prelude_doc/)
+  + [base](https://www.idris-lang.org/docs/current/base_doc/)
+  + [contrib](https://www.idris-lang.org/docs/current/contrib_doc/)
+* [コンパイラのソースコード](https://github.com/idris-lang/Idris-dev)
+
+本書では網羅的な情報は載せないので細かな部分は公式の情報やコンパイラのソースコードをあたって下さい。
+
 # 本章のまとめ
 
-Idrisについてかるーく紹介しました。
+Idris入門の入口となるような知識を学びました。

@@ -1,4 +1,4 @@
-title: "プログラング言語Idrisに入門させたい"
+title: "プログラング言語Idrisに入門させたい（v0.9）"
 summary: |
   　これは筆者（κeen）がIdris Advent Calendar 2020に投稿した内容を土台とし、一冊の本になるように増補改訂を行なったものです。
 
@@ -15,10 +15,10 @@ chapters:
   - syntax
   - bmi
   - types-and-datatypes
+  - interface
   - list-maybe-either
   - repl
-  - interface-monad-and-more
-  - io-monad
+  - functor-and-monads-and-more
   - standard-library
   - try-competitive-programming-in-idris
   - monads

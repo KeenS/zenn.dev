@@ -39,7 +39,7 @@ Show FizzBuzz where
 fizzBuzz : Integer -> FizzBuzz
 fizzBuzz n = case (n `mod` 3, n `mod` 5) of
                (0, 0) => FB
-               (_, 5) => B
+               (_, 0) => B
                (0, _) => F
                _      => I n
 fizzBuzzSeq : Integer -> List FizzBuzz
@@ -57,17 +57,17 @@ main = do
 
 ``` shell-session:ターミナル
 $ idris FizzBuzz.idr -o FizzBuzz
-$ ./fizz_buzz 15
+$ ./FizzBuzz 15
 1
 2
 fizz
 4
-5
+buzz
 fizz
 7
 8
 fizz
-10
+buzz
 11
 fizz
 13

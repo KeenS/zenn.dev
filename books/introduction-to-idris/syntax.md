@@ -38,7 +38,7 @@ title: "基本文法"
 
 # 関数と変数
 
-ドキュメントには書かれてないのですが、コンパイラのコードを見る限り識別子に使えるのは `[[:alphabet:]_][[:alphanum:]'_.]*` のようです。ここで `[:alphabet:]` に入るのはunicodeで[alphabetic](https://www.unicode.org/reports/tr44/#alphabetic)なもので、`[:alphanumeric:]` は alphabetic + numeric全般のようです。例えば `hog'.'e12_` や `漢字の識別子１` は適格なidrisの変数です。
+ドキュメントには書かれてないのですが、コンパイラのコードを見る限り識別子に使えるのは `[[:alphabet:]_][[:alphanum:]'_.]*` のようです。ここで `[:alphabet:]` に入るのはUnicodeで[Alphabetic](https://www.unicode.org/reports/tr44/#Alphabetic)なもので、`[:alphanumeric:]` は Alphabetic + Numeric全般のようです。例えば `hog'.'e12_` や `漢字の識別子１` は適格なIdrisの変数です。
 
 ## グローバル変数
 
@@ -52,7 +52,7 @@ title: "基本文法"
 例：数値100を指すグローバル変数 `version` の定義
 
 ```idris
-version : integer
+version : Integer
 version = 100
 ```
 
@@ -67,16 +67,15 @@ version = 100
 
 関数の型は `引数1の型 -> 引数2の型 -> 引数2の型 -> 返り型` です。
 
-例：2つの `integer` である `x` と `y` を受け取り、 `integer` であるその和を返す関数 `add` の定義
+例：2つの `Integer` である `x` と `y` を受け取り、 `Integer` であるその和を返す関数 `add` の定義
 
 ```idris
-add : integer -> integer -> integer
+add : Integer -> Integer -> Integer
 add x y = x + y
 ```
 
-haskell風の文法ではセミコロンや括弧、カンマなどはあまり使いません。はじめは気持ち悪いかもしれませんが、じきに慣れてこっちの方が読みやすいと感じるようになります。
 
-変数や関数はcamelcaseの命名が慣例です。コンパイラ側でも先頭に小文字がきたら変数と思って処理している箇所があるようですので、特別な理由がない限りは小文字始まりの変数名を使うとよいでしょう。
+変数や関数はcamelCaseの命名が慣例です。コンパイラ側でも先頭に小文字がきたら変数と思って処理している箇所があるようですので、特別な理由がない限りは小文字始まりの変数名を使うとよいでしょう。。
 
 ## ローカル変数
 
@@ -85,7 +84,7 @@ haskell風の文法ではセミコロンや括弧、カンマなどはあまり�
 例： `x` と `y` の和にローカル変数 `tmp` を束縛したあと `tmp` と `z` の和を計算するコード
 
 ``` idris
-add3 : integer -> integer -> integer -> integer
+add3 : Integer -> Integer -> Integer -> Integer
 add3 x y z = let tmp = x + y in
              tmp + z
 ```
@@ -96,35 +95,35 @@ add3 x y z = let tmp = x + y in
 
 
 ``` idris
-add3 : integer -> integer -> integer -> integer
+add3 : Integer -> Integer -> Integer -> Integer
 add3 x y z = tmp + z
 where
-  tmp : integer
+  tmp : Integer
   tmp = x + y
 ```
 
-idrisは [オフサイドルール](https://ja.wikipedia.org/wiki/オフサイドルール)を採用しているのでインデントが同じなら同じブロックとみなしてくれます。
-そのため `where` のあとに続く定義はインデントを揃えれば複数書けます。
+Idrisは [オフサイドルール](https://ja.wikipedia.org/wiki/オフサイドルール)を採用しているのでインデントが同じなら同じブロックとみなしてくれます。
+`where` のあとに続く定義はインデントを揃えれば複数書けます。
 
 
 ## ローカル関数
 
 `where` の記法で定義できます。
 
-例： `where` を使って3つのローカル関数 `ism4` 、 `ism100` 、 `ism400` を定義し、それらでうるう年を判定するコード
+例： `where` を使って3つのローカル関数 `isM4` 、 `isM100` 、 `isM400` を定義し、それらでうるう年を判定するコード
 
 ``` idris
-isleapyear : integer -> bool
-isleapyear y = ism4 y && not (ism100 y) && ism400 y
+isLeapYear : Integer -> Bool
+isLeapYear y = isM4 y && not (isM100 y) && isM400 y
 where
-  ism4 : integer -> bool
-  ism4 y = y `mod` 4 == 0
+  isM4 : Integer -> Bool
+  isM4 y = y `mod` 4 == 0
 
-  ism100 : integer -> bool
-  ism100 y = y `mod` 100 == 0
+  isM100 : Integer -> Bool
+  isM100 y = y `mod` 100 == 0
 
-  ism400 : integer -> bool
-  ism400 y = y `mod` 400 == 0
+  isM400 : Integer -> Bool
+  isM400 y = y `mod` 400 == 0
 ```
 
 ここで使った `&&` は論理積演算子、 `not` は論理否定の関数、 `` `mod` `` は剰余演算子、 `==` は等価演算子です。
@@ -136,7 +135,7 @@ where
 例： `double` を値を2倍にする無名関数に束縛し、それを2回適用することで値を4倍にするコード
 
 ``` idris
-quatro: integer -> integer
+quatro: Integer -> Integer
 quatro n = let double = \i => i * 2 in
            double (double n)
 ```
@@ -150,18 +149,18 @@ quatro n = let double = \i => i * 2 in
 
 ``` idris
 if n == 0
-then "zero"
-else "not zero"
+then "Zero"
+else "Not zero"
 ```
 
-idrisは式指向言語なので `if` も値を返します（なので `if` 「式」と呼ばれます）。他の言語でいういわゆる三項演算子のようなものは必要ありません。
+Idrisは式指向言語なので `if` も値を返します（なので `if` 「式」と呼ばれます）。他の言語でいういわゆる三項演算子のようなものは必要ありません。
 
 例： `if` が式であることを使って `if` の返り値をそのまま別の関数に渡すコード
 
 ``` idris
-main : io ()
+main : IO ()
 main =
-  putstrln (if 1 == 0 then "zero" else "not zero")
+  putStrLn (if 1 == 0 then "Zero" else "Not zero")
 ```
 
 ## パターンマッチ
@@ -203,7 +202,7 @@ case list of
 例：$n$ 番目の[フィボナッチ数](https://ja.wikipedia.org/wiki/フィボナッチ数)を計算するコード
 
 ``` idris
-fib: integer -> integer
+fib: Integer -> Integer
 fib 0 = 1
 fib 1 = 1
 fib n = fib (n - 1) + fib (n - 2)
@@ -213,15 +212,15 @@ fib n = fib (n - 1) + fib (n - 2)
 ## ループ、 `return` 、 `break`
 ないよ。
 
-idrisは関数型言語なのでループは関数を使います。自身を呼び出すことでループを作れるのです（再帰関数）。`break` や `return` は必要ありません。自身を呼び出すことをやめれば自然とループが止まりますし、その場で値が返ります。
+Idrisは関数型言語なのでループは関数を使います。自身を呼び出すことでループを作れるのです（再帰関数）。`break` や `return` は必要ありません。自身を呼び出すことをやめれば自然とループが止まりますし、その場で値が返ります。
 
 例： `1` から `n` までの和を求める関数
 
 ``` idris
-sumfromone: integer -> integer
-sumfromone n = loop 1 n 0
+sumFromOne: Integer -> Integer
+sumFromOne n = loop 1 n 0
 where
-  loop: integer -> integer -> integer -> integer
+  loop: Integer -> Integer -> Integer -> Integer
   loop i end sum =
     let sum = sum + i in
     if i == end
@@ -229,18 +228,18 @@ where
     else loop (i + 1) end sum
 ```
 
-関数 `sumfromone` の定義でローカル関数として `loop` を定義しています。この関数を再帰呼び出しすることでループを実現します。 `loop i end sum = ...` ではじまって `loop (i + 1) end sum` を呼んでいるので `i` を1つづつ増やしていっているのが読み取れるでしょうか。最初が `loop 1 n 0` なので `loop 2 n sum` 、 `loop 3 n sum` …と呼び出していって `loop n n sum` まできたところでループが終了します。
+関数 `sumFromOne` の定義でローカル関数として `loop` を定義しています。この関数を再帰呼び出しすることでループを実現します。 `loop i end sum = ...` ではじまって `loop (i + 1) end sum` を呼んでいるので `i` を1つづつ増やしていっているのが読み取れるでしょうか。最初が `loop 1 n 0` なので `loop 2 n sum` 、 `loop 3 n sum` …と呼び出していって `loop n n sum` まできたところでループが終了します。
 
 # 演算子
 
-idrisには組み込みの演算子がありません。もうちょっというと演算子というものはありません。代わりに、関数を中置記法で書けるようにする方法が2つあります。ユーザで中置演算子を自由に作れる訳ですね。今まで使ってきた `+` なんかもこれに該当します。
+Idrisには組み込みの演算子がありません。もうちょっというと演算子というものはありません。代わりに、関数を中置記法で書けるようにする方法が2つあります。ユーザで中置演算子を自由に作れる訳ですね。今まで使ってきた `+` なんかもこれに該当します。
 
 2つの方法のうち1つ目の方法が `` ` `` 〜 `` ` `` で関数を囲むもの。
 
 例： 2引数関数 `add` を `` ` `` 〜 `` ` `` で囲んで中置演算子として使うコード
 
 ``` idris
-add : integer -> integer -> integer
+add : Integer -> Integer -> Integer
 add x y = x + y
 
 1 `add` 2
@@ -258,10 +257,10 @@ add x y = x + y
 infixl 4 -?
 prefix 2 -!
 
-(-?) : integer -> integer -> integer
+(-?) : Integer -> Integer -> Integer
 (-?) x y = x - y
 
-(-!) : integer -> integer
+(-!) : Integer -> Integer
 (-!) x = 0 - x
 
 
@@ -296,7 +295,7 @@ prefix 2 -!
 例：引数のないコンストラクタのヴァリアントを2つ持つデータ型
 
 ``` idris
-data bool = true | false
+data Bool = True | False
 ```
 
 
@@ -304,33 +303,33 @@ data bool = true | false
 例：引数の2つあるコンストラクタのヴァリアントを1つ持つデータ型
 
 ``` idris
-data person = mkperson int string
+data Person = MkPerson Int String
 ```
 
-引数ありのコンストラクタのヴァリアントを1つ持つデータ型は頻出パターンで、構造体のように使えます。そのときのコンストラクタが構造体のコンストラクタのようになります。こういうときは `mkhoge` と `mk` （makeの略）を前置するのが慣例です。
+引数ありのコンストラクタのヴァリアントを1つ持つデータ型は頻出パターンで、構造体のように使えます。
+そのときのコンストラクタが構造体のコンストラクタのようになります。こういうときは `MkHoge` と `Mk` （makeの略）を前置するのが慣例です。
 
-`|` で複数のコンストラクタを組み合わせるのと引数のあるコンストラクタを両方同時に使うこともできます。
 
 例： 引数のあるコンストラクタや引数のないコンストラクタのヴァリアントのあるデータ型
 
 ``` idris
-data fizzbuzz = f | b | fb | i integer
+data FizzBuzz = F | B | FB | I Integer
 ```
 
 
 データ型は語ることが多いので章を新ためて説明しようと思います。
 
-# hole（穴）
+# Hole（穴）
 
-idrisの重要かつ初心者にとって役に立つ機能にhole（穴）があります。未完成のプログラムを作ることができるのです。実装が難しい部分をholeにしておくことで後で実装したり、処理系からholeについての情報を得たりできます。さらにはエディタサポートも受けられます。
+Idrisの重要かつ初心者にとって役に立つ機能にHole（穴）があります。未完成のプログラムを作ることができるのです。実装が難しい部分をHoleにしておくことで後で実装したり、処理系からHoleについての情報を得たりできます。さらにはエディタサポートも受けられます。
 
- `?` に続いてシンボルを書くとholeとして扱われます。例えば以下のように書きます。
+ `?` に続いてシンボルを書くとHoleとして扱われます。例えば以下のように書きます。
 
-例：holeを使ったプログラム
+例：Holeを使ったプログラム
 
 ``` idris
-awesomefunction: string -> integer
-awesomefunction s = ?hole
+awesomeFunction: String -> Integer
+awesomeFunction s = ?hole
 ```
 
 この `?hole` の部分がholeの記法で、 `hole` という名前のholeを作っています。さらにここから `hole` の方を処理系から取得することもできます。
@@ -338,21 +337,21 @@ awesomefunction s = ?hole
 例：`hole` の型を処理系から取得した際の出力
 
 ``` text
-    s : string
+    s : String
 ---------------
- hole : integer
+ hole : Integer
 ```
 
-これは `hole` の部分を埋めるにあたって、 `string` 型である `s` という変数が利用できて、 `hole` は `integer` 型であることが要求される、ということを表しています。
+これは `hole` の部分を埋めるにあたって、 `String` 型である `s` という変数が利用できて、 `hole` は `Integer` 型であることが要求される、ということを表しています。
 
-holeは式の途中で置くことも可能です。例えば以下のように `awesomefunction` の引数を `arg` というholeにすることもできます。
+Holeは式の途中で置くことも可能です。例えば以下のように `awesomeFunction` の引数を `arg` というHoleにすることもできます。
 
-例：式の途中にholeを置くコード
+例：式の途中にHoleを置くコード
 
 ``` idris
-awesomevalue : integer
-awesomevalue =
-  let tmp = awesomefunction ?arg
+awesomeValue : Integer
+awesomeValue =
+  let tmp = awesomeFunction ?arg
   in tmp + 2
 ```
 
@@ -362,20 +361,20 @@ awesomevalue =
 
 ``` text
 -------------
-arg : string
+arg : String
 ```
 
 こちらは引数がないので分数表記の上の方は空ですね。
 
-触れてませんでしたがholeを使って書いたコードも後の関数から使うことができます。上の `awesomevalue` がそうですね。このコードを読み込むとコンパイラがholeについての情報を出すのでholeを埋め忘れる心配はありません。
+触れてませんでしたがHoleを使って書いたコードも後の関数から使うことができます。上の `awesomeValue` がそうですね。このコードを読み込むとコンパイラがHoleについての情報を出すのでHoleを埋め忘れる心配はありません。
 
-例：holeのあるプログラムを読み込んだときの出力
+例：Holeのあるプログラムを読み込んだときの出力
 
 ``` text
-holes: main.arg, main.hole
+Holes: Main.arg, Main.hole
 ```
 
-holeについてはまだまだ語るところがあるのですが構文の学習からは少し離れてしまうのでこのあたりにしておきましょう。
+Holeについてはまだまだ語るところがあるのですが構文の学習からは少し離れてしまうのでこのあたりにしておきましょう。
 
 # モジュールと名前空間
 
@@ -397,6 +396,7 @@ module main
 例： `hoge/fuga/piyo.idr` にあるコードをインポートするコード
 ``` text
 import hoge.fuga.piyo
+Holes: Main.arg, Main.hole
 ```
 
 ## 名前空間

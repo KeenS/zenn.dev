@@ -109,7 +109,7 @@ diagnostic weight height =
   if index < 18.5
   then "Underweight"
   else if index < 25.0
-  then "Nomal range"
+  then "Normal range"
   else if index < 30.0
   then "Pre-obese"
   else if index < 35.0
@@ -139,7 +139,7 @@ Type checking ./Bmi.idr
 
 ```
 *Bmi> diagnostic 63 1.71
-"Nomal range" : String
+"Normal range" : String
 *Bmi> diagnostic 100 1.68
 "Obese class II" : String
 *Bmi> diagnostic 40 1.58

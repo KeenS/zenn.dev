@@ -373,7 +373,7 @@ Merge two sorted lists using the default ordering for the type of their elements
 
 ``` text
 *record> [1, 2, 3] ++ [4, 5, 6]
-[1, 2, 3, 4, 5, 6] : List Intege
+[1, 2, 3, 4, 5, 6] : List Integer
 ```
 
 想定どおりですね。

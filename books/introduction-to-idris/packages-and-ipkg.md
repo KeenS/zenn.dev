@@ -218,7 +218,7 @@ Can't convert handles back to TT after execution.
 
 そろそろパッケージから離れてきたのでサクっといきましょう。
 
-`SortedSet` はそのままだと表示できないので加工する必要があります。 `Data.SortedSet` をいインポートしておきましょう。
+`SortedSet` はそのままだと表示できないので加工する必要があります。 `Data.SortedSet` をインポートしておきましょう。
 
 ```idris:AnagramMain.idr
 import Data.SortedSet

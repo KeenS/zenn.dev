@@ -11,7 +11,7 @@ SMLのパターンマッチをC言語へと変換する方法について、変�
 そして、ネストのないパターンを、C言語にあるような `switch` 文へと変換します。
 本稿ではコンパイルの話には深く立ち入りませんが、このように複数の段階を経てコンパイルされるということは覚えておいてください（図[-@fig:smltoc]上）。
 
-![SMLからCに変換する際のコードとデータのフロー図](images/sml_to_c.png){#fig:smltoc}
+![SMLからCに変換する際のコードとデータのフロー図](/images/compiling_pattern_matching/sml_to_c.png){#fig:smltoc}
 
 以降では、パターンマッチのコンパイルを見る前に、代数的データ型のコンパイルについて説明します。
 なお、代数的データ型については、段階を分けることなくそのままC言語のコードに対応付けられます（図[-@fig:smltoc]下）。
@@ -105,7 +105,7 @@ struct entry {
 
 まず、 `struct entry` の構造を把握します。一見すると複雑ですが、フィールドは `tag` と `data` の2つだけです（図[-@fig:structentry]）。
 
-![構造体`entry`のフィールド](images/structentry.png){#fig:structentry}
+![構造体`entry`のフィールド](/images/compiling_pattern_matching/structentry.png){#fig:structentry}
 
 `tag` は `enum` で定義されているので、 `File` または `Directory` の2値しか取りません。
 
@@ -115,7 +115,7 @@ struct entry {
 `directory` の場合は `struct tuple_string_entry_list` へのポインタです。メモリは1ワード分を使います（図[-@fig:union1]）。
 
 
-![共用体`data`のフィールド](images/union1.png){#fig:union1}
+![共用体`data`のフィールド](/images/compiling_pattern_matching/union1.png){#fig:union1}
 
 
 これで2通りのデータ型を同じ型、同じメモリ領域で表現できるようになりました。
@@ -128,7 +128,7 @@ SMLの `datatype` では、 `File` か `Directory` かをプログラム上も�
 
 まとめると、 `struct entry` のメモリは以下のような使われ方をします（図[-@fig:union2]）。
 
-![構造体`entry`の使われ方](images/union2.png){#fig:union2}
+![構造体`entry`の使われ方](/images/compiling_pattern_matching/union2.png){#fig:union2}
 
 以上で、SMLの `datatype`に対応するデータ型を作れるようになりました。
 この表現を見ると、代数的データ型が時に**タグ付きユニオン**と呼ばれることが理解できると思います。

@@ -34,3 +34,7 @@ SMLのパターンマッチは標準的なので本記事で紹介するコン�
 
 これらの知識が得られるMinCaml（[https://github.com/esumii/min-caml](https://github.com/esumii/min-caml)）コンパイラやその解説（[http://esumii.github.io/min-caml/](http://esumii.github.io/min-caml/)）を併読するといっそう理解が深まるかと思います。
 
+本書は「著作権法」によって権利が保護されている著作物です。本書中の会社名や製品名に該当する各社の商標または登録商標です。本書の「後半まえがき」（本章）から「後半まとめ」までに掲載されている内容は、κeenによりクリエイティブ・コモンズ・表示-非営利-継承4.0国際・ライセンス提供されています。
+[![creativecommons by-nc-sa 4.0](/images/by-nc-sa.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja)
+
+

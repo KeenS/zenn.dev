@@ -24,5 +24,9 @@ chapters:
   - pattern_matching_interpreter
   - overview_of_compiler
   - compiling_pattern_matching
+  - compiling_to_case
+  - compiling_to_simple_case
+  - backtracking_automata
+  - decision_tree
   - advanced_topics
   - conclusion_of_second_half

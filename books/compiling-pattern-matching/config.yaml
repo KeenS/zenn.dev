@@ -1,0 +1,28 @@
+title: "コンパイル技法: パターンマッチ"
+summary: |
+  　本書では関数型言語をはじめとして多くの言語にあるパターンマッチをコンパイルする方法を紹介します。パターンマッチはシンプルに条件分岐の連鎖にコンパイルすることもできますが、よく研究された手法を使えば驚くほど効率的なコードを生成できるようになります。そのような手法を2種類紹介します。
+
+  　パターンマッチはデータ型に照合しそのデータを取り出すものです。例えばRustであれば match opt { Some(x) => f(x), None => g()} のように Option 型への照合などに使えます。本書の前半ではパターンマッチの挙動や使い方などを学びます。挙動の確認にはプログラミング言語Standard MLを使い、一部Cのコードも使います。その後Common LispやJavaなどの他の言語でのパターンマッチの状況を確認します。後半ではパターンマッチのコンパイル技法について紹介します。パターンマッチのコンパイルはコンパイラという巨大なソフトウェアの一部で行なわれるものなのである程度コンパイラが何をやっているのかを知っておく必要があるのでその解説も含みます。
+
+  　本書の内容の前半部分は「 n月刊ラムダノート Vol.1, No.3」（ラムダノート社 2019）で刊行されたものになります。n月刊ラムダノートのCC BY-NC-SAライセンスに基き公開します。ラムダノート社のライセンス設定のおかげで公開することができました。ありがとうございます。後半部分は未公開原稿をベースとしており、こちらもCC BY-NC-SAライセンスで公開します。そのうちn月刊ラムダノートあるいは他の媒体にて刊行されるかもしれません。
+
+topics: [compiler]
+published: false
+price: 0 # 有料の場合200〜5000
+# 本に含めるチャプターを順番に並べましょう
+chapters:
+  - preface_of_first_half
+  - environment
+  - smlsharp
+  - pattern_matching_basics
+  - pattern_matching_semantics
+  - compiling_to_c
+  - advanced_pattern_matching
+  - pattern_matching_in_other_languages
+  - conclusion_of_first_half
+  - preface_of_second_half
+  - pattern_matching_interpreter
+  - overview_of_compiler
+  - compiling_pattern_matching
+  - advanced_topics
+  - conclusion_of_second_half

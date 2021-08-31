@@ -184,7 +184,7 @@ Idris> (+) <$> [1, 2, 3] <*> [10, 11, 12]
 ``` idris
 safeDiv : Integer -> Integer -> Maybe Integer
 safeDiv _ 0 = Nothing
-safeDiv d m = d `div` m
+safeDiv d m = Just (d `div` m)
 ```
 
 新たに `Maybe` で包んで返す関数を `<$>` や `<*>` と組み合わせることもできますが、結果はあまり嬉しくありません。

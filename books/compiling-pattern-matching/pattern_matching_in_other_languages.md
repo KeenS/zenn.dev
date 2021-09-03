@@ -102,7 +102,7 @@ NIL
 
 生成されるコードについてはどうでしょうか。optimaの `match` はマクロなので、Common Lisp処理系を用意すれば、展開（コンパイル）後のコードを確認できます。
 
-例として、`issequence`の `isSequence` 関数の定義に使ったパターンマッチをoptimaで書き直してみて、その展開結果を調べてみましょう。
+例として、リスト4.12の `isSequence` 関数の定義に使ったパターンマッチをoptimaで書き直してみて、その展開結果を調べてみましょう。
 
 ``` lisp
 (match v
@@ -164,9 +164,9 @@ NIL
         nil)))
 ```
 
-SMLにおけるパターンマッチをC言語へと展開した結果（`issequence-compiled`）によく似た見た目ですね。optimaという名前が示唆するように、最適化された（optimized）コードが手に入ります。
+SMLにおけるパターンマッチをC言語へと展開した結果（リスト6.16）によく似た見た目ですね。optimaという名前が示唆するように、最適化された（optimized）コードが手に入ります。
 
-なお、よく見ると`issequence-compiled`と違う部分もあります。これは、`issequence-compiled`の生成に使われているのとは異なるアルゴリズムが使われているからです。具体的には、`issequence-compiled`だと `SML_FALSE` だった部分が `(optima:fail)` になっています。「[パターンマッチの意味](pattern_matching_semantics)」で説明に使った$\mathit{FAIL}$と同じような働きをマクロとして実装しているわけです。この `(optima:fail)` （および一緒に使われている`&or`）については、記事を改めて説明する予定です。
+なお、よく見るとリスト6.16と違う部分もあります。これは、リスト6.16の生成に使われているのとは異なるアルゴリズムが使われているからです。具体的には、リスト6.16だと `SML_FALSE` だった部分が `(optima:fail)` になっています。「[パターンマッチの意味](pattern_matching_semantics)」で説明に使った$\mathit{FAIL}$と同じような働きをマクロとして実装しているわけです。この `(optima:fail)` （および一緒に使われている`&or`）については、記事を改めて説明する予定です。
 
 
 ## Java
@@ -182,7 +182,7 @@ Javaにも代数的データ型はありませんが、抽象クラス（また�
 * サブクラスの種類がコンパイル時にわかる
 
 このことをコードで確認してみましょう。
-`datatype-cell1`で代数的データ型として定義した `stone` と同じものは、抽象クラスとそのサブクラスを使うと、次のようなJavaのコードとして実装できます。
+リスト4.5で代数的データ型として定義した `stone` と同じものは、抽象クラスとそのサブクラスを使うと、次のようなJavaのコードとして実装できます。
 
 ``` java
 abstract class Stone {}
@@ -201,7 +201,7 @@ class Empty extends Cell {}
 
 これは代数的データ型が持つような性質は満たしません。たとえば `Stone` は誰でも継承できるので、以下のように第三の勢力を投入することができます。
 
-```java:stone-menthos
+```java:リスト8.1
 class Menthos extends Stone {}
 ```
 *第三の値`Menthos`を追加*
@@ -209,7 +209,7 @@ class Menthos extends Stone {}
 
 あるいは `Full` を継承する新たなクラス `Corner` を定義すると `Full` でありかつ `Corner` であるようなクラスを作れてしまいます。
 
-```java:stone-corner
+```java:リスト8.2
 class Corner extends Full {
     Corner(Stone value) {
         super(value);
@@ -262,7 +262,7 @@ boolean isSequence(Cell c1, Cell c2, Cell c3) {
 
 この中には、以下のような「型検査をしてからダウンキャスト」するというパターンが何度も現れます。
 
-```java:java-instanceof-idiom
+```java:リスト8.3
 if (obj instanceof Full) {
   Full x = (Full)obj;
   // ...
@@ -275,11 +275,11 @@ if (obj instanceof Full) {
 
 このような `instanceof` による型検査とキャストは頻出のパターンなので、もう少し短く書けるようにしたいところです。そこで提案されているのがパターンマッチです。Javaにもパターンマッチが導入されるかもしれないのです！
 
-まず、JEP 305[^jep305]として、`java-instanceof-idiom`のようなボイラープレートを以下のような見た目で書けるようにすることが提案されています。
+まず、JEP 305[^jep305]として、リスト8.3のようなボイラープレートを以下のような見た目で書けるようにすることが提案されています。
 
 [^jep305]: [http://openjdk.java.net/jeps/305](http://openjdk.java.net/jeps/305)
 
-```java:java-instanceof-idiom2
+```java:リスト8.4
 if (obj instanceof Full x) {
     // ...
 }
@@ -356,12 +356,12 @@ final class Stone extends Enum<Stone> {
 
 つまり、`enum` を使って `Stone` を定義すれば、勝手に第三の勢力を増やしたり、列挙子のサブクラスを増やしたりすることはできなくなります。
 
-では、なぜわざわざ抽象クラスとサブクラスを使ってデータを表現したのでしょうか？実は、`Stone` は上記のように `enum` でうまく定義できるのですが、同じ`datatype-cell1`で定義していた `cell` に相当するデータ型（`datatype-cell1-re`）は、残念ながら `enum` ではうまくいきません。
+では、なぜわざわざ抽象クラスとサブクラスを使ってデータを表現したのでしょうか？実は、`Stone` は上記のように `enum` でうまく定義できるのですが、同じリスト4.5で定義していた `cell` に相当するデータ型（リスト8.5）は、残念ながら `enum` ではうまくいきません。
 
-```sml:datatype-cell1-re
+```sml:リスト8.5
 datatype cell = Empty | Full of stone
 ```
-*`datatype-cell1`で定義しているcell*
+*リスト4.5で定義しているcell*
 
 これをJavaで `enum` を使って定義しようとしても、`Full` に値を保持する必要があるので、定数としてエンコードできないのです。
 
@@ -463,7 +463,7 @@ class PatternMatch {
 
 この場合、冗長なパターンや非網羅的なパターンを書くと、Scalaのコンパイラが警告します。試しに、13行め（`case _ => false`）を削除してコンパイルしてみましょう。
 
-```console:compiledresult
+```console
 $ scalac PatternMatch.scala ⏎
 atternMatch.scala:10: warning: match may not be exhaustive.
 It would fail on the following inputs: (Empty, Empty, Empty), (Empty, Empty, Full(Black)), (Empty, Empty, Full(White)), (Empty, Full(Black), Empty), (Empty, Full(Black), Full(Black)), (Empty, Full(Black), Full(White)), (Empty, Full(White), Empty), (Empty, Full(White), Full(Black)), (Empty, Full(White), Full(White)), (Full(Black), Empty, Full(Black)), (Full(Black), Empty, Full(White)), (Full(Black), Full(White), Full(Black)), (Full(Black), Full(White), Full(White))
@@ -474,9 +474,9 @@ warning: there was one unchecked warning; re-run with -unchecked for details
 *case _ => false を削除*
 
 
-冗長な場合についても試してみましょう。`compiledresult2`は、`case (Full(White()), Full(White()), Full(White())) => true`を追加してコンパイルした結果です。
+冗長な場合についても試してみましょう。リスト8.6は、`case (Full(White()), Full(White()), Full(White())) => true`を追加してコンパイルした結果です。
 
-```console:compiledresult2
+```console:リスト8.6
 $ scalac PatternMatch.scala ⏎
 PatternMatch.scala:13: warning: unreachable code
     case (Full(White), Full(White), Full(White)) => true

@@ -33,7 +33,7 @@ case x of
 
 これを素直にジャンプテーブルにしようと思うと、約32万個のエントリが必要になり、現実的ではありません。こうしたケースでは何かしらの工夫が必要です。たとえば、ジャンプテーブルでなく、if文による二分探索へとコンパイルする手法が考えられます。
 
-```c:binsearch
+```c:リスト7.1
 if (x <= 32) {
   if (x == 1)           〈expr1〉;
   else if(x == 32)      〈expr2〉;
@@ -49,9 +49,9 @@ if (x <= 32) {
 
 あるいは、値テーブルとジャンプテーブルを別々に作る方法も考えられます。ジャンプテーブルはC言語では直接は表現できませんが、ラベルを配列に保存できるとしたら、以下のようなコードで実現できるでしょう[^jumptable]。
 
-[^jumptable]: GCCやClangでは拡張機能を使うとラベルを値として保存できます。`jumptable`はその機能の文法に則って書かれています。
+[^jumptable]: GCCやClangでは拡張機能を使うとラベルを値として保存できます。リスト7.2はその機能の文法に則って書かれています。
 
-```c:jumptable
+```c:リスト7.2
   void* jump_table[5] = {&&L_1, &&L_32, &&L_1024, &&L_327678, &&L_default};
   int value_table[4] = {1, 32, 1024, 327678};
   // 値と値テーブルからインデックスを引く
@@ -80,7 +80,7 @@ ORパターンは、1つの節にいくつかのパターンを並置できる�
 
 SMLでの `isWeekend'` 関数は以下のように定義されていました。
 
-```sml:isweekend2-re
+```sml:リスト7.3
 fun isWeekend' w = case w of
                       Sunday => true
                     | Saturday => true
@@ -91,7 +91,7 @@ fun isWeekend' w = case w of
 
 `Sunday` と `Saturday` は、どちらも同じく `true` になります。これらをまとめて扱うことはできないでしょうか。SML/NJのORパターンを使うと、 `Sunday` と `Saturday` の2つのパターンを「`|`」の前後に並置できます。ORパターンでは、「`|`」の前後のどちらかにマッチした場合に腕の式が実行されます。
 
-```sml:isweekend2-or
+```sml:リスト7.4
 fun isWeekend w = case w of
     Sunday | Saturday => true
     | other => false
@@ -155,9 +155,9 @@ fun matchList (_ :: x | x) = List.length x
 
 [^ocamlspec]: 本項の内容はOCaml 4.08.0に基づくものです。
 
-`issequence`の`isSequence`の定義を三たび再掲します。
+リスト4.12の`isSequence`の定義を三たび再掲します。
 
-```sml:issequence3
+```sml:リスト7.5
 datatype stone = Black | White
 
 datatype cell = Empty | Full of stone
@@ -167,7 +167,7 @@ fun isSequence s = case s of
                     |  (Full White, Full White, Full White) => true
                     | _ => false
 ```
-*`issequence`の再掲*
+*リスト4.12の再掲*
 
 これをそのままOCamlに翻訳すると以下のようになります。同じML語族の言語なので多少のキーワードの修正で翻訳できます。
 

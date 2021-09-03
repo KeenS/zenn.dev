@@ -15,14 +15,14 @@ title: パターンマッチのC言語へのコンパイル
 
 まずはSMLの代数的データ型をC言語のどのようなデータ型に変換すべきかを考えます。単純なものから考えていきましょう。最初の方に出てきた `week` はこのように定義されていました。
 
-```sml:datatype-week-re
+```sml:リスト6.2
 datatype week = Sunday | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday
 ```
 *データ型weekの定義（再掲）*
 
 これは以下のようなC言語の列挙型へと変換すればいいでしょう。
 
-```c:datatype-week-compiled
+```c:リスト6.3
 enum week {
   Sunday,
   Monday,
@@ -37,14 +37,14 @@ enum week {
 
 次は`person` 型です。
 
-```sml:datatype-person-re
+```sml:リスト6.4
 datatype person = MkPerson of string * int
 ```
 *データ型personの定義（再掲）*
 
 この代数的データ型は、単純には以下のようなC言語の構造体へと変換できます。
 
-```sml:datatype-week-compiled
+```sml:リスト6.5
 enum person_constructor {
   MkPerson
 };
@@ -65,7 +65,7 @@ struct person {
 
 次は `entry` 型です。`entry` 型は以下のように定義されていました。
 
-```sml:datatype-entry-re
+```sml:リスト6.6
 datatype entry = File of string | Directory of string * entry list
 ```
 *entry型の定義（再掲）*
@@ -75,7 +75,7 @@ datatype entry = File of string | Directory of string * entry list
 
 しかし、タグ付き `union` と呼ばれる表現を使えば、C言語にエンコードできます。列挙型で `File` または `Directory` を、共用体で `string` または `string * entry list` を表現すればエンコードできるのです。
 
-```c:datatype-entry-compiled
+```c:リスト6.7
 enum entry_constructor {
   File,
   Directory
@@ -100,29 +100,29 @@ struct entry {
 
 キーワードが多いので、初見だと少し身構えるかもしれません。しかし、よく見れば難しいことはしていないので、少しずつ解読していきます。
 
-まず、 `struct entry` の構造を把握します。一見すると複雑ですが、フィールドは `tag` と `data` の2つだけです（図6.2）。
+まず、 `struct entry` の構造を把握します。一見すると複雑ですが、フィールドは `tag` と `data` の2つだけです（図6.8）。
 
-![図6.2 構造体`entry`のフィールド](/images/compiling_pattern_matching/structentry.png)
-*図6.2 構造体`entry`のフィールド*
+![図6.8 構造体`entry`のフィールド](/images/compiling_pattern_matching/structentry.png)
+*図6.8 構造体`entry`のフィールド*
 
 
 `tag` は `enum` で定義されているので、 `File` または `Directory` の2値しか取りません。
 
-`data` は `union` で定義されています。その `union` のフィールドはというと、 `file` か `directory` の2つです。どちらが入っているかによってメモリの使われ方が変わります。`file` の場合は `sml_string` 型の値が格納されますが、これは実装次第です。ひとまず3ワード分を使うものとしておきましょう。`directory` の場合は `struct tuple_string_entry_list` へのポインタです。メモリは1ワード分を使います（図6.3）。
+`data` は `union` で定義されています。その `union` のフィールドはというと、 `file` か `directory` の2つです。どちらが入っているかによってメモリの使われ方が変わります。`file` の場合は `sml_string` 型の値が格納されますが、これは実装次第です。ひとまず3ワード分を使うものとしておきましょう。`directory` の場合は `struct tuple_string_entry_list` へのポインタです。メモリは1ワード分を使います（図6.9）。
 
 
-![図6.3 共用体`data`のフィールド](/images/compiling_pattern_matching/union1.png)
-*図6.3 共用体`data`のフィールド*
+![図6.9 共用体`data`のフィールド](/images/compiling_pattern_matching/union1.png)
+*図6.9 共用体`data`のフィールド*
 
 
 これで2通りのデータ型を同じ型、同じメモリ領域で表現できるようになりました。
 
 一見すると、この共用体 `data` だけで、SMLの `entry` 型を表現できているように見えるかもしれません。しかし、まだ大きな違いがあります。SMLの `datatype` では、 `File` か `Directory` かをプログラム上もパターンマッチで区別できます。しかし、C言語の `union` の場合にはプログラム上で両者を区別する手段がなく、どちらが入っているかはプログラマーが知っているものと仮定して使われます。どちらかが入るかをプログラマーが知っていれば、そもそも `union` を使う必要がありません。そのため、現実的には追加でデータを持たせる必要があります。それが `tag` です。`tag` が `File` のときには `file` のほうにデータが入っていると約束し、 `tag` が `Directory` のときは `directory` のほうにデータが入っていると約束して使うことで、両者を区別できます。
 
-まとめると、 `struct entry` のメモリは以下のような使われ方をします（図6.4）。
+まとめると、 `struct entry` のメモリは以下のような使われ方をします（図6.10）。
 
-![図6.4 構造体`entry`の使われ方](/images/compiling_pattern_matching/union2.png)
-*図6.4 構造体`entry`の使われ方*
+![図6.10 構造体`entry`の使われ方](/images/compiling_pattern_matching/union2.png)
+*図6.10 構造体`entry`の使われ方*
 
 以上で、SMLの `datatype`に対応するデータ型を作れるようになりました。
 この表現を見ると、代数的データ型が時に**タグ付きユニオン**と呼ばれることが理解できると思います。
@@ -135,7 +135,7 @@ struct entry {
 
 `printPathname` は以下のように定義されているのでした。
 
-```sml:printPathname-re
+```sml:リスト6.11
 fun printPathname prefix e =
     case e of
         File name => print (prefix ^ name ^ "\n")
@@ -146,7 +146,7 @@ fun printPathname prefix e =
 
 これをC言語へとコンパイルすることを考えます。まず、代数的データ型である`entry` 型は以下のように翻訳されるのでした。
 
-```c:datatype-entry-compiled-re
+```c:リスト6.12
 enum entry_constructor {
   File,
   Directory
@@ -167,9 +167,9 @@ struct entry {
 ```
 *entry型の変換後（再掲）*
 
-`printPathname` は、おおまかには`printPathname-compiled`のように変換されます。本当はパターンマッチ以外の処理も必要なので、コンパイラの内部の処理で型が付いたり名前が変わったりしますが、ここでは無視しています。
+`printPathname` は、おおまかにはリスト6.13のように変換されます。本当はパターンマッチ以外の処理も必要なので、コンパイラの内部の処理で型が付いたり名前が変わったりしますが、ここでは無視しています。
 
-```c:printPathname-compiled
+```c:リスト6.13
 void
 printPathname(sml_string prefix, struct entry *e)
 {
@@ -206,7 +206,7 @@ printPathname(sml_string prefix, struct entry *e)
 シンプルなパターンマッチの場合は、素直な`switch`に変換できることがわかりました。次はネストのあるパターンマッチの変換を見てみましょう。
 以前 `isSequence` 関数とその関連データ型を以下のように定義しました。
 
-```sml:issequence-re
+```sml:リスト6.14
 datatype stone = Black | White
 
 datatype cell = Empty | Full of stone
@@ -216,12 +216,12 @@ fun isSequence s = case s of
                     |  (Full White, Full White, Full White) => true
                     | _ => false
 ```
-*issequenceの再掲*
+*リスト4.12の再掲*
 
 
 このネストしたパターンを、まずはシンプルなパターンマッチのネストに変換します。その結果は、次のようなネストした `case` 式です。
 
-```sml:issequence-compiled
+```sml:リスト6.15
 fun isSequence s = case s of
     (tmp_1, tmp_2, tmp_3) => case tmp_1 of
       Full tmp_4 => (case tmp_4 of
@@ -259,7 +259,7 @@ fun isSequence s = case s of
 
 これを `printPathname` の場合と同じく、C言語へとコンパイルすることを考えます。特に目新しい点はないので、単なる作業として素直に変換をしてみると、次のような結果になります（実際のコンパイラによる変換ではさまざまな処理が入り、変換アルゴリズムによる相違もあるので、常にこのとおりの結果になるというわけではありません）。
 
-```c:issequence-compiled
+```c:リスト6.16
 enum stone {
   Black,
   White
@@ -375,12 +375,12 @@ isSequence(struct tuple_cell_cell_cell *s)
 
 ## `switch` 文か `if` 文か
 
-`printPathname-compiled`の例では、タグが `File` と `Directory` の2通りしかなかったので「case文ではなくif文でいいのでは」と思った方がいるかもしれません。
-`issequence-compiled`のような複雑にネストしたパターンマッチの変換も、一つひとつif文で検査していくほうが簡単に実装できそうに思えるかもしれません。実際、そのように実装することも可能です。しかし、それでも可能な限りswitch文を使ったほうがよい理由があります。
+リスト6.13の例では、タグが `File` と `Directory` の2通りしかなかったので「case文ではなくif文でいいのでは」と思った方がいるかもしれません。
+リスト6.16のような複雑にネストしたパターンマッチの変換も、一つひとつif文で検査していくほうが簡単に実装できそうに思えるかもしれません。実際、そのように実装することも可能です。しかし、それでも可能な限りswitch文を使ったほうがよい理由があります。
 
-if文で実装した場合の `isSequence` の変換結果を`issequence-compiled-if`に示します。
+if文で実装した場合の `isSequence` の変換結果をリスト6.17に示します。
 
-```c:issequence-compiled-if
+```c:リスト6.17
 boolean
 isSequence(struct tuple_cell_cell_cell *s)
 {
@@ -400,7 +400,7 @@ isSequence(struct tuple_cell_cell_cell *s)
 *if文による `isSequence` の変換結果*
 
 
-switch文による変換との見た目でわかりやすい違いは、比較の回数です。`(Full White, Full Black, Empty)` というデータだった場合、switch文によるのネストの場合は、 `Full` 、 `White` 、 `Full` 、 `Black` と4回比較した時点でリターンします。しかし、`issequence-compiled-if`のようなif文の場合は、 `Full` 、 `White` 、 次のif文に移って `Full` 、 `White` 、 `Full` 、 `Black` 、さらに最後のelse節に入ってリターンするので、都合6回比較することになります。うまくネストした比較に落としたほうが比較回数が少なくなるのです。
+switch文による変換との見た目でわかりやすい違いは、比較の回数です。`(Full White, Full Black, Empty)` というデータだった場合、switch文によるのネストの場合は、 `Full` 、 `White` 、 `Full` 、 `Black` と4回比較した時点でリターンします。しかし、リスト6.17のようなif文の場合は、 `Full` 、 `White` 、 次のif文に移って `Full` 、 `White` 、 `Full` 、 `Black` 、さらに最後のelse節に入ってリターンするので、都合6回比較することになります。うまくネストした比較に落としたほうが比較回数が少なくなるのです。
 
 また、コンストラクタが多い場合は、if文よりもswitch文のほうが高速になります。多少人工的な例ではありますが、 `isWeekend` の例で説明しましょう。
 
@@ -444,11 +444,10 @@ else if (w == Saturday)  return SML_TRUE;
 
 if文のほうは、もし `w` が `Saturday` だった場合、7回の比較が必要なことが見てとれるでしょう。switch文のほうは7回も比較しません。それどころか、1回も比較せずに実行すべきコードを見つけてしまいます。
 
-少し機械語の知識が必要になりますが、上記の2種類の文をコンパイルして生成される機械語を見比べてみましょう。`issequence-compiled`と`issequence-compiled-if`のC言語ふうのコードは、 `enum`の定義を補い、関数定義構文で囲ってあげれば、C言語のコードとしてコンパイルが通ります。switch文で書いたほうは`asm1`、if文で書いたほうは`asm2`のようなコンパイル結果になります。
-`asm1`の12行めに注目すると、`w` が `Saturday` の場合には実質的に`.L6`へのジャンプへと変換されていることがわかります（図6.5）。
+少し機械語の知識が必要になりますが、上記の2種類の文をコンパイルして生成される機械語を見比べてみましょう。リスト6.16とリスト6.17のC言語ふうのコードは、 `enum`の定義を補い、関数定義構文で囲ってあげれば、C言語のコードとしてコンパイルが通ります。switch文で書いたほうはリスト6.18、if文で書いたほうはリスト6.19のようなコンパイル結果になります。リスト6.18の12行めに注目すると、`w` が `Saturday` の場合には実質的に`.L6`へのジャンプへと変換されていることがわかります（図6.20）。
 
 
-```asm:asm1
+```asm:リスト6.18
 ; isWeekend(week):
   push rbp
   mov rbp, rsp
@@ -504,7 +503,7 @@ if文のほうは、もし `w` が `Saturday` だった場合、7回の比較が
 *switch文の結果*
 
 
-```asm:asm2
+```asm:リスト6.19
 ;isWeekend(week):
   push rbp
   mov rbp, rsp
@@ -574,16 +573,16 @@ if文のほうは、もし `w` が `Saturday` だった場合、7回の比較が
 *if文の結果*
 
 
-![図6.5 switch文のコンパイル結果はジャンプになる](/images/compiling_pattern_matching/switchasm.png)
-*図6.5 switch文のコンパイル結果はジャンプになる*
+![図6.20 switch文のコンパイル結果はジャンプになる](/images/compiling_pattern_matching/switchasm.png)
+*図6.20 switch文のコンパイル結果はジャンプになる*
 
 switch文のほうはジャンプテーブルを作っているので、 `enum week` のどんな値がきても、 `L4 + rax*8` へ1回、 `L1` へ1回の計2回しかジャンプしません。一方、if文のほうは、もし `Saturday` がきたら `L2` 、 `L4` 、 `L5` 、 `L6` 、 `L7` 、 `L8` 、 `L1` と7回ジャンプすることになってしまいます。switch文を使ったほうが効率的な機械語が生成されるのです。
 
 しかし、先ほどのswitch文による例でも、実はSMLからC言語へのコンパイラが知っているはずの情報が一部抜け落ちてしまっています。具体的には、SMLのコンパイラはタグが網羅的であることを知っているはずなので、最初の値が6以下であるかどうかの確認は不要です。この情報は、GCC拡張の `__builtin_unreachable` を使うことで、C言語のコンパイラへと伝えることができます。
 
-`builtinunreachable`に、`default` 節に `__builtin_unreachable` を置いた例を示します。
+リスト6.21に、`default` 節に `__builtin_unreachable` を置いた例を示します。
 
-```c:builtinunreachable
+```c:リスト6.21
 switch(w) {
 case Sunday:    return 1;
 case Monday:    return 0;
@@ -598,10 +597,10 @@ default: __builtin_unreachable();
 *GCC拡張で網羅性を伝える*
 
 
-`builtinunreachable`を同様にしてコンパイルすると、`builtinunreachable-compiled`のような結果になります。
+リスト6.21を同様にしてコンパイルすると、リスト6.22のような結果になります。
 
 
-```asm:builtinunreachable-compiled
+```asm:リスト6.22
 isWeekend:
   push rbp
   mov rbp, rsp
@@ -642,7 +641,7 @@ isWeekend:
   pop rbp
   ret
 ```
-*\ref{lst:builtinunreachable}のコンパイル結果*
+*リスト6.22のコンパイル結果*
 
 
 先頭にあった、「値が6以下である」旨の検査が消えました。もちろん、これくらいの式であれば、if文で書いてもC言語のコンパイラの最適化オプションをオンにすればジャンプすらなくなります。しかし、実際に扱うパターンマッチはもっと複雑でしょうから、おそらくその最適化に頼っていては目的のコードが生成されないでしょう。

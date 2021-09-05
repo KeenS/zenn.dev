@@ -15,15 +15,18 @@ title: 後半まとめ
 
 # 参考文献
 
-本稿のアルゴリズムはバックトラック法は[@LeFessant:2001:OPM:507635.507641]、決定木法は[@Maranget:2008:CPM:1411304.1411311]をベースにしています。
+本稿のアルゴリズムはバックトラック法は1、決定木法は2をベースにしています。
 
-[@LeFessant:2001:OPM:507635.507641]では節をいれかえてバックトラック法を改善する方法が紹介されています。
+1では節をいれかえてバックトラック法を改善する方法が紹介されています。
 
-[@Scott:2000:WDMHM]および[@Maranget:2008:CPM:1411304.1411311]では決定木法を最適する方法が調べられています。
+4および2では決定木法を最適する方法が調べられています。
 
-今回紹介できませんでしたが、[@Maranget:2007:WPM:S0956796807006223]はパターンマッチの網羅性判定、非冗長性判定を扱っています。
+今回紹介できませんでしたが、3はパターンマッチの網羅性判定、非冗長性判定を扱っています。
 
-\setbib
+1. Le Fessant, Fabrice and Maranget, Luc, "Optimizing Pattern Matching," Proceedings of the Sixth ACM SIGPLAN International Conference on Functional Programming (2001), 26-37
+2. Maranget, Luc, "Compiling Pattern Matching to Good Decision Trees," Proceedings of the 2008 ACM SIGPLAN Workshop on ML (2008), 35-46
+3. Maranget, Luc, "Warnings for pattern matching", J. Funct (2007). Program. Vol.17, 387-421
+4. Scott, Kevin and Ramsey, Norman, "When Do Match-Compilation Heuristics Matter?," 2007
 
 
 

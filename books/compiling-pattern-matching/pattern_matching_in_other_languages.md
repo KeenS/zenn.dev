@@ -342,7 +342,7 @@ final class Stone extends Enum<Stone> {
     }
 
     public static final Stone BLACK = new Stone("BLACK", 0);
-    public static final Stone WHITE = new Stone("WHITE, 1);
+    public static final Stone WHITE = new Stone("WHITE", 1);
 
     private static final Stone ENUM$VALUES[] = {BLACK, WHITE};
 }
@@ -429,7 +429,7 @@ switch (c) {
 // 定義
 sealed interface Cell {}
 record Full(Stone s) implements Cell {}
-record Empty() interface Cell {}
+record Empty() implements Cell {}
 
 // 生成とパターンマッチ
 Cell c = new Empty();

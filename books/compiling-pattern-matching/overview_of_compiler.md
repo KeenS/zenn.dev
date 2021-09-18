@@ -238,7 +238,7 @@ val y = case tmp of (_, y) => y
 struct sml_tuple2 *tmp;
 int x, y;
 
-switch(foo->descriminant) {
+switch(foo->discriminant) {
   case FOO: {
     tmp = foo->data
     break;
@@ -257,7 +257,7 @@ y = tmp->snd;
 ``` c
 int x, y;
 
-switch(foo->descriminant) {
+switch(foo->discriminant) {
   case FOO: {
     x = foo->data->fst;
     y = foo->data->snd;

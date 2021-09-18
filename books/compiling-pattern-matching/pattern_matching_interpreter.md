@@ -123,9 +123,9 @@ mod case {
     pub enum Expr {
         /// (expr1, expr2, ...)
         Tuple(Vec<Expr>),
-        /// inj<descriminant>(data)
+        /// inj<discriminant>(data)
         Inject {
-            descriminant: u8,
+            discriminant: u8,
             data: Option<Box<Expr>>,
         },
         /// case cond of pattern1 => expr1 | pattern2 => expr2 ...
@@ -143,9 +143,9 @@ mod case {
     pub enum Pattern {
         /// (pat1, pat2, ...)
         Tuple(Vec<Pattern>),
-        /// c<descriminant>(pattern)
+        /// c<discriminant>(pattern)
         Constructor {
-            descriminant: u8,
+            discriminant: u8,
             pattern: Option<Box<Pattern>>,
         },
         /// x
@@ -165,8 +165,8 @@ ASTを表わすデータ型は式（expression）を表わす `Expr` とパタ�
 #### Boxについて
 随所にでてくる `Box<...>` はRustでのポインタ型（の一種）です。データ構造の制約からこれが必要になりますが、本稿では本筋でないのであまり気にする必要はありません。 `Expr::case` に出てくる `(Pattern, Expr)` は `Pattern` と `Expr` のタプル（組）を表わす型です。
 
-#### InjectとDescriminant
-`Expr::Inject` はコンストラクタの適用です。適用するコンストラクタを表わす数値と、必要であれば引数の式を受け取ります。見て分かるとおり、代数的データ型がどのコンストラクタで作られたかを表わすデータはdescriminant（判別子）と呼んでいます。どの代数的データ型にinject（注入[^inject]）するかの情報、つまり型情報は引数にありません。引数に含む設計もありますが、パターンマッチのコンパイルだけなら不要なので省きました。
+#### InjectとDiscriminant
+`Expr::Inject` はコンストラクタの適用です。適用するコンストラクタを表わす数値と、必要であれば引数の式を受け取ります。見て分かるとおり、代数的データ型がどのコンストラクタで作られたかを表わすデータはdiscriminant（判別子）と呼んでいます。どの代数的データ型にinject（注入[^inject]）するかの情報、つまり型情報は引数にありません。引数に含む設計もありますが、パターンマッチのコンパイルだけなら不要なので省きました。
 
 [^inject]: 分かりやすいように注入と書きましたが多分自然な単射の意味で使われている用語だと思います。
 #### Patternが表わすもの
@@ -182,22 +182,22 @@ use Expr::*;
 
 // `false` （値）のつもり
 let falsev = Expr::Inject {
-    descriminant: 1,
+    discriminant: 1,
     data: None,
 };
 // `true` （値）のつもり
 let truev = Expr::Inject {
-    descriminant: 0,
+    discriminant: 0,
     data: None,
 };
 // `false` （パターン）のつもり
 let falsep = Pattern::Constructor {
-    descriminant: 1,
+    discriminant: 1,
     pattern: None,
 };
 // `true` （パターン）のつもり
 let truep = Pattern::Constructor {
-    descriminant: 0,
+    discriminant: 0,
     pattern: None,
 };
 
@@ -263,9 +263,9 @@ mod case {
     pub enum Value {
         /// (value1, value2, ...)
         Tuple(Vec<Value>),
-        /// c<descriminant>(value)
+        /// c<discriminant>(value)
         Constructor {
-            descriminant: u8,
+            discriminant: u8,
             value: Option<Box<Value>>,
         },
     }
@@ -313,8 +313,8 @@ impl CaseInterp {
             // シンボルはスコープから名前を解決する（後述）
             Symbol(s) => Ok(self.resolve(&s)),
             // コンストラクタなら引数があれば評価し、値を作る
-            Inject { descriminant, data } => Ok(case::Value::Constructor {
-                descriminant,
+            Inject { discriminant, data } => Ok(case::Value::Constructor {
+                discriminant,
                 value: match data {
                     None => None,
                     Some(d) => Some(Box::new(self.eval(*d)?)),
@@ -423,11 +423,11 @@ impl CaseInterp {
                 .fold(Ok(()), |is_match, ret| ret.and(is_match)),
             (
                 case::Pattern::Constructor {
-                    descriminant: c1,
+                    discriminant: c1,
                     pattern,
                 },
                 case::Value::Constructor {
-                    descriminant: c2,
+                    discriminant: c2,
                     value,
                 },
             ) => {
@@ -460,7 +460,7 @@ impl CaseInterp {
 リスト11.1の `case` 言語のコード(をデータ型で表わしたもの)を実行してみます。リスト11.1のコードは `(false, false)` の組をxor相当の計算に渡しているコードなのでした。細かな実行部分は省いて実行結果だけ貼ると以下のようになります。
 
 ``` console
-Constructor { descriminant: 1, value: None }
+Constructor { discriminant: 1, value: None }
 ```
 
 `datatype bool = true | false` で `true` が `0` 、 `false` が `1` でしたので、これは `false` を表わしています。 `(false, false)` を評価して `false` が返ってきたので正しく実装できているようです。他にも引数のある代数的データ型や変数なども各々試してみて下さい。

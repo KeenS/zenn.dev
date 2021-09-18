@@ -57,8 +57,8 @@ where
     pub fn compile(&mut self, case: case::Expr) -> simple_case::Expr {
         match case {
             case::Expr::Tuple(vs) => self.compile_tuple(vs),
-            case::Expr::Inject { descriminant, data } => {
-                self.compile_inject(descriminant, data.map(|d| *d))
+            case::Expr::Inject { discriminant, data } => {
+                self.compile_inject(discriminant, data.map(|d| *d))
             }
             case::Expr::Case { cond, ty, clauses } => self.compile_case(*cond, ty, clauses),
             case::Expr::Symbol(s) => self.compile_symbol(s),
@@ -69,9 +69,9 @@ where
         simple_case::Expr::Tuple(data.into_iter().map(|d| self.compile(d)).collect())
     }
 
-    fn compile_inject(&mut self, descriminant: u8, data: Vec<case::Expr>) -> simple_case::Expr {
+    fn compile_inject(&mut self, discriminant: u8, data: Vec<case::Expr>) -> simple_case::Expr {
         simple_case::Expr::Inject {
-            descriminant,
+            discriminant,
             data: data.into_iter().map(|d| self.compile(d)).collect(),
         }
     }

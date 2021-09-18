@@ -55,9 +55,9 @@ mod simple_case {
             expr: Box<Expr>,
             body: Box<Expr>,
         },
-        /// inject data with descriminant
+        /// inject data with discriminant
         Inject {
-            descriminant: u8,
+            discriminant: u8,
             data: Option<Box<Expr>>,
         },
         /// case cond of pattern1 => expr1 | pattern2 => expr2 ...
@@ -80,9 +80,9 @@ mod simple_case {
     pub enum Pattern {
         /// (pat1, pat2, ...)
         Tuple(Vec<Symbol>),
-        /// constructor of descriminant and its data
+        /// constructor of discriminant and its data
         Constructor {
-            descriminant: u8,
+            discriminant: u8,
             data: Option<Symbol>,
         },
         /// x
@@ -232,7 +232,7 @@ mod case {
 
     #[derive(Debug, Clone)]
     pub struct Constructor {
-        pub descriminant: u8,
+        pub discriminant: u8,
         pub param: Option<TypeId>,
     }
 
@@ -297,12 +297,12 @@ type_db.register_adt(
     vec![
         // True
         case::Constructor {
-            descriminant: 0,
+            discriminant: 0,
             param: None,
         },
         // False
         case::Constructor {
-            descriminant: 1,
+            discriminant: 1,
             param: None,
         },
     ],
@@ -385,9 +385,9 @@ mod case {
         pub fn constructor(self) -> (u8, Option<Pattern>) {
             match self {
                 Pattern::Constructor {
-                    descriminant,
+                    discriminant,
                     pattern,
-                } => (descriminant, pattern.map(|p| *p)),
+                } => (discriminant, pattern.map(|p| *p)),
                 _ => panic!("pattern is not a constructor"),
             }
         }
@@ -507,8 +507,8 @@ impl SimpleToSwitch {
         match case {
             simple_case::Expr::Tuple(t) => self.compile_tuple(t),
             simple_case::Expr::Let { var, expr, body } => self.compile_let(var, *expr, *body),
-            simple_case::Expr::Inject { descriminant, data } => {
-                self.compile_inject(descriminant, data.map(|d| *d))
+            simple_case::Expr::Inject { discriminant, data } => {
+                self.compile_inject(discriminant, data.map(|d| *d))
             }
             simple_case::Expr::Case { cond, clauses } => self.compile_case(*cond, clauses),
             simple_case::Expr::RaiseMatch => self.compile_raise_match(),
@@ -581,7 +581,7 @@ impl SimpleToSwitch {
 
 ### `Inject` のコンパイル
 
-つぎは `Inject` 、 `simple_case` 言語での `inject(desc, data)` （コンストラクタの適用）のコンパイルです。  `Inject` のコンパイルに入る前にシンボルジェネレータの `gensym` を短く呼べる手を用意しておきましょう。
+つぎは `Inject` 、 `simple_case` 言語での `inject(disc, data)` （コンストラクタの適用）のコンパイルです。  `Inject` のコンパイルに入る前にシンボルジェネレータの `gensym` を短く呼べる手を用意しておきましょう。
 
 ``` rust
 impl SimpleToSwitch {
@@ -594,11 +594,11 @@ impl SimpleToSwitch {
 
 `.symbol_generator` の部分を省けるようになるだけですが、以後何度か呼ぶので短く呼べるようにする価値がありす。
 
-さて `inject(desc, data)` はおおまかには以下のようにコンパイルされます。
+さて `inject(disc, data)` はおおまかには以下のようにコンパイルされます。
 
 ``` c
 v := alloc(2);
-store(v+0, <desc>);
+store(v+0, <disc>);
 store(v+1, <data>);
 ```
 
@@ -610,8 +610,8 @@ store(v+1, <data>);
 ただし `data` はさらにコンパイルされる点、`store` の右辺にシンボルしか許してない点から、もう少し詳しく書くと以下のようになります。
 
 ``` c
-/* descriminantの部分 */
-desc := <desc>;
+/* discriminantの部分 */
+disc := <disc>;
 
 /* dataの部分 */
 ...
@@ -619,11 +619,11 @@ data := ...;
 
 /* injectの構成 */
 v := alloc(2);
-store(v+0, desc);
+store(v+0, disc);
 store(v+1, data);
 ```
 
-先に `desc` 、 `data` を計算してからそれぞれの値をメモリに書き込みます。
+先に `disc` 、 `data` を計算してからそれぞれの値をメモリに書き込みます。
 
 以上のことに加え、 `data` はオプショナルなことに注意しつつコードにするとこうなります。
 
@@ -632,16 +632,16 @@ impl SimpleToSwitch {
     // ...
     fn compile_inject(
         &mut self,
-        descriminant: u8,
+        discriminant: u8,
         data: Vec<simple_case::Expr>,
     ) -> (Vec<switch::Stmt>, Symbol) {
         use switch::{Op, Stmt};
         let mut ret = Vec::new();
         let size = (data.is_some() as u8) + 1;
 
-        // descriminantの部分
-        let des = self.gensym("des");
-        ret.push(Stmt::Assign(des.clone(), Op::Const(descriminant as i32)));
+        // discriminantの部分
+        let dis = self.gensym("dis");
+        ret.push(Stmt::Assign(dis.clone(), Op::Const(discriminant as i32)));
 
         // dataの部分
         let mut data_sym = None;
@@ -657,7 +657,7 @@ impl SimpleToSwitch {
         ret.push(Stmt::Store {
             base: v.clone(),
             offset: 0,
-            data: des.clone(),
+            data: dis.clone(),
         });
         if let Some(sym) = data_sym {
             ret.push(Stmt::Store {
@@ -907,8 +907,8 @@ case <cond> of
 ...
 cond := ...;
 
-cond_desc = load(cond+0);
-switch(cond_desc) {
+cond_disc = load(cond+0);
+switch(cond_disc) {
   case 0: {
     <arm1>
   }
@@ -951,8 +951,8 @@ LLVM IRなどのSSAではφノードと呼ばれるノードを配置します�
 ...
 cond := ...;
 
-cond_desc = load(cond+0);
-switch(cond_desc) {
+cond_disc = load(cond+0);
+switch(cond_disc) {
   case 0: {
     <arm1>
     switch_result := ...;
@@ -1073,7 +1073,7 @@ impl SimpleToSwitch {
             let (arm_stmts, arm_symbol) = self.compile_expr(arm);
             // コンストラクタ、変数へのパターンマッチそれぞれをここで捌く
             match pat {
-                simple_case::Pattern::Constructor { descriminant, data } => {
+                simple_case::Pattern::Constructor { discriminant, data } => {
                     let mut block = vec![];
                     if let Some(sym) = data {
                         let load = Op::Load {
@@ -1084,7 +1084,7 @@ impl SimpleToSwitch {
                     }
                     block.extend(arm_stmts);
                     block.push(Stmt::Assign(result_sym.clone(), Op::Symbol(arm_symbol)));
-                    switch_clauses.push((descriminant as i32, Block(block)))
+                    switch_clauses.push((discriminant as i32, Block(block)))
                 }
                 simple_case::Pattern::Variable(s) => {
                     let mut block = vec![Stmt::Assign(s.clone(), Op::Symbol(cond_symbol.clone()))];

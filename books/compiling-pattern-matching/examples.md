@@ -34,12 +34,12 @@ let s = compiler.compile(sc);
 
 ```
 {
-    des@19 := 1;
+    dis@19 := 1;
     v@20 := alloc(1);
-    store(v@20 + 0, des@19);
-    des@21 := 1;
+    store(v@20 + 0, dis@19);
+    dis@21 := 1;
     v@22 := alloc(1);
-    store(v@22 + 0, des@21);
+    store(v@22 + 0, dis@21);
     tuple@23 := alloc(2);
     store(tuple@23 + 0, v@20);
     store(tuple@23 + 1, v@22);
@@ -50,16 +50,16 @@ let s = compiler.compile(sc);
         case 0: {
             switch(v@18) {
                 case 0: {
-                    des@30 := 1;
+                    dis@30 := 1;
                     v@31 := alloc(1);
-                    store(v@31 + 0, des@30);
+                    store(v@31 + 0, dis@30);
                     switch_result@29 := v@31;
                 }
 
                 case 1: {
-                    des@32 := 0;
+                    dis@32 := 0;
                     v@33 := alloc(1);
-                    store(v@33 + 0, des@32);
+                    store(v@33 + 0, dis@32);
                     switch_result@29 := v@33;
                 }
 
@@ -74,16 +74,16 @@ let s = compiler.compile(sc);
         case 1: {
             switch(v@18) {
                 case 0: {
-                    des@35 := 0;
+                    dis@35 := 0;
                     v@36 := alloc(1);
-                    store(v@36 + 0, des@35);
+                    store(v@36 + 0, dis@35);
                     switch_result@34 := v@36;
                 }
 
                 case 1: {
-                    des@37 := 1;
+                    dis@37 := 1;
                     v@38 := alloc(1);
-                    store(v@38 + 0, des@37);
+                    store(v@38 + 0, dis@37);
                     switch_result@34 := v@38;
                 }
 
@@ -145,12 +145,12 @@ type_db.register_adt(
     vec![
         // Nil
         case::Constructor {
-            descriminant: 0,
+            discriminant: 0,
             param: None,
         },
         // Cons () * List
         case::Constructor {
-            descriminant: 1,
+            discriminant: 1,
             param: Some(TypeId::new("cons")),
         },
     ],
@@ -167,14 +167,14 @@ let expr = {
 
     // `Nil` （値）のつもり
     let nilv = Expr::Inject {
-        descriminant: 0,
+        discriminant: 0,
         data: None,
     };
 
     // `Cons` （コンストラクタ）のつもり
     fn consv(arg: Expr) -> Expr {
         Expr::Inject {
-            descriminant: 1,
+            discriminant: 1,
             data: Some(Box::new(arg)),
         }
     }
@@ -189,14 +189,14 @@ let expr = {
 
     // `Nil` （パターン）のつもり
     let nilp = Pattern::Constructor {
-        descriminant: 0,
+        discriminant: 0,
         pattern: None,
     };
 
     // `Cons` （パターン）のつもり
     fn consp(car: Pattern, cdr: Pattern) -> Pattern {
         Pattern::Constructor {
-            descriminant: 1,
+            discriminant: 1,
             pattern: Some(Box::new(tuple2p(car, cdr))),
         }
     }
@@ -235,12 +235,12 @@ let expr = {
 
 ```
 {
-    des@29 := 0;
+    dis@29 := 0;
     v@30 := alloc(1);
-    store(v@30 + 0, des@29);
-    des@31 := 0;
+    store(v@30 + 0, dis@29);
+    dis@31 := 0;
     v@32 := alloc(1);
-    store(v@32 + 0, des@31);
+    store(v@32 + 0, dis@31);
     tuple@33 := alloc(2);
     store(tuple@33 + 0, v@30);
     store(tuple@33 + 1, v@32);
@@ -337,12 +337,12 @@ let expr = {
 
 ```
 {
-    des@68 := 0;
+    dis@68 := 0;
     v@69 := alloc(1);
-    store(v@69 + 0, des@68);
-    des@70 := 0;
+    store(v@69 + 0, dis@68);
+    dis@70 := 0;
     v@71 := alloc(1);
-    store(v@71 + 0, des@70);
+    store(v@71 + 0, dis@70);
     tuple@72 := alloc(2);
     store(tuple@72 + 0, v@69);
     store(tuple@72 + 1, v@71);

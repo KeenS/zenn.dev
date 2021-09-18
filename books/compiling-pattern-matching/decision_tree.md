@@ -220,11 +220,11 @@ compile [ci, c2,..., c1, ..., cn] [
 パターン行列の特殊化は以下の疑似コード `specialize` で表現されます。引数があるコンストラクタとないコンストラクタがあるのでその場合分け、コンストラクタパターンと変数パターンがあるのでその場合分けで都合4通りの処理をします。
 
 ``` sml
-specialize condvar descriminant pattern_matrix = for each row of pattern_matrix
+specialize condvar discriminant pattern_matrix = for each row of pattern_matrix
   if pi1 is constructor and
-     descriminant matches   => collect it as ([pi2, ...]      => ei)
+     discriminant matches   => collect it as ([pi2, ...]      => ei)
   if pi1 is constructor arg and
-     descriminant matches   => collect it as ([arg, pi2, ...] => ei)
+     discriminant matches   => collect it as ([arg, pi2, ...] => ei)
   if pi1 is variable and
      constructor has no arg => collect it as ([pi2, ...]      => let pi1 = condvar in ei end)
   if pi1 is variable and
@@ -732,31 +732,31 @@ impl DecisionTreePatternCompiler {
             })
             .collect::<Vec<_>>();
         // 1. 先頭パターンのコンストラクタを集めてくる
-        let descriminants = clause_with_heads
+        let discriminants = clause_with_heads
             .iter()
             .filter_map(|(head, _)| match head {
-                case::Pattern::Constructor { descriminant, .. } => Some(*descriminant),
+                case::Pattern::Constructor { discriminant, .. } => Some(*discriminant),
                 _ => None,
             })
             .collect::<HashSet<_>>();
         // 2. コンストラクタ毎に特殊化行列を作る
-        let mut clauses = descriminants
+        let mut clauses = discriminants
             .iter()
-            .map(|&descriminant| {
+            .map(|&discriminant| {
                 let clauses = self.specialized_patterns(
                     sym.clone(),
                     &ty,
-                    descriminant,
+                    discriminant,
                     clause_with_heads.iter(),
                 );
                 // 本来ならコンストラクタごとに、引数の有無で処理が微妙に変わる。
                 // そこを `Option` 型のメソッドで違いを吸収している。
-                let param_ty = self.type_db.param_ty_of(&ty, descriminant);
+                let param_ty = self.type_db.param_ty_of(&ty, discriminant);
                 let tmp_var = param_ty.clone().map(|_| self.symbol_generator.gensym("v"));
                 let mut new_cond = cond.clone();
                 new_cond.extend(tmp_var.iter().cloned().zip(param_ty).rev());
                 let pat = simple_case::Pattern::Constructor {
-                    descriminant,
+                    discriminant,
                     data: tmp_var,
                 };
                 let arm = self.compile(new_cond, clauses);
@@ -765,7 +765,7 @@ impl DecisionTreePatternCompiler {
             .collect();
 
         // 3. コンストラクタが網羅的でなければデフォルト行列を作る
-        if self.is_exhausitive(&ty, descriminants) {
+        if self.is_exhausitive(&ty, discriminants) {
             simple_case::Expr::Case {
                 cond: Box::new(simple_case::Expr::Symbol(sym.clone())),
                 clauses,
@@ -808,19 +808,19 @@ impl DecisionTreePatternCompiler {
         &'a mut self,
         cond: Symbol,
         type_id: &TypeId,
-        descriminant: u8,
+        discriminant: u8,
         clause_with_heads: impl Iterator<
             Item = &'b (case::Pattern, (Stack<case::Pattern>, simple_case::Expr)),
         >,
     ) -> Vec<(Stack<case::Pattern>, simple_case::Expr)> {
-        let param_ty = self.type_db.param_ty_of(&type_id, descriminant);
+        let param_ty = self.type_db.param_ty_of(&type_id, discriminant);
         clause_with_heads
             .filter_map(|(head, clause)| match head {
                 // 判別子が一致するコンストラクタパターンはそのままあつめる
                 case::Pattern::Constructor {
-                    descriminant: d,
+                    discriminant: d,
                     pattern,
-                } if *d == descriminant => Some((pattern.clone().map(|p| *p), clause.clone())),
+                } if *d == discriminant => Some((pattern.clone().map(|p| *p), clause.clone())),
                 // 変数パターンは無条件で集めるが、
                 // 腕やパターンに小細工が必要
                 case::Pattern::Variable(var) => {
@@ -840,7 +840,7 @@ impl DecisionTreePatternCompiler {
                     };
                     Some((extra_pattern, (pat, arm)))
                 }
-                // descriminantが一致しないコンストラクタは無視
+                // discriminantが一致しないコンストラクタは無視
                 _ => None,
             })
             .map(|(extra_pattern, (mut pat, arm))| {
@@ -865,7 +865,7 @@ impl DecisionTreePatternCompiler {
 
 ``` rust
 match head {
-  Constructor { ... } if *d == descriminant => { ... },
+  Constructor { ... } if *d == discriminant => { ... },
   Variable( ...)                            => { ... },
   _                                         => { ... }
 }
@@ -912,7 +912,7 @@ impl DecisionTreePatternCompiler {
     fn is_exhausitive(
         &self,
         type_id: &TypeId,
-        descriminansts: impl IntoIterator<Item = u8>,
+        discriminansts: impl IntoIterator<Item = u8>,
     ) -> bool {
         self.type_db
             .find(&type_id)
@@ -920,16 +920,16 @@ impl DecisionTreePatternCompiler {
             .unwrap()
             .adt()
             .into_iter()
-            .map(|c| c.descriminant)
+            .map(|c| c.discriminant)
             .collect::<HashSet<_>>()
-            == descriminansts.into_iter().collect::<HashSet<_>>()
+            == discriminansts.into_iter().collect::<HashSet<_>>()
     }
 
     // ...
 }
 ```
 
-パターン内で使われている `descriminant` の集合が、データ型に定義された全てのコンストラクタの判別子の集合と一致しているかで判定しています。Rustでは集合を実装した型 `HashSet` を `==` で比較すると集合同士の比較の意味になります。
+パターン内で使われている `discriminant` の集合が、データ型に定義された全てのコンストラクタの判別子の集合と一致しているかで判定しています。Rustでは集合を実装した型 `HashSet` を `==` で比較すると集合同士の比較の意味になります。
 
 ---
 

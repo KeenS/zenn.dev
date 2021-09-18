@@ -888,28 +888,28 @@ impl BackTrackPatternCompiler {
                 (head, clause)
             })
             .collect::<Vec<_>>();
-        // 先頭のパターンのdescriminantの集合をとる。
-        let descriminants = clause_with_heads
+        // 先頭のパターンのdiscriminantの集合をとる。
+        let discriminants = clause_with_heads
             .iter()
             .map(|c| (c.0).0)
             .collect::<HashSet<_>>();
-        // descriminantごとに特殊化する
-        let mut clauses = descriminants
+        // discriminantごとに特殊化する
+        let mut clauses = discriminants
             .iter()
-            .map(|&descriminant| {
-                // パターン行列をdescriminantで特殊化したものを取得
-                let clauses = self.specialize(descriminant, clause_with_heads.iter());
+            .map(|&discriminant| {
+                // パターン行列をdiscriminantで特殊化したものを取得
+                let clauses = self.specialize(discriminant, clause_with_heads.iter());
                 // Type DBから今パターンマッチしている型の、
-                // 対象にしているdescriminantをもつヴァリアントの、
+                // 対象にしているdiscriminantをもつヴァリアントの、
                 // 引数があればその型を取得する
-                let param_ty = self.type_db.param_ty_of(&ty, descriminant);
+                let param_ty = self.type_db.param_ty_of(&ty, discriminant);
                 // 引数があれば一時変数を生成し、条件変数に追加する
                 let tmp_var = param_ty.as_ref().map(|_| self.symbol_generator.gensym("v"));
                 let mut new_cond = cond.clone();
                 new_cond.extend(tmp_var.iter().cloned().zip(param_ty).rev());
                 // 返り値はコンストラクタパターンと、それにマッチしたあとの腕の組
                 let pat = simple_case::Pattern::Constructor {
-                    descriminant,
+                    discriminant,
                     data: tmp_var,
                 };
                 let arm = self.compile(new_cond, clauses);
@@ -918,7 +918,7 @@ impl BackTrackPatternCompiler {
             .collect();
 
         // ヴァリアントが網羅的かどうかで挙動を変える。
-        if self.is_exhausitive(&ty, descriminants) {
+        if self.is_exhausitive(&ty, discriminants) {
             // 網羅的ならそのまま `case` 式の生成
             simple_case::Expr::Case {
                 cond: Box::new(simple_case::Expr::Symbol(sym.clone())),
@@ -952,7 +952,7 @@ impl BackTrackPatternCompiler {
 
     fn specialize<'a, 'b>(
         &'a mut self,
-        descriminant: u8,
+        discriminant: u8,
         clause_with_heads: impl Iterator<
             Item = &'b (
                 (u8, Option<case::Pattern>),
@@ -962,7 +962,7 @@ impl BackTrackPatternCompiler {
     ) -> Vec<(Stack<case::Pattern>, simple_case::Expr)> {
         // 先頭のパターンが指定された判別子に合致する節をあつめてくる
         clause_with_heads
-            .filter(|(head, _)| head.0 == descriminant)
+            .filter(|(head, _)| head.0 == discriminant)
             .cloned()
             .map(|(head, (mut pat, arm))| {
                 pat.extend(head.1.into_iter());
@@ -974,7 +974,7 @@ impl BackTrackPatternCompiler {
     fn is_exhausitive(
         &self,
         type_id: &TypeId,
-        descriminansts: impl IntoIterator<Item = u8>,
+        discriminansts: impl IntoIterator<Item = u8>,
     ) -> bool {
         // 判別子の集合がパターンマッチしている型のヴァリアント全ての集合と合致するかで検査
         self.type_db
@@ -983,9 +983,9 @@ impl BackTrackPatternCompiler {
             .unwrap()
             .adt()
             .into_iter()
-            .map(|c| c.descriminant)
+            .map(|c| c.discriminant)
             .collect::<HashSet<_>>()
-            == descriminansts.into_iter().collect::<HashSet<_>>()
+            == discriminansts.into_iter().collect::<HashSet<_>>()
     }
 
     // ...

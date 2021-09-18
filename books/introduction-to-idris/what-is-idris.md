@@ -48,7 +48,7 @@ fizzBuzzSeq n = map fizzBuzz [1..n]
 main : IO ()
 main = do
   [_, arg] <- getArgs
-    | _ => putStrLn "prease specify N"
+    | _ => putStrLn "please specify N"
   let Just n = parseInteger arg
     | Nothing => putStrLn "arg must be an integer"
   for_(fizzBuzzSeq n) (putStrLn . show)

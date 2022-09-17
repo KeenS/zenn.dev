@@ -25,19 +25,19 @@ title: 代数的データ型がない言語とパターンマッチ
 [^optima]: [https://github.com/m2ym/optima](https://github.com/m2ym/optima) （現在は開発者によってアーカイブ済み）
 [^quicklisp]: [https://www.quicklisp.org/beta/](https://www.quicklisp.org/beta/)
 
-``` lisp
+```lisp
 (ql:quickload :optima)
 ```
 
 optimaの `match` マクロをインポートすると、すぐにパターンマッチが使えるようになります。
 
-``` lisp
+```lisp
 (shadowing-import 'optima:match)
 ```
 
 基本的な挙動を確認してみましょう。 `x` に `1` が渡されたら `"one"` を、 `2` が渡されたら `"two"` を、 `3` が渡されたら `"three"` を、 それ以外が渡されたら `"other"` を返すシンプルな関数をパターンマッチで書いてみます。
 
-``` lisp
+```lisp
 (defun trivial-match (v)
   (match v
     (1  "one")
@@ -48,7 +48,7 @@ optimaの `match` マクロをインポートすると、すぐにパターン�
 
 これを試すと、意図どおりの結果を返します。
 
-``` console
+```console
 CL-USER> (trivial-match 1) ⏎
 "one"
 CL-USER> (trivial-match 2) ⏎
@@ -61,7 +61,7 @@ CL-USER> (trivial-match 4) ⏎
 
 もう少し複雑な例も紹介します。次の例は、3つまでの要素を持つリストに対してマッチし、その要素の和を返すというマッチです。
 
-``` lisp
+```lisp
 (match v
   ((list x)     x)
   ((list x y)   (+ x y))
@@ -70,7 +70,7 @@ CL-USER> (trivial-match 4) ⏎
 
 Common Lispは動的型付言語なので、リストとベクタのそれぞれに対するパターンを1つのマッチに書くこともできます。SMLではありえない例ですが、Common Lispではこういうパターンマッチが必要になる場合もあるでしょう。
 
-``` lisp
+```lisp
 (match v
   ((list x)   "list")
   ((vector x) "vector")
@@ -79,7 +79,7 @@ Common Lispは動的型付言語なので、リストとベクタのそれぞれ
 
 このように、optimaを使うとCommon Lispでパターンマッチを書けるようになります。しかし、optimaによるパターンマッチには、SMLにあったような網羅性検査や非冗長性検査は付いてきません。たとえば、以下のコードには冗長なパターンがあります。もちろん、すべてのリストが網羅されているわけではないですし、先ほど紹介した「まったく別の型の値（数値型やベクタ型など）に対するマッチ」も含まれていません。
 
-``` lisp
+```lisp
 (match v
   ((list x)     x)
   ((list x)     x)
@@ -104,7 +104,7 @@ NIL
 
 例として、リスト4.12の `isSequence` 関数の定義に使ったパターンマッチをoptimaで書き直してみて、その展開結果を調べてみましょう。
 
-``` lisp
+```lisp
 (match v
   ((list 'black 'black 'black) t)
   ((list 'white 'white 'white) t)
@@ -115,7 +115,7 @@ NIL
 
 上記のコードをCommon Lisp処理系に展開させたあと、大文字を小文字に直したり、パッケージ名の修飾や自動生成された名前などを取り除いたりしてコードの見た目を整えると、下記のようになります。
 
-``` lisp
+```lisp
 (let ((tmp1 v))
   (%or
    (%if (consp tmp1)
@@ -184,7 +184,7 @@ Javaにも代数的データ型はありませんが、抽象クラス（また�
 このことをコードで確認してみましょう。
 リスト4.5で代数的データ型として定義した `stone` と同じものは、抽象クラスとそのサブクラスを使うと、次のようなJavaのコードとして実装できます。
 
-``` java
+```java
 abstract class Stone {}
 class Black extends Stone {}
 class White extends Stone {}
@@ -239,7 +239,7 @@ Javaでは拡張可能性が重要視されますが、それがそのまま代�
 
 このまま `isSequence` も実装してみましょう。説明の都合上、Visitor Patternなどは使わず、 `instanceof` で実装していきます。
 
-``` java
+```java
 boolean isSequence(Cell c1, Cell c2, Cell c3) {
     if (c1 instanceof Full) {
         Full f1 = (Full)c1;
@@ -292,7 +292,7 @@ if (obj instanceof Full x) {
 [^jep354]: [http://openjdk.java.net/jeps/354](http://openjdk.java.net/jeps/354)、Java 13でプレビュー機能としてリリース済み。
 [^Bierman]: [http://cr.openjdk.java.net/~briangoetz/amber/pattern-match.html](http://cr.openjdk.java.net/~briangoetz/amber/pattern-match.html)
 
-``` java
+```java
 switch (obj) {
     case Full x  -> // ...;
     case Empty x -> // ...;
@@ -303,7 +303,7 @@ switch (obj) {
 
 しかし、この構文が導入されたところで、代数的データ型の性質から得られるようなパターンマッチの性質は満たしません。たとえば網羅性については、 `White` または `Black` で以下のように分岐したとして、第三の勢力にマッチする可能性を排除できません（実際、 `Stone` クラスを継承して `Menthos` クラスを作れたことを思い出しましょう）。
 
-``` java
+```java
 boolean isBlack(Stone s) {
     return switch(s) {
         case White w -> false;
@@ -315,7 +315,7 @@ boolean isBlack(Stone s) {
 
 サブクラスに由来する面倒もあります。代数的データ型と異なり、「AでありかつBであるような値は存在しない」という性質が成り立ちません。そのため、たとえば「`Cell` が `Full` または `Empty` であることに加えて、`Full`を継承した`Corner`になる可能性もある」という分岐をパターンマッチで書くとき、プログラマーがよく気をつけないと、無用なパターンを書いてしまう可能性があります。実際、以下のコードには無用なパターンがありますが、わかるでしょうか？
 
-``` java
+```java
 switch (c) {
     case Full f -> // ...;
     case Corner c -> // ...;
@@ -329,13 +329,13 @@ switch (c) {
 
 さて、ここまでは代数的データ型に近いものをJavaで書くのに抽象クラスとサブクラスを使ってきましたが、Java には列挙型 `enum` もあります。`enum` を使うと、 `Black` もしくは `White` であるような `Stone` を以下のように書けます。
 
-``` java
+```java
 enum Stone { BLACK, WHITE }
 ```
 
 この `enum` を使ったコードは、コンパイルすると、概ね以下のようなクラスへと展開されます。
 
-``` java
+```java
 final class Stone extends Enum<Stone> {
     private Stone(String name, int ordinal) {
         super(name, ordinal);
@@ -367,7 +367,7 @@ datatype cell = Empty | Full of stone
 
 しかし、クラスを `final` にする手は使えそうです。いま、 `Stone` と同じ方法で継承クラスとして `Cell` を定義し、継承したクラスたちに `final` を付けておくことにしましょう。
 
-``` java
+```java
 abstract class Cell {}
 final class Full extends Cell {
     Stone value;
@@ -377,7 +377,7 @@ final class Empty extends Cell {}
 
 これで勝手に新しいクラス（たとえば `Corner` クラス）が作られる可能性はなくなりました。しかし、まだ新たな `Cell` のサブクラスが作られる可能性はあります。
 
-``` java
+```java
 final class Pod extends Cell {
     Stone stones[];
 }
@@ -389,7 +389,7 @@ final class Pod extends Cell {
 
 [^sealed]: [http://cr.openjdk.java.net/~briangoetz/amber/datum.html](http://cr.openjdk.java.net/~briangoetz/amber/datum.html)
 
-``` java
+```java
 // 継承できるクラスを `Full` と `Empty` に制限
 sealed abstract class Cell permits Full, Empty {}
 final class Full {
@@ -405,7 +405,7 @@ final class Empty extends Cell {}
 
 `Cell` を `sealed` な型とすることで、以下のように `switch` 式における `default` 節が不要になります。
 
-``` java
+```java
 switch (c) {
     case Full f -> // ...;
     case Empty e -> // ...;
@@ -425,7 +425,7 @@ switch (c) {
 
 `Cell` を題材に`record`の例を見てみましょう。`record`は継承ができないようなので `Cell` をインタフェースで実装すると、次のように`Cell`に対するパターンマッチのコードが書けます。
 
-``` java
+```java
 // 定義
 sealed interface Cell {}
 record Full(Stone s) implements Cell {}
@@ -443,7 +443,7 @@ switch (c) {
 
 ただし、ここで紹介した機能はリリース版のJavaではまだ利用できません。Scalaでは本質的に同じ機能がすでに利用できるので、Scalaで試してみましょう。
 
-``` scala
+```scala
 sealed trait Stone;
 case class Black() extends Stone;
 case class White() extends Stone;

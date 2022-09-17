@@ -16,7 +16,7 @@ title: パターンマッチのコンパイル：決定木法
 
 以下のコードを考えます。
 
-``` sml
+```sml
 case ([], [true]) of
     (_,  []) => []
   | ([], _ ) => []
@@ -26,7 +26,7 @@ case ([], [true]) of
 
 まずはパーターンの先頭行に着目します。先頭行には2要素目にコンストラクタパターンがあります。ここを起点に分岐したいので、パターンマッチ全体で2要素目に注目します。
 
-``` sml
+```sml
 case (..., [true]) of
     (...,  []) => []
   | (...,   _) => []
@@ -35,7 +35,7 @@ case (..., [true]) of
 
 このうち、条件式の `[true]` にマッチしうるのは2節目と3節だけですのでそれを残して他は選択肢から外します。
 
-``` sml
+```sml
 case (..., [true]) of
   | (...,   _) => []
   | (..., y::ys) => (x, y) :: zip xs ys
@@ -43,7 +43,7 @@ case (..., [true]) of
 
 2要素目にマッチする可能性は全て列挙できたので2要素目のことは忘れます。
 
-``` sml
+```sml
 case ([]) of
   | ([]) => []
   | (x::xs) => (x, y) :: zip xs ys
@@ -53,14 +53,14 @@ case ([]) of
 
 条件式 `[]` にマッチするのは1節目だけですのでそれを残して他は選択肢から外します。
 
-``` sml
+```sml
 case ([]) of
   | ([]) => []
 ```
 
 これで1要素目のことは忘れます。
 
-``` sml
+```sml
 case () of
   | () => []
 ```
@@ -80,13 +80,13 @@ case () of
 
 つまり、以下のようなコンパイルは
 
-``` sml
+```sml
 compile [c1, ...] []
 ```
 
 $\mathit{FAIL}$ へとコンパイルされます
 
-``` sml
+```sml
 FAIL
 ```
 
@@ -98,7 +98,7 @@ FAIL
 
 変数則が決定木法でのコンパイルアルゴリズムの基底になります。つまり、以下のようなコンパイルは
 
-``` sml
+```sml
 compile [c1, ..., cn] [
   ([v1, v2, ..., vn]   => e1),
   ([p21, p22, ..., p2n]   => e2),
@@ -110,7 +110,7 @@ compile [c1, ..., cn] [
 先頭行が採用されるので `E1` になります。
 ただし、変数の束縛が必要なのでそこだけ導入しておきます。
 
-``` sml
+```sml
 let
   val v1 = c1
   val v2 = c2
@@ -129,7 +129,7 @@ end
 まず、先頭行の変数ではないパターンが $i$ 列目にあるとすると、それを1列目と交換します。このとき、他の行のパターンや条件変数も列を交換します。
 
 
-``` sml
+```sml
          ↓             ↓
 compile [c1, c2, ..., ci, ..., cn] [
   ([v11, v12, ..., p1i, ..., v1n] => E1),
@@ -140,7 +140,7 @@ compile [c1, c2, ..., ci, ..., cn] [
 
 ↓
 
-``` sml
+```sml
          ↓             ↓
 compile [ci, c2, ..., c1, ..., cn] [
   ([p1i, v12, ..., v11, ..., v1n] => E1),
@@ -158,7 +158,7 @@ compile [ci, c2, ..., c1, ..., cn] [
 
 1行1列がタプルの場合、 `compile` は以下のような見た目をしているはずです。
 
-``` sml
+```sml
 compile [ci, c2, ..., c1, ..., cn] [
   ([(q11, ..., q1m), v12, ..., v11, ..., v1n] => E1),
   ([v2i,           , v22, ..., v21, ..., v2n] => E2),
@@ -170,7 +170,7 @@ compile [ci, c2, ..., c1, ..., cn] [
 
 条件変数の方はタプルはバックトラック法のときと同じく `case` を使って分解します。
 
-``` sml
+```sml
 case ci of
   (d1, ..., dn) => compile [d1, ..., dn, ..., c1, ..., cn] [
     ...
@@ -185,7 +185,7 @@ case ci of
 
 まとめると、1行1列のパターンをタプル、2行1列のパターンを変数とすると、 `compile` は以下のように変換します。
 
-``` sml
+```sml
 case ci of
   (d1, ..., dn) => compile [d1, ..., dn, ..., c1, ..., cn] [
     ([q11, ..., q1m, ..., v11, ..., v1n] => E1),
@@ -198,7 +198,7 @@ case ci of
 
 1行1列がコンストラクタの場合は以下のような見た目をしているはずです。
 
-``` sml
+```sml
 compile [ci, c2,..., c1, ..., cn] [
   ([C1 p1i, v12, ..., v11, ..., v1n] => E1),
   ([v2i,    v22, ..., v21, ..., v2n] => E2),
@@ -219,7 +219,7 @@ compile [ci, c2,..., c1, ..., cn] [
 
 パターン行列の特殊化は以下の疑似コード `specialize` で表現されます。引数があるコンストラクタとないコンストラクタがあるのでその場合分け、コンストラクタパターンと変数パターンがあるのでその場合分けで都合4通りの処理をします。
 
-``` sml
+```sml
 specialize condvar discriminant pattern_matrix = for each row of pattern_matrix
   if pi1 is constructor and
      discriminant matches   => collect it as ([pi2, ...]      => ei)
@@ -237,7 +237,7 @@ end
 
 $\Sigma$ に `C1` 〜 `Ca` までのコンストラクタの判別子が集まったとしましょう。このとき、 元の `compile` 関数の引数にあったパターン行列を `pattern_matrix` とすると `compile` は1段階進んで以下のようになります。
 
-``` sml
+```sml
 case ci of
    C1 [arg] => compile [arg, c2, ...] (specialize ci C1 pattern_matrix)
 |  C2 [arg] => compile [arg, c2, ...] (specialize ci C2 pattern_matrix)
@@ -248,7 +248,7 @@ case ci of
 
 追加するためのデフォルト節の腕を構築する `default_patterns` も定義しましょう。疑似コードで以下のような処理をします。
 
-``` sml
+```sml
 default_patterns condvar pattern_matrix = for each row of pattern_matrix
   if pi1 is variable  => collect it as ([pi2, ...] => let pi1 = condvar in ei end)
   else ignore
@@ -257,7 +257,7 @@ end
 
 これを使って、最終的に `case` は以下のようになります。
 
-``` sml
+```sml
 case ci of
    C1 [arg] => compile [arg, c2, ...] (specialize ci C1 pattern_matrix)
 |  C2 [arg] => compile [arg, c2, ...] (specialize ci C2 pattern_matrix)
@@ -279,7 +279,7 @@ case ci of
 ここでも具体的なコードに上記の原理をあてはめてみましょう。
 何度もでてきている `zip` のコード例です。
 
-``` sml
+```sml
 case (xs, ys) of
     (_,  []) => []
   | ([], _ ) => []
@@ -413,7 +413,7 @@ case tmp2 of
 
 上の `compile` は *変数則* を適用してコンパイル終了ですので下の `compile` をみていきます。
 
-``` sml
+```sml
 compile [tmp4, tmp3] [
     ([(x, xs), (y, ys)] => (x, y) :: zip xs ys)
 ]
@@ -422,7 +422,7 @@ compile [tmp4, tmp3] [
 1行目は全てが変数パターンではありませんので *混合則* を適用します。
 そのまま *タプルの場合* に進み、処理します。
 
-``` sml
+```sml
 case tmp4 of
     (tmp5, tmp6) => compile [tmp5, tmp6, tmp3] [
     ([x, xs, (y, ys)] => (x, y) :: zip xs ys)
@@ -431,7 +431,7 @@ case tmp4 of
 
 まだタプルパターンが残っているので同じく *混合則* の *タプルの場合* に進みます。
 
-``` sml
+```sml
 case tmp4 of
     (tmp5, tmp6) => case tmp3 of
         (tmp7, tmp8) => compile [tmp7, tmp8, tmp5, tmp6] [
@@ -442,7 +442,7 @@ case tmp4 of
 
 これは先頭行が全て変数パターンなので変数則を適用して以下のようになります。
 
-``` sml
+```sml
 case tmp4 of
     (tmp5, tmp6) => case tmp3 of
         (tmp7, tmp8) => let
@@ -490,7 +490,7 @@ case (xs, ys) of
 
 まずは構造体。
 
-``` rust
+```rust
 struct DecisionTreePatternCompiler {
     type_db: case::TypeDb,
     symbol_generator: SymbolGenerator,
@@ -511,7 +511,7 @@ impl DecisionTreePatternCompiler {
 
 バックトラック法と同じですね。`compile` もほぼ同様です。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn compile(
         &mut self,
@@ -541,7 +541,7 @@ impl DecisionTreePatternCompiler {
 バックトラック法と同じく、空則と変数則は実装が簡単です。空則の実装は以下になりす。
 
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn compile_empty(
         &mut self,
@@ -561,7 +561,7 @@ impl DecisionTreePatternCompiler {
 
 空則に続いて変数則もそこまで難しくはありません。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn compile_variable(
         &mut self,
@@ -594,7 +594,7 @@ impl DecisionTreePatternCompiler {
 
 次は混合則です。混合則はタプルの場合とコンストラクタの場合でそれぞれ場合分けがありました。タプル、コンストラクタそれぞれ別メソッドに切り出すことにします。すると混合則の実装はこうなります。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn compile_mixture(
         &mut self,
@@ -624,7 +624,7 @@ impl DecisionTreePatternCompiler {
 
 変数でないパターンをみつけたらそれを先頭と交換したあと、タプル、またはコンストラクタで分岐します。ここで、 `find_nonvar` の実装はこうなっています。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn find_nonvar(&mut self, clauses: &[(Stack<case::Pattern>, simple_case::Expr)]) -> usize {
         clauses[0].0.iter().rposition(|p| !p.is_variable()).unwrap()
@@ -644,7 +644,7 @@ impl DecisionTreePatternCompiler {
 
 少し長くなりますが、タプルの場合は以下のような実装です。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn compile_tuple(
         &mut self,
@@ -713,7 +713,7 @@ impl DecisionTreePatternCompiler {
 
 次は混合則のコンストラクタの場合です。これは原理のところで説明が長かったことからも分かるように、実装も長くなります。まずはメソッド全体を掲載します。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn compile_constructor(
         &mut self,
@@ -802,7 +802,7 @@ impl DecisionTreePatternCompiler {
 
 まずは `specialized_patterns` です。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn specialized_patterns<'a, 'b>(
         &'a mut self,
@@ -863,7 +863,7 @@ impl DecisionTreePatternCompiler {
 
 ここで、1. の処理でパターンガードを使っています。
 
-``` rust
+```rust
 match head {
   Constructor { ... } if *d == discriminant => { ... },
   Variable( ...)                            => { ... },
@@ -875,7 +875,7 @@ match head {
 
 それでは `compile_constructor` で使われていたメソッドの2つめ、 `default_patterns` に移ります。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn default_patterns<'a, 'b>(
         &'a mut self,
@@ -907,7 +907,7 @@ impl DecisionTreePatternCompiler {
 
 最後に `compile_constructor` で使われていたメソッドの3つめ、 `is_exhausitive` に移りましょう。
 
-``` rust
+```rust
 impl DecisionTreePatternCompiler {
     fn is_exhausitive(
         &self,

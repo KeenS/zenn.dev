@@ -103,7 +103,7 @@ No such variable MkExportData
 
 2箇所エラーが出ました。1つ目はここ。
 
-``` idris
+```idris
   putStrLn privateHoge
 ```
 
@@ -111,7 +111,7 @@ No such variable MkExportData
 
 2つ目はここ。
 
-``` idris
+```idris
 ex: ExportData
 ex = MkExportData "export"
 ```
@@ -124,7 +124,7 @@ ex = MkExportData "export"
 
 例：HogeMain.idrをコンパイルするコマンド（再掲）
 
-``` shell-sesion
+```shell-sesion
 $ idris -o HogeMain HogeMain.idr
 ```
 
@@ -136,7 +136,7 @@ $ idris -o HogeMain HogeMain.idr
 
 例： `Hoge/Fuga/Piyo.idr` を作成するコマンド
 
-``` shell-session
+```shell-session
 $ mkdir -p Hoge/Fuga
 $ cat > Hoge/Fuga/Piyo.idr <<EOF
 module Foo
@@ -150,7 +150,7 @@ EOF
 
 例： `Bar.idr` を作成するコマンド
 
-``` shell-session
+```shell-session
 $ cat > Bar.idr <<EOF
 module Main
 import Hoge.Fuga.Piyo
@@ -164,7 +164,7 @@ EOF
 
 例： `Bar.idr` をコンパイルするコマンド
 
-``` shell-session
+```shell-session
 $ idris -o Bar Bar.idr
 $ ./Bar
 foo
@@ -182,7 +182,7 @@ foo
 
 例： `foo` の修飾名を使うコード
 
-``` idris
+```idris
 main : IO ()
 main = putStrLn Foo.foo
 ```
@@ -192,7 +192,7 @@ main = putStrLn Foo.foo
 
 これも試してみましょう。先程の `Hoge/Fuga/Piyo.idr` を以下のように変更します。
 
-``` idris:Hoge/Fuga/Piyo.idr
+```idris:Hoge/Fuga/Piyo.idr
 module Hoge.Fuga.Piyo
 export
 foo : String
@@ -201,7 +201,7 @@ foo = "foo"
 
 そして `Bar.idr` には以下のコードを書きます。
 
-``` idris:Bar.idr
+```idris:Bar.idr
 module Main
 import Hoge.Fuga.Piyo
 
@@ -215,7 +215,7 @@ main = do
 
 これをコンパイルしてみると、正常に動くことが分かります。
 
-``` shell-session
+```shell-session
 $ idris -o Bar Bar.idr
 ```
 
@@ -235,7 +235,7 @@ Idrisにはディレクティブというのがあるんですが、ひとまず
 
 例： `access` ディレクティブを使った可視性の制御
 
-``` idris
+```idris
 privateItem : String
 privateItem = "private"
 
@@ -258,7 +258,7 @@ Idrisの名前空間の特徴の1つとして名前空間さえ異なれば同�
 
 例： `namespace` 文を使ったオーバーロード
 
-``` idris
+```idris
 module Namespace
 
 
@@ -275,7 +275,7 @@ namespace Double
 
 REPLにロードして少し遊んでみましょう。
 
-``` text
+```text
 Idris> add 1 2
 Can't disambiguate name: Namespace.Double.add, Namespace.Int.add
 Idris> add 1.0 2.0
@@ -301,7 +301,7 @@ Can't disambiguate name: Namespace.Double.add, Namespace.Int.add
 
 例
 
-``` idris
+```idris
 record User where
   constructor MkUser
   id : Integer
@@ -316,7 +316,7 @@ record Group where
 
 これらのアクセサ関数はそれぞれ `namespace User` と `namespace Group` に定義されるのでした
 
-``` text
+```text
 Idris> :browse User
 Namespaces:
 
@@ -337,7 +337,7 @@ Names:
 
 このおかげで `id` や `name` はオーバーロードされて、両方が同時に使えます。
 
-``` text
+```text
 Idris> name (MkUser 1 "user")
 "user" : String
 Idris> name (MkGroup 1 "group")
@@ -372,7 +372,7 @@ baseはコンパイラに付属してついてくるライブラリのうち、�
 
 例：複素数ライブラリを使ったコード
 
-``` idris:BaseExample.idr
+```idris:BaseExample.idr
 module Main
 
 import Data.Complex
@@ -390,7 +390,7 @@ main = do
 
 これをコンパイル/実行するとこうなります。
 
-``` shell-session
+```shell-session
 $ idris -o BaseExample BaseExample.idr
 $ ./BaseExample
 3 :+ 2

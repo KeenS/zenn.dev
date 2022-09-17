@@ -20,7 +20,7 @@ ifThenElse False t e = e
 
 以下の関数を定義します。`Bool` ではなく `Maybe` に対して動く `ifThenElse` 関数です。
 
-``` idris
+```idris
 ifThenElse: Maybe a -> (a -> b) -> Lazy b -> b
 ifThenElse (Just a) f _ = f a
 ifThenElse Nothing _  b = b
@@ -28,7 +28,7 @@ ifThenElse Nothing _  b = b
 
 これを読み込んだREPLでは `Maybe` 型の式に対して `if` が使えます。
 
-``` text
+```text
 Idris> if Just 1 then (+1) else -1
 2 : Integer
 Idris> if Nothing then (+1) else -1
@@ -44,7 +44,7 @@ Idris> if Nothing then (+1) else -1
 `do` 記法もシンタックシュガーです。
 以下の `do` 式は
 
-``` idris
+```idris
 do
   x <- hoge
   y <- fuga x
@@ -54,7 +54,7 @@ do
 
 以下のように展開されます。
 
-``` idris
+```idris
 hoge   >>= (\x =>
 fuga x >>= (\y =>
 piyo y >>= (\z =>
@@ -64,7 +64,7 @@ pure $ chun z
 
 ここで `(>>=)` もオーバーロード可能なので変テコな定義も可能です。
 
-``` idris
+```idris
 (>>=) : String -> (() -> String) -> String
 (>>=) s _ = s
 
@@ -78,7 +78,7 @@ hoge = do
 
 `(>>=)` は常に左側を返すので `hoge` は `"This is string"` を返します。
 
-``` text
+```text
 Idris> hoge
 "This is string" : String
 ```
@@ -91,7 +91,7 @@ Idrisには何故か `do` 記法と役割の被る構文がいっぱいありま
 
 以下の関数を書き換えながら紹介します。
 
-``` idris
+```idris
 addDo : Maybe Int -> Maybe Int -> Maybe Int
 addDo xs ys = do
   x <- xs
@@ -104,7 +104,7 @@ addDo xs ys = do
 以前リスト内包表記と紹介しましたが、より一般にはモナド内包表記です。
 例えば `Maybe` に対しても使えます。
 
-``` idris
+```idris
 addComplehensions : Maybe Int -> Maybe Int -> Maybe Int
 addComplehensions xs ys = [x + y | x <- xs, y <- ys]
 ```
@@ -115,7 +115,7 @@ addComplehensions xs ys = [x + y | x <- xs, y <- ys]
 
 もうちょっと簡潔に書く方法として `!` 記法もあります。
 
-``` idris
+```idris
 addBang : Maybe Int -> Maybe Int -> Maybe Int
 addBang x y = pure $  !x + !y
 ```
@@ -124,7 +124,7 @@ addBang x y = pure $  !x + !y
 
 これはMonadではなくApplicativeの記法です。
 
-``` idris
+```idris
 addBracket : Maybe Int -> Maybe Int -> Maybe Int
 addBracket xs ys = [| xs + ys |]
 ```
@@ -132,7 +132,7 @@ addBracket xs ys = [| xs + ys |]
 これは以下に同じです。
 
 
-``` idris
+```idris
 addBracket : Maybe Int -> Maybe Int -> Maybe Int
 addBracket xs ys = (+) <$> xs <*> ys
 ```
@@ -149,11 +149,11 @@ Idrisには中置演算子をユーザが定義できる機能があるという
 
 `if then else` は既にあるので `unless then else` を定義してみましょう。`then` 節と `else` 節を逆にして `ifThenElse` 関数に渡すとよいでしょう。
 
-``` idris
+```idris
 syntax "unless" [test] "then" [t] "else" [e] = ifThenElse test e t
 ```
 
-``` idris
+```idris
 Idris> unless True then 1 else 2
 2 : Integer
 Idris> unless False then 1 else 2
@@ -162,7 +162,7 @@ Idris> unless False then 1 else 2
 
 次に変数を使うユーザ定義構文も定義してみましょう。 `for` 式です。
 
-``` idris
+```idris
 syntax for {x} "in" [xs] ":" [body] = forLoop xs (\x => body)
 
 forLoop : List a -> (a -> b) -> List b
@@ -182,14 +182,14 @@ Idris> for x in [1, 2, 3]: x + 1
 因みに `syntax` で定義した構文はパターンとしても使えます。
 例えば以下のように定義すると、 `Some` を `Just` の代わりに使えます。
 
-``` idris
+```idris
 syntax "Some" [x] = Just x
 syntax "None" = Nothing
 ```
 
 パターンとして使うときはこうですね。
 
-``` idris
+```idris
 hoge : Maybe Int -> Int
 hoge x =
   case x of
@@ -199,7 +199,7 @@ hoge x =
 
 値として使うときはこうです。
 
-``` text
+```text
 Idris> hoge (Some 1)
 1 : Int
 Idris> hoge None

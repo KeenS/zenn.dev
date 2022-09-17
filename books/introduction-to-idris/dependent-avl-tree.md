@@ -92,7 +92,7 @@ $$
 
 これを型にエンコードしたAVL木を定義すればよさそうです。ただし先程紹介したように `-` は扱いが面倒なので移項して足し算にして、以下の定義が考えられます。
 
-``` idris
+```idris
 infixr 1 \/, /\
 
 (\/) : Type -> Type -> Type
@@ -118,7 +118,7 @@ data Tree : (n: Nat) -> (a : Type) -> Type where
 
 先程は条件分岐を1箇所に押し込もうとして冗長になってました。条件分岐は左が右より1高い、左右が同じ高さ、右が左より1高いの3通りです。であれば、3通りをバラしてしまえばよさそうです。するとこういう定義ができあがります。
 
-``` idris
+```idris
 data Tree : Nat -> (a : Type) -> Type where
   Leaf: Tree Z a
   Lefty  : Tree (S n) a -> a -> Tree    n  a -> Tree (S (S n)) a
@@ -128,7 +128,7 @@ data Tree : Nat -> (a : Type) -> Type where
 
 これでもおおむねよいのですが、左右の高さに関係のない関数が冗長になってしまいます。例えば要素が含まれるかを検査する `member` 関数は3回同じことを書かないといけなくなります。
 
-``` idris
+```idris
 total
 member : Ord a => a -> Tree n a -> Bool
 member _ Leaf = False
@@ -153,7 +153,7 @@ member x (Righty l v r) with (compare x v)
 
 [View](https://keens.github.io/blog/2020/12/22/idrisomoshirokinou_withkoubuntoview/)のことを思い出してほしいのですが、依存型で値同士の関係をうまいこと制御できるのでした。この仕組みを使うともう少し整理できます。左右の木の高さを表現するビューと、実際のデータ構造に分けて管理するのです。
 
-``` idris
+```idris
 data Balance : Nat -> Nat -> Nat -> Type where
   Lefty  : Balance (S n) (S (S n))    n
   Mid    : Balance    n     (S n)     n
@@ -170,7 +170,7 @@ data Tree : Nat -> (a : Type) -> Type where
 
 以下のような簡単な操作ならすぐさま書けるでしょう。
 
-``` idris
+```idris
 ||| 空の木
 total
 empty : Tree Z a
@@ -198,7 +198,7 @@ member x (Node _   l v r) with (compare x v)
 
 AVL木は強めに平衡のとれた木なので要素を増減させる操作が重いです。ちょっとずつ便利関数を積み重ねていきましょう。まずはノードを作る関数3つ。
 
-``` idris
+```idris
 total
 createR : Tree n a -> a -> Tree (S n) a -> Tree (S (S n)) a
 createR l x r = Node Righty l x r
@@ -216,7 +216,7 @@ createL l x r = Node Lefty l x r
 
 次が木の右回転をする `rotateR` 関数です。
 
-``` idris
+```idris
 total
 rotateR : Tree (S (S n)) a -> a -> Tree n a -> Either (Tree (S (S n)) a) (Tree (S (S (S n))) a)
 rotateR (Node Lefty  ll lv lr)                        v r = Left  $ createM          ll lv          (createM lr  v r)
@@ -230,7 +230,7 @@ rotateR (Node Righty ll lv (Node Righty lrl lrv lrr)) v r = Left  $ createM (cre
 
 これと同様に左回転の `rotateL` も実装できます。
 
-``` idris
+```idris
 total
 rotateL : Tree n a -> a -> Tree (S (S n)) a -> Either (Tree (S (S n)) a) (Tree (S (S (S n))) a)
 rotateL l v (Node Lefty  (Node Lefty  rll rlv rlr) rv rr) = Left  $ createM (createM l v rll) rlv (createR rlr rv rr)
@@ -243,26 +243,26 @@ rotateL l v (Node Righty rl                        rv rr) = Left  $ createM (cre
 
 それでは準備が整ったので挿入を定義しましょう。挿入は回転と同じく木の高さが変わったり変わらなかったりする操作です。なので型は以下のようになります。
 
-``` idris
+```idris
 total
 insert : Ord a => a -> Tree n a -> Either (Tree n a) (Tree (S n) a)
 ```
 
 続いて簡単な場合から潰していきましょう。 `Leaf` への挿入はシングルトンで一撃です。高さは1増えます。
 
-``` idris
+```idris
 insert x Leaf = Right $ singleton x
 ```
 
 それ以外の場合はノードの値と挿入しようとしてる値の大小関係を比較して `with` 構文でひとまとめにパターンマッチしましょう。
 
-``` idris
+```idris
 insert x (Node bal l v r) with (compare x v)
 ```
 
 それぞれ場合分けしていくのですが、 `x` と `v` が等しい場合は挿入せずにそのまま終了します。
 
-``` idris
+```idris
   insert x (Node bal    l v r) | EQ = Left $ Node bal    l v r
 ```
 
@@ -270,7 +270,7 @@ insert x (Node bal l v r) with (compare x v)
 
 ここで `Node` の第1引数にある `Balance` の値に応じて依存型で使っている数値が変化することを思い出して下さい。この挙動を利用するには `Balance` の値に対してパターンマッチしないといけません。ちょっと面倒ですが `Balance` の値で分岐したあとに `x` を左の木に挿入することになります。つまりこのようなコードになります。
 
-``` idris
+```idris
   insert x (Node Lefty  l v r) | LT = case insert x l of
     ...
   insert x (Node Mid    l v r) | LT = case insert x l of
@@ -281,7 +281,7 @@ insert x (Node bal l v r) with (compare x v)
 
 それぞれのケースで、 `Left` の場合、すなわち挿入前と挿入後で木の高さが変わらなかった場合は挿入前と `Balance` は変わりません。
 
-``` idris
+```idris
   insert x (Node Lefty  l v r) | LT = case insert x l of
     Left  l => Left  $ Node Lefty l v r
     ...
@@ -295,7 +295,7 @@ insert x (Node bal l v r) with (compare x v)
 
 `Right` の場合、すなわち挿入前から高さが1増えた場合は `Righty` → `Mid` 、 `Mid` → `Lefty` へと変化します。では `Lefty` の場合はどうなるかというと、回転が発生します。左に寄りすぎたので右回転ですね。
 
-``` idris
+```idris
   insert x (Node Lefty  l v r) | LT = case insert x l of
     ...
     Right l => rotateR            l v r
@@ -309,7 +309,7 @@ insert x (Node bal l v r) with (compare x v)
 
 これと同様に `x` が `v` より大きい場合も書けますね。総合して `insert` は以下のような見た目になります。
 
-``` idris
+```idris
 total
 insert : Ord a => a -> Tree n a -> Either (Tree n a) (Tree (S n) a)
 insert x Leaf = Right $ singleton x
@@ -339,7 +339,7 @@ insert x (Node bal l v r) with (compare x v)
 
 これで木を作れるようになったので試してみましょう。 `(insert 1 (insert 10 (insert 3 (insert 1 empty))))` で `1` 、 `10` 、 `3` が入った木を作れるはずです。
 
-``` text
+```text
 Idris> :let tree = (insert 1 (insert 10 (insert 3 (insert 1 empty))))
 (input):1:14-61:When checking an application of function Main.insert:
         Type mismatch between
@@ -363,7 +363,7 @@ Idris> :let tree = (insert 1 (insert 10 (insert 3 (insert 1 empty))))
 
 APIでは型から木の高さを消しましょうといいましたが、型を消去するなんてできるのでしょうか。結論からいうと、できます。くどい話は先送りにして、以下のように書けば型から高さの情報を消せます。
 
-``` idris
+```idris
 data Set : Type -> Type where
   MkSet : (n: Nat ** Tree n a) -> Set a
 ```
@@ -374,7 +374,7 @@ data Set : Type -> Type where
 
 さて、この定義を使ってAPIを定義していきましょう。手始めに、さっきまでのコードを `Internal` の名前空間に押し込めましょう。
 
-``` idris
+```idris
 namespace Internal
   data Balanse ...
 
@@ -386,14 +386,14 @@ namespace Internal
 
 そしてAPIを定義しはじめます。今回、値を素直に保持する木を作ったのでAPIとしては集合と同等ですね。
 
-``` idris
+```idris
 data Set : Type -> Type where
   MkSet : (n: Nat ** Internal.Tree n a) -> Set a
 ```
 
 なんだかんだ、APIとして提供できるのは `empty` 、 `insert` 、 `member` くらいですね。これらのラッパーを書きましょう。まずは `empty` 。
 
-``` idris
+```idris
 total
 empty : Set a
 empty = MkSet (_ ** Internal.empty)
@@ -403,7 +403,7 @@ empty = MkSet (_ ** Internal.empty)
 
 `member` 関数も簡単ですね。
 
-``` idris
+```idris
 total
 member : Ord a => a -> Set a -> Bool
 member x (MkSet (_ ** tree)) = Internal.member x tree
@@ -413,7 +413,7 @@ member x (MkSet (_ ** tree)) = Internal.member x tree
 
 `insert` もほぼラップするだけですが、返り値が `Either` なのを思い出して `Left` と `Right` で処理を分けます。
 
-``` idris
+```idris
 total
 insert : Ord a => a -> Set a -> Set a
 insert x (MkSet (_ ** tree)) =
@@ -424,7 +424,7 @@ insert x (MkSet (_ ** tree)) =
 
 因みに木の高さは値として保存されているので取り出すこともできます。
 
-``` idris
+```idris
 total
 height : Set a -> Nat
 height (MkSet (height ** _)) = height
@@ -433,7 +433,7 @@ height (MkSet (height ** _)) = height
 
 さてさて、これで役者が揃ったので今度こそ動いているか試せます。
 
-``` idris
+```idris
 Idris> :let tree = (insert 1 (insert 10 (insert 3 (insert 1 empty))))
 defined
 Idris> member 1 tree

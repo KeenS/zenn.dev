@@ -11,12 +11,12 @@ title: "Idrisってどんな言語？"
 
 ## Hello World
 
-``` idris:HelloWorld.idr
+```idris:HelloWorld.idr
 main : IO ()
 main = putStrLn "Hello World"
 ```
 
-``` shell-session:ターミナル
+```shell-session:ターミナル
 $ idris HelloWorld.idr -o HelloWorld
 $ ./HelloWorld
 Hello World
@@ -25,7 +25,7 @@ Hello World
 
 ## FizzBuzz
 
-``` idris:FizzBuzz.idr
+```idris:FizzBuzz.idr
 import Data.String
 
 data FizzBuzz = F | B | FB | I Integer
@@ -55,7 +55,7 @@ main = do
 ```
 
 
-``` shell-session:ターミナル
+```shell-session:ターミナル
 $ idris FizzBuzz.idr -o FizzBuzz
 $ ./FizzBuzz 15
 1
@@ -79,7 +79,7 @@ fizzbuzz
 
 IdrisにはREPL（インタラクティブシェル）もあります。 `Idris>` で始まる行が入力で、続く行が出力です。
 
-``` shell-session
+```shell-session
 $ idris
      ____    __     _
     /  _/___/ /____(_)____
@@ -108,7 +108,7 @@ Idris> "Hello, " ++ "REPL"
 
 例えばこういう関数の実装の型を考えてみましょう。
 
-``` idris
+```idris
 foo True  = "True"
 foo False = 0
 ```
@@ -119,7 +119,7 @@ foo False = 0
 
 しかしIdrisなら簡単に型付けできます。まさしく「引数が `True` のときに `String` 型、 `False` のときに `Integer` 型」と記述するだけです。
 
-``` idris
+```idris
 foo: (b: Bool) -> if b then String else Integer
 foo True  = "True"
 foo False = 0
@@ -131,7 +131,7 @@ foo False = 0
 
 例えばそのベクタを結合する関数 `++` は以下のような型をしています。
 
-``` idris
+```idris
 (++) : (xs : Vect m elem) -> (ys : Vect n elem) -> Vect (m + n) elem
 ```
 
@@ -139,7 +139,7 @@ foo False = 0
 
 あるいは要素 `n` 個を取り出す関数 `take` は以下のような型をしています。
 
-``` idris
+```idris
 take : (n : Nat) -> Vect (n + m) elem -> Vect n elem
 ```
 

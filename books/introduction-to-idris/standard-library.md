@@ -211,7 +211,7 @@ snd (x, y) = y
 
 `(.)` は関数合成をします。
 
-``` idris
+```idris
 infixr 9 .
 
 (.) : (b -> c) -> (a -> b) -> a -> c
@@ -220,7 +220,7 @@ infixr 9 .
 
 `flip` は2引数関数の引数の順序を入れ替えます。`(.)` と組み合わせて使うときなんかに便利ですね。
 
-``` idris
+```idris
 flip : (f : a -> b -> c) -> b -> a -> c
 flip f x y = f y x
 ```
@@ -234,14 +234,14 @@ flip f x y = f y x
 
 `Cast` インタフェースが定義されています。
 
-``` idris
+```idris
 interface Cast from to where
     cast : (orig : from) -> to
 ```
 
 以外な型同士にも `Cast` が定義されているのは紹介したとおりです。
 
-``` idris
+```idris
 Cast Double String where
    -- ...
 ```
@@ -256,14 +256,14 @@ Cast Double String where
 
 リストと似ていますが、終わりのないデータ型です。
 
-``` idris
+```idris
 data Stream : Type -> Type where
   (::) : (value : elem) -> Inf (Stream elem) -> Stream elem
 ```
 
 例えば無限に1が続くデータ型なんかを作れます。
 
-``` text
+```text
 Idris> :let ones = the (Stream Int) $ repeat 1
 Idris> take 10 ones
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] : List Int
@@ -287,7 +287,7 @@ Idris> take 10 ones
 
 `Show` インタフェースが定義されています。
 
-``` idris
+```idris
 interface Show ty where
   partial
   show : (x : ty) -> String
@@ -303,7 +303,7 @@ interface Show ty where
 
 `Foldable` と `Applicative` を組み合わせるときに使います。 `Foldable` の要素の1つ1つに操作を加えます。
 
-``` idris
+```idris
 interface (Functor t, Foldable t) => Traversable (t : Type -> Type) where
   traverse : Applicative f => (a -> f b) -> t a -> f (t b)
 ```
@@ -311,14 +311,14 @@ interface (Functor t, Foldable t) => Traversable (t : Type -> Type) where
 
 まあ、一番分かりやすいのは `for_` 関数ですかね。
 
-``` idris
+```idris
 for_ : (Foldable t, Applicative f) => t a -> (a -> f b) -> f ()
 for_ = flip traverse_
 ```
 
 こう使います。
 
-``` idris
+```idris
 Idris> :exec for_ [1..10] $ \n => printLn n
 1
 2
@@ -341,7 +341,7 @@ baseの方が複雑なんですが便利なライブラリがあるんですよ�
 
 失敗するかもしれない計算の失敗を処理する機能を提供します。
 
-``` idris
+```idris
 interface Catchable (m : Type -> Type) t | m where
     throw : t -> m a
     catch : m a -> (t -> m a) -> m a
@@ -349,7 +349,7 @@ interface Catchable (m : Type -> Type) t | m where
 
 `catch` を 中置記法で使うとそれっぽいですかね。
 
-``` text
+```text
 *Control/Catchable> Right "Correct" `catch` \_ => Left "Failed"
 Right "Correct" : Either String String
 *Control/Catchable> the (Either String String) $ Left "Incorrect" `catch` \_ => Left "Failed"
@@ -361,7 +361,7 @@ Left "Failed" : Either String String
 `IO (Either err a)` のパターンが頻出なのでそれをまとめた型です。
 
 
-``` idris
+```idris
 record IOExcept' (f:FFI) err a where
      constructor IOM
      runIOExcept : IO' f (Either err a)
@@ -371,7 +371,7 @@ record IOExcept' (f:FFI) err a where
 
 変更可能な変数のデータ型を定義しています。
 
-``` idris
+```idris
 ||| A mutable variable in the IO monad.
 export
 data IORef a = MkIORef a
@@ -379,7 +379,7 @@ data IORef a = MkIORef a
 
 APIは以下です。
 
-``` idris
+```idris
 newIORef : a -> IO (IORef a)
 readIORef : IORef a -> IO a
 writeIORef : IORef a -> a -> IO ()
@@ -388,7 +388,7 @@ modifyIORef : IORef a -> (a -> a) -> IO ()
 
 以下のようにして使います。
 
-``` idris
+```idris
 do
   result <- newIORef 0
   for_ [0..10] $ \n =>
@@ -408,7 +408,7 @@ do
 
 複素数を定義しています。
 
-``` idris
+```idris
 infix 6 :+
 data Complex a = (:+) a a
 ```
@@ -417,7 +417,7 @@ data Complex a = (:+) a a
 
 長さの決まっているリストを定義しています。
 
-``` idris
+```idris
 data Vect : (len : Nat) -> (elem : Type) -> Type where
   Nil  : Vect Z elem
   (::) : (x : elem) -> (xs : Vect len elem) -> Vect (S len) elem
@@ -427,7 +427,7 @@ data Vect : (len : Nat) -> (elem : Type) -> Type where
 
 有限の自然数を定義しています。
 
-``` idris
+```idris
 data Fin : (n : Nat) -> Type where
     FZ : Fin (S k)
     FS : Fin k -> Fin (S k)
@@ -435,7 +435,7 @@ data Fin : (n : Nat) -> Type where
 
 例えば `Fin 3` なら3未満の整数しかとれません。
 
-``` text
+```text
 Idris> :module Data.Fin
 *Data/Fin> the (Fin 3) 0
 FZ : Fin 3
@@ -451,7 +451,7 @@ FS (FS FZ) : Fin 3
 
 `Vect` に対するインデックスのように `len` 未満の値を指定したいときに便利ですね。
 
-``` idris
+```idris
 index : Fin len -> Vect len elem -> elem
 index FZ     (x::xs) = x
 index (FS k) (x::xs) = index k xs
@@ -462,7 +462,7 @@ index (FS k) (x::xs) = index k xs
 `Debug.Error` と `Debug.Trace`はそれぞれデバッグ用に使います。 `IO` 文脈でなくてもIO処理ができてしまう魔法の関数です。
 
 
-``` idris
+```idris
 import Debug.Trace
 
 add : Integer -> Integer -> Integer
@@ -473,7 +473,7 @@ main = printLn $ 3 * (add 1 2)
 ```
 
 
-``` shell-session
+```shell-session
 $ idris -o add add.idr
 $ ./add
 debbuging

@@ -6,7 +6,7 @@ title: "REPLを使いこなす"
 
 `idris` を引数なしで起動するとインタラクティブシェルに入ります。
 
-``` shell-session
+```shell-session
 $ idris
      ____    __     _
     /  _/___/ /____(_)
@@ -35,7 +35,7 @@ Idris>
 
 上にも書いたとおり、式を入力するとそれを計算して表示してくれます。
 
-``` text
+```text
 Idris> [1..10]
 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : List Integer
 Idris> [ i | i <- [1..10], i `mod ` 2 == 0]
@@ -44,7 +44,7 @@ Idris> [ i | i <- [1..10], i `mod ` 2 == 0]
 
 Idrisでは型も値として扱えることを思い出すと、型名を入力するとそれも評価して表示してくれることが分かります。
 
-``` text
+```text
 Idris> List
 List : Type -> Type
 Idris> Integer
@@ -60,7 +60,7 @@ List Integer : Type
 一応計算を含む型であればそれを計算した結果が表示されます。
 
 
-``` text
+```text
 Idris> if True then Integer else String
 Integer : Type
 ```
@@ -70,7 +70,7 @@ Integer : Type
 
 さて、ここからが本番です。IdrisのREPLには豊富なコマンドがあります。その全貌はREPLに `:?` または `:help` と打つと表示されます。
 
-``` text
+```text
 Idris> :?
 
 Idris version 1.3.3
@@ -131,7 +131,7 @@ Idris version 1.3.3
 
 REPLに打ち込んで評価できるのは式までで、 `foo = 1` のような変数定義は扱えません。その代わり `:let` コマンドで定義できます。試してみましょう。
 
-``` text
+```text
 Idris> :let foo : Integer
 Idris> foo
 foo : Integer
@@ -144,7 +144,7 @@ Idris> foo
 
 関数も定義できますが、少し癖があるようです。
 
-``` text
+```text
 Idris> :let add : Integer -> Integer -> Integer
 Idris> :let add x y = x + y
 When checking an application of function Prelude.Interfaces.+:
@@ -158,7 +158,7 @@ add : Integer -> Integer -> Integer
 
 定義した関数は `:unlet` （`:undefine`）で未定義に戻すことができます。
 
-``` text
+```text
 Idris> :undefine
 Undefined foo,foo,add,add.
 ```
@@ -167,7 +167,7 @@ Undefined foo,foo,add,add.
 
 `:t` あるいは `:type` コマンドで式の型を表示できます。
 
-``` text
+```text
 Idris> :t 1
 1 : Integer
 Idris> :t Integer
@@ -184,7 +184,7 @@ putStrLn : String -> IO ()
 REPLにファイルを読み込んでみましょう。`Record.idr` というファイルに以下の内容を書いて保存しておきます
 
 
-``` idris:Record.idr
+```idris:Record.idr
 record Person where
   constructor MkPerson
   age: Int
@@ -195,7 +195,7 @@ record Person where
 
 `:cd` コマンドで `Record.idr` を書いたディレクトリまで移動します。
 
-``` text
+```text
 Idris> :cd ../Idris
 ```
 
@@ -203,7 +203,7 @@ Idris> :cd ../Idris
 ファイル名はTABによる補完が効きます。
 
 
-``` text
+```text
 Idris> :l Record.idr
 Type checking ./Record.idr
 *Record>
@@ -213,7 +213,7 @@ Type checking ./Record.idr
 
 例えば `Person` 型のコンストラクタ `MkPerson` が読み込まれてるのが確認できます。
 
-``` text
+```text
 *record> :t MkPerson
 MkPerson : Int -> String -> Person
 ```
@@ -222,7 +222,7 @@ MkPerson : Int -> String -> Person
 
 次に `Record.idr` を編集して `incAge` を追加してみましょう
 
-``` idris:Record.idr
+```idris:Record.idr
 -- ...
 incAge: Person -> Person
 incAge = record { age $= (1+) }
@@ -233,7 +233,7 @@ incAge = record { age $= (1+) }
 
 1つは普通にエディタで編集して、 IdrisのREPLで `:r` （ `:reload` ）するものです。
 
-``` idris
+```idris
 *Record> :r
 ```
 
@@ -242,7 +242,7 @@ incAge = record { age $= (1+) }
 もう1つはターミナルにひきこもってる人向けにIdrisのREPLから `:e` （ `:edit` ） でファイルを編集するものです。`EDITOR` または `VISUAL` 環境変数に設定されているエディタを起動し、ファイルを編集するよう促します。編集し終わるとIdrisのREPLに戻ってきて、以下のように続きます。
 
 
-``` text
+```text
 *Record> :e
 Type checking ./Record.idr
 
@@ -260,7 +260,7 @@ Type checking ./Record.idr
 
 では今読み込んだ `incAge` 関数を試してみましょう。
 
-``` text
+```text
 *Record> incAge (MkPerson 28 "Tom")
 MkPerson 29 "Tom" : Person
 ```
@@ -271,7 +271,7 @@ MkPerson 29 "Tom" : Person
 
 因みに型チェックしたいだけなら `:w` （ `:watch` ）でファイル変更を監視して継続的にリロードすることもできます。
 
-``` text
+```text
 *Record> :w
 Record.idr
 Watching for .idr changes in ["Record.idr"], press enter to cancel.
@@ -288,7 +288,7 @@ IdrisのREPLはIdrisが知っていることを教えてくれます。例えば
 
 `:browse` コマンドで名前空間に定義されているアイテムを一覧することができます。`Main` で定義されているアイテムを表示してみましょう。
 
-``` text
+```text
 *Record> :browse Main
 Namespaces:
   Main.Person
@@ -300,7 +300,7 @@ Names:
 
 表示されましたね。因みに `Main.Person` という名前空間もあるようです。これも表示してみましょう。
 
-``` text
+```text
 *Record> :browse Main.Person
 Namespaces:
 
@@ -319,7 +319,7 @@ Idrisには言語組み込みでドキュメントの機能があります（基
 
 例えば標準ライブラリの `List` のドキュメントを表示してみましょう。
 
-``` text
+```text
 *Record> :doc List
 Data type Prelude.List.List : (elem : Type) -> Type
     Generic lists
@@ -345,7 +345,7 @@ Constructors:
 
 例えば `List` を結合する関数を探しているとしましょう。その関数は `List a -> List a -> List a` という型をしているはずです。これを検索してみましょう。`:s` （ `:search` ） でその型を使って検索できます。
 
-``` text
+```text
 *Record> :s List a -> List a -> List a
 = Prelude.List.(++) : List a -> List a -> List a
 Append two lists
@@ -371,7 +371,7 @@ Merge two sorted lists using the default ordering for the type of their elements
 
 ひとまず最初の候補である `Prelude.List.(++)` に 「Append two lists」 と書かれているのでこれが求める演算子のようです。使ってみましょう。
 
-``` text
+```text
 *record> [1, 2, 3] ++ [4, 5, 6]
 [1, 2, 3, 4, 5, 6] : List Integer
 ```
@@ -380,7 +380,7 @@ Merge two sorted lists using the default ordering for the type of their elements
 
 もう1つ探し方があります。自然言語で全文検索する方法です。こちらは `:apropos` を使います。同じく `List` を結合する関数を「append」 のキーワードで検索してみましょう。
 
-``` text
+```text
 *Record> :apropos append
 
 Prelude.List.(++) : List a -> List a -> List a
@@ -415,7 +415,7 @@ Appending pairwise equal lists gives equal lists
 
 `:printdef` で関数の定義を表示することもできます。
 
-``` text
+```text
 *Record> :printdef Prelude.List.(++)
 (++) : List a -> List a -> List a
 [] ++ right = right
@@ -430,14 +430,14 @@ Appending pairwise equal lists gives equal lists
 
 そして以下の内容の `HelloWorld.idr` を用意しておきます。
 
-``` idris:HelloWorld.idr
+```idris:HelloWorld.idr
 main : IO ()
 main = putStrLn "Hello, World"
 ```
 
 そして `idris` の引数に `HelloWorld.idr` を与えながら起動します。
 
-``` shell-session
+```shell-session
 $ idris HelloWorld.idr
      ____    __     _
     /  _/___/ /____(_)____
@@ -456,21 +456,21 @@ Type checking ./HelloWorld.idr
 さて、このファイルには `main` が定義されています。つまり実行可能です。 `:exec` でファイルをコンパイ/実行できます。
 
 
-``` text
+```text
 *HelloWorld> :exec
 Hello, World
 ```
 
 `:c` （ `:compile` ） でコンパイルするこもできます。
 
-``` text
+```text
 *HelloWorld> :c hello_world
 ```
 
 また、読み込んだ `main` の名前を指定して実行することもできます。
 `:x` です。
 
-``` text
+```text
 *HelloWorld> :x main
 Hello, World
 MkIO (\w => prim_io_pure ()) : IO' (MkFFI C_Types String String) ()
@@ -484,7 +484,7 @@ MkIO (\w => prim_io_pure ()) : IO' (MkFFI C_Types String String) ()
 
 結果は貼りませんが、以下のようなコマンドでIdrisの基本の手札を確認できるんじゃないでしょうか。
 
-``` text
+```text
 Idris> :browse Builtins
 idris> :browse Prelude
 Idris> :browse Prelude.List

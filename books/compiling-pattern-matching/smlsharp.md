@@ -155,7 +155,7 @@ val it = 1 : int
 
 まず、 `algebraic_data_types.smi` というファイルを用意し、以下のように記述してください。（ファイル名の末尾は `smi` です。 `sml` ではないので間違えなようにしてください。）
 
-``` sml
+```sml
 _require "basis.smi"
 ```
 

@@ -176,14 +176,14 @@ VectのAppendで雰囲気を掴めたと思うのでもう少し難しい題材�
 
 行列の転置は行と列を転置する操作です。例えば以下のデータがあるとして
 
-``` idris
+```idris
 [[1, 2, 3],
  [4, 5, 6]]
 ```
 
 転置をするとこうなります。
 
-``` idris
+```idris
 [[1, 4],
  [2, 5],
  [3, 6]]
@@ -193,14 +193,14 @@ VectのAppendで雰囲気を掴めたと思うのでもう少し難しい題材�
 
 Type: `n` 行 `m` 列の行列を `Vect n (Vect m a)` で表現するとして転置する関数 `transposeMat` の型を定義します。
 
-``` idris
+```idris
 transposeMat: (matrix: Vect n (Vect m a)) -> Vect m (Vect n a)
 ```
 
 
 Define: `addclase` と `casesplit` を適用します。
 
-``` idris
+```idris
 transposeMat: (matrix: Vect n (Vect m a)) -> Vect m (Vect n a)
 transposeMat [] = ?transposeMat_rhs_1
 transposeMat (x :: xs) = ?transposeMat_rhs_2
@@ -208,7 +208,7 @@ transposeMat (x :: xs) = ?transposeMat_rhs_2
 
 Type: それぞれのHoleの型を調べます。まずは `transposeMat_rhs_1` 。
 
-``` idris
+```idris
 - + Main.transposeMat_rhs_1 [P]
  `--                     a : Type
                          m : Nat
@@ -220,7 +220,7 @@ Type: それぞれのHoleの型を調べます。まずは `transposeMat_rhs_1` 
 
 Refine: `Vect 0 a` は `[]` のことなので `[]` を `m` 個用意すればよさそうです。同じ値を複数個用意するのは `replicate` 関数があるのでそれを使いましょう。
 
-``` idris
+```idris
 import Data.Vect using (Vect, replicate)
 -- ファイル先頭のimportに `replicate` を追加する
 
@@ -233,7 +233,7 @@ transposeMat (x :: xs) = ?transposeMat_rhs_2
 Type: `transposeMat_rhs_2` の型も見ます。
 
 
-``` idris
+```idris
 - + Main.transpose_rhs_2 [P]
  `--                     a : Type
                          m : Nat
@@ -248,7 +248,7 @@ Type: `transposeMat_rhs_2` の型も見ます。
 
 Refine: `transposeMat` を再帰呼出します
 
-``` idris
+```idris
 transposeMat: (matrix: Vect n (Vect m a)) -> Vect m (Vect n a)
 transposeMat {m} [] = replicate m []
 transposeMat (x :: xs) = let mat = transposeMat xs in
@@ -257,7 +257,7 @@ transposeMat (x :: xs) = let mat = transposeMat xs in
 
 Type: `transposeMat_rhs_2` の型を調べます
 
-``` idris
+```idris
 - + Main.transposeMat_rhs_2 [P]
  `--                        a : Type
                             m : Nat
@@ -273,7 +273,7 @@ Type: `transposeMat_rhs_2` の型を調べます
 
 Refine: ここで練習問題の指示で `zipWith : (a -> b -> c) -> Vect n a -> Vect n b -> Vect n c` を使うことになっています。 `mat` と同じ要素数の `Vect` は `x` なので `x` と `mat` を `zipWith` で組み合わせてあげることになります。3つの型を眺めてみましょう。
 
-``` idris
+```idris
       x : Vect m a
     mat : Vect m (Vect len a)
 zipWith : (a -> b -> c) -> Vect n a -> Vect n b -> Vect n c
@@ -283,7 +283,7 @@ zipWith : (a -> b -> c) -> Vect n a -> Vect n b -> Vect n c
 
 `a` と `Vect len a` から `Vect (S len) a` を作れる関数を用意すればできそうですね。そしてそれは `::` です。つまり以下のような実装になります。
 
-``` idris
+```idris
 transposeMat: (matrix: Vect n (Vect m a)) -> Vect m (Vect n a)
 transposeMat {m} [] = replicate m []
 transposeMat (x :: xs) = let mat = transposeMat xs in
@@ -292,7 +292,7 @@ transposeMat (x :: xs) = let mat = transposeMat xs in
 
 これでコンパイルが通ります。REPLで試してみましょう。
 
-``` idris
+```idris
 Idris> transposeMat [[1, 2, 3], [4, 5, 6]]
 [[1, 4], [2, 5], [3, 6]] : Vect 3 (Vect 2 Integer)
 ```

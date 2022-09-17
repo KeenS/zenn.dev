@@ -244,7 +244,7 @@ main = do
 以下のコマンドでコンパイル/実行します。
 
 
-``` shell-session
+```shell-session
 $ idris -o AnagramMain -p contrib AnagramMain.idr
 $ ./AnagramMain tea
 ["ate", "eat", "eta", "tea"]

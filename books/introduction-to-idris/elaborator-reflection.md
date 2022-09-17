@@ -40,7 +40,7 @@ Elaboratorリフレクションは難しい機能になるので公式ドキュ�
 
 まずはElaboratorリフレクションをonにします。
 
-``` idris
+```idris
 %language ElabReflection
 ```
 
@@ -48,13 +48,13 @@ Elaboratorリフレクションは難しい機能になるので公式ドキュ�
 
 Elaboratorスクリプトを書きましょう。Elaboratorスクリプトは `Elab` モナドで記述します。こういう書き出しになります。
 
-``` idris
+```idris
 mkId : Elab ()
 ```
 
 実装する前に使用例を出しておくと、以下のように使います。
 
-``` idris
+```idris
 idNat : Nat -> Nat
 idNat = %runElab mkId
 ```
@@ -63,7 +63,7 @@ idNat = %runElab mkId
 
 この実装は以下のスクリプトで与えられます。
 
-``` idris
+```idris
 mkId : Elab ()
 mkId = do intro `{{x}}
           fill (Var `{{x}})
@@ -72,7 +72,7 @@ mkId = do intro `{{x}}
 
 軽く解説しておきましょう。 `` `{{x}} `` はリフレクションで使う機能で、変数名の内部表現を手軽に書く記法です。
 
-``` text
+```text
 Idris> `{{x}}
 UN "x" : TTName
 Idris> `{{Prelude.Basics.id}}
@@ -87,14 +87,14 @@ NS (UN "id") ["Basics", "Prelude"] : TTName
 
 それでは先程紹介したとおり使ってみます。
 
-``` idris
+```idris
 idNat : Nat -> Nat
 idNat = %runElab mkId
 ```
 
 今定義した `idNat` を軽く使ってみましょう。
 
-``` text
+```text
 Idris> idNat 1
 1 : Nat
 Idris> idNat 0
@@ -107,7 +107,7 @@ Idris> idNat 1000
 
 REPLには `:core` という組み込みコマンドがあります。任意の式のコア言語での表現を取得できます。これで生成された `idNat` の中身を見てみましょう。
 
-``` text
+```text
 Idris> :core idNat
 Main.idNat : (__pi_arg : Prelude.Nat.Nat) → Prelude.Nat.Nat
 Main.idNat ↦ λ x . x
@@ -146,13 +146,13 @@ ElaboratorリフレクションのスクリプトはElabと呼んでしまうこ
 
 つまり、以下のコードで
 
-``` idris
+```idris
 %runElab genMyId
 ```
 
 以下のコード相当のものが定義されるのを目指します。
 
-``` idris
+```idris
 myId : a -> a
 myId = \(x: a) => x
 ```
@@ -168,7 +168,7 @@ myId = \(x: a) => x
 それでは `genMyId` を書きはじめましょう。
 
 
-``` idris
+```idris
 genMyId : Elab ()
 genMyId = do
   -- ...
@@ -221,7 +221,7 @@ genMyId = do
 
 これで生成された関数のcore表現を見てみましょう。
 
-``` text
+```text
 Idris> :core myId
 myId : (a : Type) → (x : a) → a
 myId ↦ λ a . λ x . x
@@ -233,14 +233,14 @@ myId ↦ λ a . λ x . x
 
 先程は以下のような関数を生成しました。
 
-``` idris
+```idris
 myId : a -> a
 myId = \(x: a) => x
 ```
 
 次は少しだけ構文を変えて、以下のように定義します。
 
-``` idris
+```idris
 myId : a -> a
 myId x = x
 ```
@@ -249,7 +249,7 @@ myId x = x
 
 これは以下のようなスクリプトで生成できます。
 
-``` idris
+```idris
 genMyId2 : Elab ()
 genMyId2 = do
   let name = `{{myId2}}
@@ -276,13 +276,13 @@ genMyId2 = do
 
 関数とのそ引数の定義構文についてです。
 
-``` idris
+```idris
 myId a =
 ```
 
 は
 
-``` idris
+```idris
 (RApp (Var name) (Var x))
 ```
 
@@ -292,7 +292,7 @@ myId a =
 
 それではこちらのElabクリプトで生成したコードの方もコア表現を見てみましょう。
 
-``` text
+```text
 Idris> :core myId2
 myId2 : (a : Type) → (x : a) → a
 var a : Type, x : a .
@@ -313,7 +313,7 @@ myNot False = True
 
 これを生成するElabスクリプトを書くとこうなります。
 
-``` idris
+```idris
 genNot : Elab ()
 genNot = do
   let name = `{{myNot}}
@@ -348,7 +348,7 @@ IdrisにはHaskellにある `deriving Show, Eq` のような機能がありま�
 
 最終的には以下のコードを書くと
 
-``` idris
+```idris
 data Janken = Gu | Choki | Pa
 
 %runElab deriveShow `{{Main.Janken}}
@@ -356,7 +356,7 @@ data Janken = Gu | Choki | Pa
 
 以下が生成されるスクリプトを目指します。
 
-``` idris
+```idris
 Show Janken where
   show Gu    = "Gu"
   show Choki = "Choki"
@@ -369,7 +369,7 @@ Show Janken where
 
 イメージとしては以下のコードを書くと
 
-``` idris
+```idris
 data Janken = Gu | Choki | Pa
 
 %runElab (genShow `{{Main.Janken}})
@@ -377,7 +377,7 @@ data Janken = Gu | Choki | Pa
 
 以下のコードを生成する感じです。
 
-``` idris
+```idris
 myShow : Janken -> String
 myShow Gu    = "Gu"
 myShow Choki = "Choki"
@@ -388,7 +388,7 @@ myShow Pa    = "Pa"
 
 実装を与えるとこうなります。
 
-``` idris
+```idris
 genShow : TTName -> Elab ()
 genShow name = do
   let fname = `{{myShow}}
@@ -412,7 +412,7 @@ where
 
 今日一番のエスパーの使いどころですよ。Elabでインタフェース関連の機能はこれだけです。
 
-``` text
+```text
 Idris> :doc addImplementation
 Language.Reflection.Elab.Tactics.addImplementation : (ifaceName : TTName) ->
     (implName : TTName) -> Elab ()
@@ -430,7 +430,7 @@ Language.Reflection.Elab.Tactics.addImplementation : (ifaceName : TTName) ->
 
 ちょっとよく分からないので `show` のコア表現をみてみましょう。
 
-``` idris
+```idris
 λΠ> :core show
 Prelude.Show.show : (ty : Type) →
                     (__interface : Prelude.Show.Show ty) → (x : ty) → String
@@ -447,14 +447,14 @@ var ty : Type,
 
 具体例でイメージを掴みましょう。例えば以下のようなインタフェースを定義したとします。
 
-``` idris
+```idris
 interface Name a where
   name: a -> String
 ```
 
 するとコア的にはだいたい以下のような表現へと変換されます。
 
-``` idris
+```idris
 data Name a = MkName (a -> a)
 
 name : (a : Type) -> Name a -> a -> a
@@ -463,14 +463,14 @@ name _ (MkName f) = f
 
 次にこれをStringに実装します。
 
-``` idris
+```idris
 Name String where
   name x = x
 ```
 
 すると以下のようなコア表現へとなります。
 
-``` idris
+```idris
 strName : Name String
 strName = MkName name
 where
@@ -480,14 +480,14 @@ where
 
 そして `Name` を使うコードを書きましょう。
 
-``` idris
+```idris
 getName : String -> String
 genName = name
 ```
 
 この関数にはコンパイラが型から `strName` が適切だとみつけ、暗黙に渡すのです。
 
-``` idris
+```idris
 getName : String -> String
 genName = name Strig strName
 ```
@@ -496,7 +496,7 @@ genName = name Strig strName
 
 これで `Show` の実装方法が分かりました。 `deriveShow` 関数を書いていきましょう。
 
-``` idris
+```idris
 deriveShow : TTName -> Elab ()
 deriveShow name = ...
 ```
@@ -507,7 +507,7 @@ deriveShow name = ...
 
 `Show` の定義には2つのメソッドがあります。
 
-``` idris
+```idris
 interface Show ty where
   show : (x : ty) -> String
   show x = showPrec Open x -- Eta expand to help totality checker
@@ -549,7 +549,7 @@ where
 
 `genShow` はほぼさっき定義したものと同じです。
 
-``` idris
+```idris
   genClause : TTName -> (TTName, List CtorArg, Raw) -> FunClause Raw
   genClause fname (cname, _, _) =
     let NS (UN cnameStr) _ = cname in
@@ -569,7 +569,7 @@ where
 
 `genShowPrec` は新規コードですが、 `show` を呼び出すだけなのでそこまで難しくないでしょう。
 
-``` idris
+```idris
   genShowPrec fshow dt = do
     fshowPrec <- gensym "showPrec"
     let prec = `{{Prelude.Show.Prec}}
@@ -590,7 +590,7 @@ where
 
 これで完成しました。全体を再掲するとこうです。
 
-``` idris
+```idris
 deriveShow : TTName -> Elab ()
 deriveShow name = do
   dt <- lookupDatatypeExact name
@@ -646,7 +646,7 @@ where
 
 それでは使ってみましょう。
 
-``` idris
+```idris
 data Janken = Gu | Choki | Pa
 %runElab deriveShow `{{Main.Janken}}
 ```
@@ -654,7 +654,7 @@ data Janken = Gu | Choki | Pa
 これを動かしてみます。
 
 
-``` idris
+```idris
 Idris> show Gu
 "Gu" : String
 Idris> show Choki

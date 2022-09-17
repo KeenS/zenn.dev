@@ -15,7 +15,7 @@ title: シンプルなパターンからC風言語へのコンパイル
 `simple_case` 言語では以下のような式が書けます。
 
 
-``` sml
+```sml
 (* データ型の値を構築する *)
 false
 
@@ -40,7 +40,7 @@ in case tuple of
 
 この言語をデータ型にすると以下のようになります。
 
-``` rust
+```rust
 mod simple_case {
     use super::*;
 
@@ -99,7 +99,7 @@ mod simple_case {
 
 `switch` 言語はC風の言語です。大きな特徴はC言語のような `switch` 文があることです。また、メモリ操作など手続的な操作もあります。代わりに `simple_case` 言語にあった `Inject` がなくなり、メモリの確保やデータの保存を逐一行なうようになります。
 
-``` C
+```C
 /* 変数 */
 x := 1;
 
@@ -143,7 +143,7 @@ sml_raise(SML_EXN_MATCH);
 
 `simple_case` 言語と同様に `switch` 言語をデータ型で表わすと以下のようになります。
 
-``` rust
+```rust
 mod switch {
     use super::*;
 
@@ -226,7 +226,7 @@ mod switch {
 
 それでは `case` 言語に型DBを追加しましょう。モージュール定義の下部に追記する形で実装します。必要なのはコンストラクタ、型、型DBです。
 
-``` rust
+```rust
 mod case {
     // ...
 
@@ -251,7 +251,7 @@ mod case {
 
 型DBにはコンストラクタ、登録、参照の機能もつけておきましょう。
 
-``` rust
+```rust
 mod case {
     // ...
 
@@ -289,7 +289,7 @@ mod case {
 型DBに登録するときは以下のように地道に1つ1つデータ型の表現を登録していきます。
 
 
-``` rust
+```rust
 let mut type_db = case::TypeDb::new();
 // datatype bool = True | False
 type_db.register_adt(
@@ -321,7 +321,7 @@ type_db.register_tuple(
 
 まずはパターンが3種類あるのでそのどれであるかを返すメソッドを定義します。
 
-``` rust
+```rust
 mod case {
     // ...
 
@@ -351,7 +351,7 @@ mod case {
 
 次にパターンに名指しでタプルであるかなどを返す `is_xxx` と、パターンがタプルであると決め付けてその引数を取り出す `xxx` メソッド群を定義します。
 
-``` rust
+```rust
 mod case {
     // ...
 
@@ -411,7 +411,7 @@ mod case {
 
 `Type` 型にも同様のメソッドを定義しましょう。
 
-``` rust
+```rust
 mod case {
     // ...
 
@@ -440,7 +440,7 @@ mod case {
 
 コンパイラを書きはじめましょう。まずはユーティリティとしてシンボル生成器を定義しておきます。
 
-``` rust
+```rust
 use std::rc::Rc;
 use std::cell::Cell;
 
@@ -472,7 +472,7 @@ impl SymbolGenerator {
 
 さて、コンパイラ自身のデータ型は以下のように定義します。
 
-``` rust
+```rust
 struct SimpleToSwitch {
     symbol_generator: SymbolGenerator,
     local_handler_labels: Vec<Symbol>,
@@ -493,7 +493,7 @@ impl SimpleToSwitch {
 コンパイル処理を書き始めます。エントリーポイントは `compile` です。内部的にはほぼ `compile_expr` を呼ぶだけです。そして `compile_expr` は構文でパターンマッチしてそれぞれの構文ごとの処理に振り分けるだけです。
 
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
 
@@ -531,7 +531,7 @@ impl SimpleToSwitch {
 
 まずは `Symbol` です。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn compile_symbol(&mut self, s: Symbol) -> (Vec<switch::Stmt>, Symbol) {
@@ -546,7 +546,7 @@ impl SimpleToSwitch {
 
 `simple_case` 言語での `let val var = expr in body end` のコンパイルです。おおざっぱには以下のような見た目になります。
 
-``` c
+```c
 /* exprの部分 */
 ...
 sym := ...;
@@ -558,7 +558,7 @@ ret := ...;
 
 これを実装したのが以下です。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn compile_let(
@@ -583,7 +583,7 @@ impl SimpleToSwitch {
 
 つぎは `Inject` 、 `simple_case` 言語での `inject(disc, data)` （コンストラクタの適用）のコンパイルです。  `Inject` のコンパイルに入る前にシンボルジェネレータの `gensym` を短く呼べる手を用意しておきましょう。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn gensym(&mut self, hint: impl Into<String>) -> Symbol {
@@ -596,7 +596,7 @@ impl SimpleToSwitch {
 
 さて `inject(disc, data)` はおおまかには以下のようにコンパイルされます。
 
-``` c
+```c
 v := alloc(2);
 store(v+0, <disc>);
 store(v+1, <data>);
@@ -609,7 +609,7 @@ store(v+1, <data>);
 
 ただし `data` はさらにコンパイルされる点、`store` の右辺にシンボルしか許してない点から、もう少し詳しく書くと以下のようになります。
 
-``` c
+```c
 /* discriminantの部分 */
 disc := <disc>;
 
@@ -627,7 +627,7 @@ store(v+1, data);
 
 以上のことに加え、 `data` はオプショナルなことに注意しつつコードにするとこうなります。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn compile_inject(
@@ -678,7 +678,7 @@ impl SimpleToSwitch {
 
 `simple_case` 言語での `(e0, ..., en)` のコンパイルです。タプルは要素を1つ1つコンパイルしたあと、メモリを確保してそこに書き込むだけです。
 
-``` c
+```c
 /* 0つめのデータ */
 ...
 e0 := ...
@@ -697,7 +697,7 @@ store(tuple+1, e1);
 
 これを実装するとこうなります。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn compile_tuple(&mut self, es: Vec<simple_case::Expr>) -> (Vec<switch::Stmt>, Symbol) {
@@ -738,13 +738,13 @@ impl SimpleToSwitch {
 
 `simple_case` 言語での `raise Match` のコンパイルです。 `RaiseMatch` は例外の送出なので本来は複雑な処理です。しかしここでは例外を上げる関数 `sml_raise` を呼ぶことにしてお茶を濁します。
 
-``` c
+```c
 sml_raise(SML_EXN_MATCH);
 ```
 
 実装も至ってシンプルです。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn compile_raise_match(&mut self) -> (Vec<switch::Stmt>, Symbol) {
@@ -765,13 +765,13 @@ impl SimpleToSwitch {
 
 `simple_case` 言語での `raise Fail` と `handle Fail => exrp` のコンパイルです。 `RaiseFail` と `HandleFail` はコンパイラが生成する式なので、無茶な使われ方をしないという前提でコンパイルできます。具体的には「`RaiseFail` に対応する `HandleFail` が必ず同一のスコープにある」という仮定を置いてコンパイルします。本来、例外の送出とそのハンドリングは複雑な処理ですが、この仮定を置くことでただの `goto` とラベルに置き換えられます。すなわち、以下のような `simple_case` 言語の式を
 
-``` sml
+```sml
 (... raise Fail ...) handle Fail => expr
 ```
 
 以下のような `switch` 言語の式に変換できます。
 
-``` c
+```c
   ...
   goto Catch;
   ...
@@ -783,7 +783,7 @@ impl SimpleToSwitch {
 
 さて、ここで `handle` 式は以下のようにネストすることがあることに気をつけましょう。
 
-``` sml
+```sml
 ((raise Fail) handle Fail => ...) handle Fail => ...
 ```
 
@@ -791,7 +791,7 @@ impl SimpleToSwitch {
 
 `raise` とそれに対応する `handle` を探してあげる操作が必要になります。 `handle` は `raise` に最も近いものを選べばいいのでスタックを使って管理すればよさそうです。Rustの標準ライブラリにスタックはありませんが、 `Vec` で代用できます。 `SimpleToSwitch` に `local_handler_labels: Vec<Symbol>` があることを思い出しながら2つの構文のコンパイルを眺めましょう。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn compile_raise_fail(&mut self) -> (Vec<switch::Stmt>, Symbol) {
@@ -815,7 +815,7 @@ impl SimpleToSwitch {
 
 `HandleFail` のコンパイルではスタックにラベルをpushしてハンドルする式をコンパイルしたあとラベルをpopします。ここで少し面倒なのが `handle` したあとも式なので返り値の管理をしないといけない点です。以下のような式を考えます。
 
-``` rust
+```rust
 val result = (...) handle Fail => 0;
 case result of
   ...
@@ -824,7 +824,7 @@ case result of
 これは `handle` が値を返す点と例外が起きなかった場合は例外をハンドルする式が呼ばれない点に注意して、以下のようにコンパイルできます。
 
 
-``` c
+```c
   ...
   /* raiseは goto Catch に変換されているものとする */
   result := ...
@@ -841,7 +841,7 @@ case result of
 
 これを実装しましょう。
 
-``` rust
+```rust
 impl SimpleToSwitch {
    // ...
     fn compile_handle_fail(
@@ -892,7 +892,7 @@ impl SimpleToSwitch {
 
 ここまできたら残りは `Case` です。`simple_case` 言語での `case .. of ... | ...` です。 `case` は条件式やそれぞれの腕の式と、式が多いので見た目が長くなりますがそこまで難しいことはしません。例えば以下の `simple_case` 言語の式を考えます。
 
-``` sml
+```sml
 case <cond> of
   Foo => <arm1>
   Bar x => <arm2>
@@ -902,7 +902,7 @@ case <cond> of
 このとき、 `Foo` の判別子は `0` 、 `Bar` の判別子は `1` とします。
 するとこれは以下のような `switch` 言語の文にコンパイルされます。
 
-``` c
+```c
 /* condの計算 */
 ...
 cond := ...;
@@ -928,7 +928,7 @@ switch(cond_disc) {
 
 ところで、分岐が出てくるので `case` 式の返り値の扱いに注意が必要です。 `switch`言語にコンパイルしたあとに `switch` の外で使える変数に返り値を保存しないといけません。
 
-``` sml
+```sml
 switch {
   case 0: {
     /* ここの返り値 */
@@ -946,7 +946,7 @@ switch {
 
 LLVM IRなどのSSAではφノードと呼ばれるノードを配置しますが、ここではややこしくなるので使いません。 `switch` の各腕で同じ名前の変数に代入することでどの節を経由しても1つの変数で返り値を受け取れるようにしましょう。これらを含めると先程のコードは詳細には以下のようにコンパイルされます。
 
-``` c
+```c
 /* condの計算 */
 ...
 cond := ...;
@@ -982,7 +982,7 @@ switch(cond_disc) {
 
 まずは `compile_case` は分岐する `case` と分岐しない `case` で場合分けして処理します。
 
-``` rust
+```rust
 impl SimpleToSwitch {
    // ...
     fn compile_case(
@@ -1009,7 +1009,7 @@ impl SimpleToSwitch {
 
 ここはそこまで難しいことはないですね。タプルパターンの処理もそこまで難しいことはないです。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn compile_case_tuple(
@@ -1051,7 +1051,7 @@ impl SimpleToSwitch {
 
 代数的データ型のコンパイルは少しだけ複雑になります。
 
-``` rust
+```rust
 impl SimpleToSwitch {
     // ...
     fn compile_case_adt(

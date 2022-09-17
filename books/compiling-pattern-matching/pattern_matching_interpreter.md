@@ -57,7 +57,7 @@ $$
 
 実際には中間言語なので構文は存在しませんが、SML風に記述するならばこれらを組み合わせると例えば以下のような式が書けることになります。
 
-``` sml
+```sml
 (* datatype bool = True | False *)
 case  (True, False) of
     (True, True) => False
@@ -76,7 +76,7 @@ case  (True, False) of
 
 まずはASTの前に、ユーティリティとしてシンボル、型IDのデータ型を用意します。
 
-``` rust
+```rust
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 /// 名前を表わすデータ型
 pub struct Symbol(String, u32);
@@ -96,7 +96,7 @@ pub struct TypeId(String);
 
 `TypeId` にはコンストラクタも用意しておきましょう。
 
-``` rust
+```rust
 impl TypeId {
     pub fn new(s: impl Into<String>) -> Self {
         Self(s.into())
@@ -114,7 +114,7 @@ impl TypeId {
 
 まずはSMLの小さなサブセットになる `case` 言語を定義します。
 
-``` rust
+```rust
 mod case {
     use super::*;
 
@@ -176,7 +176,7 @@ ASTを表わすデータ型は式（expression）を表わす `Expr` とパタ�
 
 定義だけだと何ができるか分かりづらいのでこのデータ型の定義を用いて `case` 言語のコードを表現してみましょう。先程のXORを計算するコードは以下のデータ型で表せます。
 
-``` rust:リスト11.1
+```rust:リスト11.1
 use case::*;
 use Expr::*;
 
@@ -234,7 +234,7 @@ Case {
 
 まずはインタプリタのデータ型を用意します。前半で紹介したとおり `case` 式がスコープを導入するのでそれを管理するためにハッシュマップを保持します。
 
-``` rust
+```rust
 struct CaseInterp {
     scope: HashMap<Symbol, case::Value>,
 }
@@ -254,7 +254,7 @@ impl CaseInterp {
 
 インタプリタで評価した結果は値（value）になります。式とは違って `case` 式などの計算がありません。値も `case` 言語の一部として定義しましょう。
 
-``` rust
+```rust
 mod case {
     // ...
 
@@ -274,7 +274,7 @@ mod case {
 
 インタプリタの実装に戻りましょう。パターンマッチにでてくる $\mathit{FAIL}$ に相当するデータ型 `Fail` と、最終的にパターンマッチに失敗したことをユーザに伝えるデータ型 `Match` を定義します。
 
-``` rust
+```rust
 struct Fail;
 struct Match;
 ```
@@ -283,7 +283,7 @@ struct Match;
 
 準備が整ったのでインタプリタを実装しましょう。インタプリタの心臓部分、 `eval` は以下のように書けます。
 
-``` rust
+```rust
 impl CaseInterp {
     pub fn eval(&mut self, expr: case::Expr) -> Result<case::Value, Match> {
         use case::Expr::*;
@@ -333,7 +333,7 @@ impl CaseInterp {
 
 ということで `Symbol` の腕で使われている `resolve` メソッドは以下のように定義できます。
 
-``` rust
+```rust
 impl CaseInterp {
     // ...
 
@@ -351,7 +351,7 @@ impl CaseInterp {
 
 次に `Case` についてです。主題がパターンマッチについてなのでここの比重は大きくなりますね。 `Case` の節の腕を抜き出すと以下のようになっています。
 
-``` rust
+```rust
 // 条件式を評価
 let cond = self.eval(*cond)?;
 // それぞれの節について、最初から順番にパターンマッチを試す。
@@ -372,7 +372,7 @@ match ret {
 
 上記の処理をイテレータを使って実装しています。イテレータを使ったコードに読み慣れない方は以下のような手続的なコードの方が読みやすいかもしれません。
 
-``` rust
+```rust
 // let ret = clauses
 //     .into_iter()
 //     .map(|(pat, arm)| self.pattern_match(pat, cond.clone()).map(|()| arm))
@@ -393,7 +393,7 @@ for (pat, arm) in clauses {
 
 さらに、ここで使われている `Result::or` は $\|$ と同じ挙動をします。すなわち、以下の表明が全て成り立ちます。
 
-``` rust
+```rust
 assert_eq!( Ok(expr1).or( Ok(expr2)), Ok(expr1));
 assert_eq!( Ok(expr) .or(Err(Fail)),  Ok(expr));
 assert_eq!(Err(Fail) .or( Ok(expr)),  Ok(expr));
@@ -406,7 +406,7 @@ assert_eq!(Err(Fail) .or(Err(Fail)),  Err(Fail));
 
 では、ここで使われている `pattern_match` の実装を見てみましょう。
 
-``` rust
+```rust
 impl CaseInterp {
     // ...
 
@@ -459,7 +459,7 @@ impl CaseInterp {
 
 リスト11.1の `case` 言語のコード(をデータ型で表わしたもの)を実行してみます。リスト11.1のコードは `(false, false)` の組をxor相当の計算に渡しているコードなのでした。細かな実行部分は省いて実行結果だけ貼ると以下のようになります。
 
-``` console
+```console
 Constructor { discriminant: 1, value: None }
 ```
 

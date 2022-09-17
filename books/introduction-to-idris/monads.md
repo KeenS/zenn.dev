@@ -123,7 +123,7 @@ Idris> take 10 $ do { x <- cycle [0..3]; y <- cycle [0..3]; pure (x, y) }
 
 `Stream` と同じく対角成分をとります。
 
-``` idris
+```idris
 do
   x <- [1, 2, 3]
   y <- [1, 2, 3]
@@ -317,7 +317,7 @@ execState : State stateType a -> stateType -> stateType
 
 今回は乱数の状態は捨てることにして `evalState` を使ってみましょう。
 
-``` idris
+```idris
 evalState getRandomPair seed
 -- (D212EB9E, C7E45E25)
 ```
@@ -326,7 +326,7 @@ evalState getRandomPair seed
 
 ところがREPLで試すと最後まで計算してくれず、巨大な式が表示されます。これはIdrisのREPLがコンパイラではなくHaskellのインタプリタで実装されていることによる限界です。仕方ないのでコンパイラにコンパイルしてもらって実行しましょう。
 
-``` idris
+```idris
 Idris> :exec printLn $ evalState getRandomPair seed
 ```
 
@@ -339,7 +339,7 @@ Idris> :exec printLn $ evalState getRandomPair seed
 
 実際のコードを見てみましょう。標準入力から1行読んで `Writer` に記録するコードです。
 
-``` idris
+```idris
 readLine : IO (Writer (List String) Integer)
 readLine = do
   line <- getLine
@@ -353,7 +353,7 @@ readLine = do
 
 先程のコードはモナドトランスフォーマを使うと楽に書けるようになります。
 
-``` idris
+```idris
 readLine' : WriterT (List String) IO Integer
 readLine' = do
   line <- lift getLine
@@ -392,7 +392,7 @@ readLine' = do
 
 実際、 `Reader` や `Writer` はまずモナドトランスフォーマとして定義されていて、それを `Identity` に適用したものになっています。
 
-``` idris
+```idris
 -- Reader
 Reader : Type -> Type -> Type
 Reader r a = ReaderT r Identity a

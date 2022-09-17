@@ -182,7 +182,7 @@ where
 
 名前からも分かるかと思いますが、 `foldl` は手続的なコードでのループによく似ています。例えばCで配列の和をとる処理はこう書けますね。
 
-``` c
+```c
 // arr = ...;
 // length = ...;
 int sum = 0;
@@ -196,7 +196,7 @@ return sum;
 
 `foldl` の使いどころとしてはリストを逆順にする `reverse` 関数などがあります。
 
-``` idris
+```idris
 reverse : List a -> List a
 reverse l = foldl (::) [] l
 ```
@@ -227,7 +227,7 @@ loop [] 6              | 6
 
 `foldr` と `foldl` は `Foldable` インタフェースで定義されています。
 
-``` idris
+```idris
 interface Foldable (t : Type -> Type) where
   foldr : (func : elem -> acc -> acc) -> (init : acc) -> (input : t elem) -> acc
 
@@ -245,7 +245,7 @@ interface Foldable (t : Type -> Type) where
 
 例：リスト内に指定した条件を満たす要素があるか調べる関数の定義
 
-``` idris
+```idris
 any: List a -> (a -> Bool) -> Bool
 any []         _ = False
 any (hd :: tl) f = if f hd then True else any tl f
@@ -260,7 +260,7 @@ any (hd :: tl) f = if f hd then True else any tl f
 例：リスト内に指定した条件を満たす最初の要素のインデックスを返す関数の定義（部分）
 
 
-``` idris
+```idris
 position: List a -> (a -> Bool) -> Nat
 position l f = loop l 0
 where
@@ -272,7 +272,7 @@ where
 
 `[]` と `::` で分岐しますが、 `::` の方は分かりやすいですね。こう実装します。
 
-``` idris
+```idris
   loop []         n = ?hole
   loop (hd :: tl) n = if f hd then n else loop tl (1 + n)
 ```
@@ -281,14 +281,14 @@ where
 
 こういうときは `Maybe` を使います。`Maybe` 型を復習するとおおむね以下のように定義されているデータ型です。
 
-``` idris
+```idris
 data Maybe a = Nothing | Just a
 ```
 
 `Maybe` のときにデータがないことを表わし、 `Just` のときにデータがあることを表わします。ということで `Maybe` を使って `position` を実装するとこうなります。
 
 
-``` idris
+```idris
 position: List a -> (a -> Bool) -> Maybe Nat
 position l f = loop l 0
 where
@@ -301,7 +301,7 @@ where
 
 例： `position` の結果に対して `case` で場合分けするコード片
 
-``` idris
+```idris
 let list = [1, 2, 3, 4] in
 case position list (\n => n `mod` 2 == 0) of
   Nothing => "No evens"
@@ -319,7 +319,7 @@ case position list (\n => n `mod` 2 == 0) of
 
 例： `map` の動作例
 
-``` text
+```text
 Idris> map (1+) Nothing
 Nothing : Maybe Integer
 Idris> map (1+) (Just 0)
@@ -328,7 +328,7 @@ Just 1 : Maybe Integer
 
 イメージとしては以下のような定義です。
 
-``` idris
+```idris
 map : (a -> b) -> Maybe a -> Maybe b
 map _ Nothing  = Nothing
 map f (Just x) = Just (f x)
@@ -340,7 +340,7 @@ map f (Just x) = Just (f x)
 
 例： `fromMaybe` の動作例
 
-``` text
+```text
 Idris> fromMaybe True (Just False)
 False : Bool
 Idris> fromMaybe True Nothing
@@ -349,7 +349,7 @@ True : Bool
 
 イメージとしては以下の定義です。
 
-``` idris
+```idris
 fromMaybe : a -> Maybe a -> a
 fromMaybe def Nothing  = def
 fromMaybe def (Just j) = j
@@ -359,7 +359,7 @@ fromMaybe def (Just j) = j
 
 さて、これらを組み合わせれば先程の `position` の返り値で条件分岐するコードは条件分岐なしに書き換えられます。
 
-``` text
+```text
 let list = [1, 2, 3, 4] in
 fromMaybe "No evens"
           (map (\i => "Found an even at " ++ (show i))
@@ -368,7 +368,7 @@ fromMaybe "No evens"
 
 `map` と `fromMaybe` はよく使うのでえておいて下さい。因みにそんなによくは使わないんですが、今回のユースケースだとピタリとあてはまる関数に `maybe` があります。それを使えばもう少し短くなります。
 
-``` idris
+```idris
 let list = [1, 2, 3, 4] in
 maybe "No evens"
       (\i => "Found an even at " ++ (show i))
@@ -379,7 +379,7 @@ maybe "No evens"
 
 例： `maybe` 関数の定義イメージ
 
-``` idris
+```idris
 maybe : b -> (a -> b) -> Maybe a -> b
 maybe n j Nothing  = n
 maybe n j (Just x) = j x
@@ -391,7 +391,7 @@ maybe n j (Just x) = j x
 
 正しく値を計算できない場合は `Maybe` で値がないかもしれないことを表わせばいいことが分かりました。しかし `Maybe` ではどうして値を計算できないのかを知る術がありません。そこで `Maybe` の `Nothing` の部分にも値を持たせてエラーを扱えるようにしたデータ型が考えられます。それが `Either` です。 `Either` について復習するとおおむね以下のように定義されているデータ型です。
 
-``` idris
+```idris
 data Either a b = Left a | Right b
 ```
 
@@ -401,7 +401,7 @@ data Either a b = Left a | Right b
 
 例：`zipE` の動作例
 
-``` text
+```text
 Idris> zipE [1, 2, 3] [4, 5, 6]
 Right [(1, 4), (2, 5), (3, 6)] : Either ZipError (List (Integer, Integer))
 Idris> zipE [1, 2, 3, 4] [4, 5, 6]
@@ -414,26 +414,26 @@ Left ShortLeft : Either ZipError (List (Integer, Integer))
 
 それでは書いていきましょう。まずは失敗したときのエラー型 `ZipError` を定義します。
 
-``` idris
+```idris
 data ZipError = ShortLeft | ShortRight
 ```
 
 `ShortLeft` が左側の引数のリストが短いとき、 `ShortRight` が右側の引数のリストが短いときを表します。`zipE` の型は以下です。
 
-``` idris
+```idris
 zipE : List a -> List b -> Either ZipError (List (a, b))
 ```
 
 返り型の左に失敗したときの型 `ZipError` が、右に成功したときの型 `List (a, b)` が書かれていますね。これを実装します。両方とも空リストのときは正しく空リストが返ります。
 
-``` idris
+```idris
 zipE []       []     = Right []
 ```
 
 正しく計算できたので `Right` で返っています。左右どちらかが空リストで、他方が `::` の場合は長さが違うのでエラーを出します。
 
 
-``` idris
+```idris
 zipE []      (_::_)  = Left ShortLeft
 zipE (_::_)  []      = Left ShortRight
 ```
@@ -441,7 +441,7 @@ zipE (_::_)  []      = Left ShortRight
 正しく計算できないので `Left` が返っています。両方とも `::` の場合は計算を一歩進められます。ここで再帰を使うのですが、 `zipE` が `Either` を返すのでそれをちゃんと扱わないといけません。すなわち、 `zipE` がエラーのときはそのままエラーを返し、 `zipE` が正しく計算できたときはペアにする処理を進めます。以下のような実装になるでしょう。
 
 
-``` idris
+```idris
 zipE (x::xs) (y::ys) = case zipE xs ys of
                          Left e     => Left e
                          Right list => Right ((x, y) :: list)
@@ -451,13 +451,13 @@ zipE (x::xs) (y::ys) = case zipE xs ys of
 
 これでも正しく動作するのですが、ちょっと冗長な部分がありますよね。 `Left e => Left e` のことです。もうちょっと言うと `Right ... => Right ...` と `Right` でマッチして `Right` を再度作っているところもです。この処理は何もしていないのでいかにも無駄です。この無駄を避ける方法はあって、 `map` を使うとサッパリと書けます。
 
-``` idris
+```idris
 zipE (x::xs) (y::ys) = map (\list => (x, y) :: list) (zipE xs ys)
 ```
 
 `List` や `Maybe` にもあるのでなんとなく受け入れられるでしょう。`Either` の場合は引数が2つあるのでちょっと混乱しがちですが、 `Right` の値を正しいとしているので `Right` にのみ作用します（right-biasedなどと呼ばれます）。因みにセクションを思い出してもらうと上記はもっと短くも書けます。
 
-``` idris
+```idris
 zipE (x::xs) (y::ys) = map ((x, y) ::) (zipE xs ys)
 ```
 

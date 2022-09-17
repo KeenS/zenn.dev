@@ -72,7 +72,7 @@ Idrisでは特に特別なものではないんですが、HaskellやRustで関�
 
 例：インタフェース `Extract` の定義
 
-``` idris
+```idris
 interface Extract a where
   From: Type
   extract: From -> a
@@ -84,7 +84,7 @@ interface Extract a where
 
 例：`Person` 型の定義
 
-``` idris
+```idris
 record Person where
   constructor MkPerson
   age: Int
@@ -95,7 +95,7 @@ record Person where
 
 例：`Extract` を `Name` に実装するコード
 
-``` idris
+```idris
 Extract Name where
   From = Person
   extract = name
@@ -109,7 +109,7 @@ Extract Name where
 
 例：プレリュードでのインタフェース `Cast` の定義
 
-``` idris
+```idris
 interface Cast from to where
     cast : (orig : from) -> to
 ```
@@ -118,7 +118,7 @@ interface Cast from to where
 
 例： `Cast` を `Double` と `Int` に定義するときの書き出し
 
-``` idris
+```idris
 Cast Double Int where
   -- ...
 ```
@@ -136,7 +136,7 @@ Cast Double Int where
 
 例：2つ目の `Show` インタフェースを `Name` に実装しようとした際に出るエラー
 
-``` text
+```text
 - + Errors (1)
  `-- (no file) line 0 col -1:
      interface.idr:21:1-9:Main.Name implementation of Prelude.Show.Show already defined
@@ -147,7 +147,7 @@ Cast Double Int where
 
 例：インタフェース `Zero` を定義し、それをプリミティブ `Int` に実装するコード
 
-``` idris
+```idris
 interface Zero a where
   zero : a
 
@@ -161,7 +161,7 @@ Zero Int where
 
 例：プレリュードで `Cast` の実装が複数ある例
 
-``` idris
+```idris
 Cast String Int where
     -- ...
 Cast Char Int where
@@ -183,7 +183,7 @@ Cast Double Integer where
 
 例： `a` 同士を比較できないためエラーになるコード例
 
-``` idris
+```idris
 ordered : a -> a -> (a, a)
 ordered a b =
   if a < b
@@ -192,7 +192,7 @@ ordered a b =
 
 ```
 
-``` text
+```text
 - + Errors (1)
  `-- Ordered.idr line 35 col 2:
      When checking right hand side of ordered with expected type
@@ -205,7 +205,7 @@ ordered a b =
 
 そういうときは特定のインタフェースを実装している型のみ受け付ける制約を書きます。`インタフェース名 変数名 => 型` の構文です。`<` 演算子は `Ord` インタフェースで定義されているため、上記の `ordered` を修正すると以下のようになります。
 
-``` idris
+```idris
 ordered: Ord a => a -> a -> (a, a)
 ordered a b =
   if a < b
@@ -217,7 +217,7 @@ ordered a b =
 
 例：ジェネリクスの型変数に複数のインタフェース制約を書いたコード
 
-``` idris
+```idris
 orderedMsg: (Ord a, Show a) => a -> a -> String
 orderedMsg a b =
   let (a, b) = ordered a b in
@@ -231,7 +231,7 @@ orderedMsg a b =
 
 例：プレリュードのタプルへの `Eq` の実装例
 
-``` idris
+```idris
 (Eq a, Eq b) => Eq (a, b) where
   (==) (a, c) (b, d) = (a == b) && (c == d)
 ```
@@ -247,7 +247,7 @@ orderedMsg a b =
 例：プレリュードの `Num` と `Neg` のコード
 
 
-``` idris
+```idris
 ||| The Num interface defines basic numerical arithmetic.
 interface Num ty where
     (+) : ty -> ty -> ty

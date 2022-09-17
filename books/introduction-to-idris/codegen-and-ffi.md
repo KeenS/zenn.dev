@@ -207,7 +207,7 @@ Hello
 
 因みにNode専用ならNodeバックエンドもあるので `--codegen node` という書き方もできます。未確認ですがこっちの方が標準出入力の扱いが上手そうです。
 
-``` javascript
+```javascript
 // Node codegenのランタイムのコード抜粋
 $JSRTS.prim_writeStr = function (x) { return process.stdout.write(x) };
 
@@ -237,7 +237,7 @@ $JSRTS.prim_readStr = function () {
 IdrisにはFFIの仕組みがあります。特にデフォルトのcodegenバックエンドであるCのFFIは重要です。例えばプレリュードの `File` は以下のようにFFIをベースに組み立てられています。
 
 
-``` idris
+```idris
 data File : Type where
   FHandle : (p : Ptr) -> File
 
@@ -251,7 +251,7 @@ fflush (FHandle h) = foreign FFI_C "fflush" (Ptr -> IO ()) h
 
 さて、もう少しFFIについて解説しておくと、キーになるのは `foreign` 関数です。
 
-``` text
+```text
 Idris> :type foreign
 foreign : (f : FFI) -> ffi_fn f -> (ty : Type) -> {auto fty : FTy f [] ty} -> ty
 Idris> :doc FTy
@@ -274,7 +274,7 @@ C FFIに限っていえば `foreign C_FFI "関数名" (対応するIdrisの型)`
 
 C FFIを使うにあたって、Cのオブジェクトファイルをリンクする必要がありますよね？それ専用のIdrisのディレクティブもあります。実例で確かめてみましょう。まずはリンクするCのオブジェクトファイルを用意しておきましょう。一番シンプルな内容でいきます。以下の内容を `ffi.h` に保存しておきます。
 
-``` c:ffi.h
+```c:ffi.h
 int
 add(int, int);
 ```
@@ -293,7 +293,7 @@ add(int x, int y) {
 
 これは一旦コンパイルしておきましょう。
 
-``` shell-session
+```shell-session
 $ gcc -c -o ffi.o ffi.c
 ```
 
@@ -304,21 +304,21 @@ Cのオブジェクトファイルを使う手段として、2つのディレク
 
 これをふまえて、まず `ffi.idr` の先頭に以下を書きます。
 
-``` idris:ffi.idr
+```idris:ffi.idr
 %include C "ffi.h"
 %link C "ffi.o"
 ```
 
 `int add(int, int);` を呼び出すコードを書きましょう。FFIをした返り値は `IO` でないといけないようなので以下のコードを書きます。
 
-``` idris:ffi.idr
+```idris:ffi.idr
 ffiAdd : Int -> Int -> IO Int
 ffiAdd = foreign FFI_C "add" (Int -> Int -> IO Int)
 ```
 
 これを使う `main` はこう書きましょう。
 
-``` idris:ffi.idr
+```idris:ffi.idr
 main : IO ()
 main = do
   ret <- ffiAdd 1 2
@@ -328,7 +328,7 @@ main = do
 
 これをコンパイル・実行します。
 
-``` shell-session
+```shell-session
 $ idris ffi.idr -o ffi
 $ ./ffi
 3
@@ -338,7 +338,7 @@ $ ./ffi
 
 因みに `%include` は本当に `#include "..."` しているだけのようです。試しに `%include` してcodegenしてみたらファイルの先頭に `#include` が足されてました。
 
-``` c
+```c
 // ↓これ
 #include "ffi.h"
 #include "math.h"
@@ -353,7 +353,7 @@ void* _idris_Prelude_46_Bool_46__38__38_(VM*, VAL*);
 
 Cと同様にJavaScrptバックエンドでもFFIができます。Cと同じように `add` 関数を定義した `ffi.js` を用意します。
 
-``` javascript:ffi.js
+```javascript:ffi.js
 function add(x, y) {
     return x + y;
 }
@@ -361,13 +361,13 @@ function add(x, y) {
 
 `%include` はCと同様です。`%link` はどうも意味を成さないようです。
 
-``` idris:ffi_js.idr
+```idris:ffi_js.idr
 %include JavaScript "ffi.js"
 ```
 
 C FFIと同じようなコードを書くと、このような書き方になります。
 
-``` idris:ffi_js.idr
+```idris:ffi_js.idr
 ffiAdd : Int -> Int -> JS_IO Int
 ffiAdd = foreign FFI_JS "add(%0, %1)" (Int -> Int -> JS_IO Int)
 ```
@@ -389,7 +389,7 @@ main = do
 
 このコードをコンパイル・実行してみましょう。
 
-``` shell-session
+```shell-session
 $ idris --codegen javascript ffi_js.idr -o ffi_gen.js
 $ node ffi_gen.js
 3
@@ -399,7 +399,7 @@ $ node ffi_gen.js
 
 因みに `Node` バックエンドを使うときは `%include` の第一引数が `JavaScript` ではなく `Node` になります。それ以外は共通です。両方とも同じファイルをインクルードするなら2つともまとめて書いてしまえばよいでしょう。
 
-``` idris
+```idris
 %include JavaScript "ffi.js"
 %include Node       "ffi.js"
 ```
@@ -411,7 +411,7 @@ JavaScriptバックエンドに関しては興味のある方が多いかと思�
 
 因みにCと同様、 `%include` は本当にファイルの中身を展開しているだけのようです。
 
-``` javascript:ffi_gen.js
+```javascript:ffi_gen.js
 // ...
 
 $JSRTS.prim_writeStr = function (x) { return console.log(x) };

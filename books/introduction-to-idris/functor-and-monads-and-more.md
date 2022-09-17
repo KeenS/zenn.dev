@@ -14,7 +14,7 @@ title: "ファンクタやモナドなどなど"
 例： `List a` と `Maybe a` に対する素朴な `map` の実装
 
 
-``` idris
+```idris
 -- List
 map : (a -> b) -> List a -> List b
 map f []      = []
@@ -28,7 +28,7 @@ map f Nothing  = Nothing
 
 これを抽象化するインタフェースを定義したいです。するとパラメータになるのは `List` や `Maybe` の部分です。これらは型コンストラクタ、Idris的にいうと `Type -> Type` の値です。
 
-``` idris
+```idris
 Idris> :t List
 List : Type -> Type
 Idris> :t Maybe
@@ -40,7 +40,7 @@ Maybe : Type -> Type
 例： プレリュードのインタフェース `Functor` の定義
 
 
-``` idris
+```idris
 interface Functor (f : Type -> Type) where
     map : (func : a -> b) -> f a -> f b
 
@@ -50,7 +50,7 @@ interface Functor (f : Type -> Type) where
 
 `Functor` インタフェースのおかげでこのように `List` や `Maybe` の値に対して1を足す関数を適用できます。
 
-``` text
+```text
 Idris> map (1+) (Just 1)
 Just 2 : Maybe Integer
 Idris> map (1+) [1, 2, 3]
@@ -61,7 +61,7 @@ Idris> map (1+) [1, 2, 3]
 
 因みに `map` の代わりに `<$>` という演算子も使えます。 `<$>` はプレリュードで以下のように定義されている演算子です。
 
-``` idris
+```idris
 infixr 4 <$>
 (<$>) : Functor f => (func : a -> b) -> f a -> f b
 func <$> x = map func x
@@ -69,7 +69,7 @@ func <$> x = map func x
 
 以下のように使います。
 
-``` text
+```text
 Idris> (1+) <$> (Just 1)
 Just 2 : Maybe Integer
 Idris> (1+) <$> [1, 2, 3]
@@ -88,7 +88,7 @@ Idris> (1+) <$> [1, 2, 3]
 
 例： `map` を使って素朴に `(+)` を `Just 1` と `Just 2` に適用した式
 
-``` text
+```text
 Idris> map (+) (Just 1) (Just 2)
 (input):1:1-25:When checking an application of function Prelude.Functor.map:
         Type mismatch between
@@ -109,7 +109,7 @@ Idris> map (+) (Just 1) (Just 2)
 
 例： `Maybe` に包まれた関数を無理矢理適用してしまうコード
 
-``` idris
+```idris
 ap: Maybe (a -> b) -> Maybe a -> Maybe b
 ap (Just f) (Just x) = Just (f x)
 ap _        _        = Nothing
@@ -119,7 +119,7 @@ ap _        _        = Nothing
 
 例：プレリュードの `Applicative` の定義
 
-``` idris
+```idris
 infixl 3 <*>
 interface Functor f => Applicative (f : Type -> Type) where
     pure  : a -> f a
@@ -132,7 +132,7 @@ interface Functor f => Applicative (f : Type -> Type) where
 
 例：プレリュードの `Applicative` の `Maybe` への実装
 
-``` idris
+```idris
 Applicative Maybe where
     pure = Just
 
@@ -146,7 +146,7 @@ Applicative Maybe where
 
 例： `Functor` と `Applicative` の利用
 
-``` idris
+```idris
 Idris> (+) <$> (Just 1) <*> (Just 2)
 Just 3 : Maybe Integer
 ```
@@ -155,7 +155,7 @@ Just 3 : Maybe Integer
 
 例： `List` での `Functor` と `Applicative` の利用
 
-``` idris
+```idris
 Idris> (+) <$> [1, 2, 3] <*> [10, 11, 12]
 [11, 12, 13, 12, 13, 14, 13, 14, 15] : List Integer
 ```
@@ -181,7 +181,7 @@ Idris> (+) <$> [1, 2, 3] <*> [10, 11, 12]
 
 例：`safeDiv` 関数
 
-``` idris
+```idris
 safeDiv : Integer -> Integer -> Maybe Integer
 safeDiv _ 0 = Nothing
 safeDiv d m = Just (d `div` m)
@@ -238,7 +238,7 @@ Nothing : Maybe Integer
 
 例： `safeDiv` を `Maybe` の値に適用する計算を `do` 記法で書いたコード
 
-``` idris
+```idris
 do
   d <- Just 1
   m <- Just 0
@@ -251,7 +251,7 @@ do
 
 例： `do` 記法をREPLで使うコード
 
-``` text
+```text
 Idris> do {d <- Just 1; m <- Just 0; safeDiv d m }
 Nothing : Maybe Integer
 ```
@@ -262,7 +262,7 @@ Nothing : Maybe Integer
 
 例：九九の左斜め下半分を `do` 記法で計算するコード
 
-``` idris
+```idris
 do
   x <- [0..9]
   y <- [0..x]
@@ -284,7 +284,7 @@ IOモナドはIdrisで一番重要なモナドなのでここで同時に触れ�
 
 ということでモナドを知った今、改めてHello Worldをしてみましょう。 `putStrLn` は以下のような型をしています。
 
-``` text
+```text
 Idris> :t putStrLn
 putStrLn : String -> IO ()
 ```
@@ -293,7 +293,7 @@ putStrLn : String -> IO ()
 
 例：IdrisでのHello World
 
-``` idris:HelloWorld.idr
+```idris:HelloWorld.idr
 main : IO ()
 main = putStrLn "Hello, World"
 ```
@@ -302,7 +302,7 @@ main = putStrLn "Hello, World"
 
 例：Hello Worldをコンパイル・実行するコマンド
 
-``` shell-session
+```shell-session
 $ idris -o HelloWorld HelloWorld.idr
 $ ./HelloWorld
 Hello, World
@@ -314,7 +314,7 @@ Hello, World
 
 例： `getLine` と `putStrLn` を使ってユーザの入力を表示するプログラム
 
-``` idris:Echo.idr
+```idris:Echo.idr
 main : IO ()
 main = getLine >>= \s => putStrLn ("Your input is " ++ s)
 ```
@@ -323,7 +323,7 @@ main = getLine >>= \s => putStrLn ("Your input is " ++ s)
 
 例： `getLine` と `putStrLn` を使ってユーザの入力を表示するプログラムを `do` 記法で書いたもの
 
-``` idris:Echo.idr
+```idris:Echo.idr
 main : IO ()
 main = do
   s <- getLine
@@ -332,7 +332,7 @@ main = do
 
 これを `Echo.idr` に保存し、コンパイル、実行すると以下のように動作します。
 
-``` shell-session
+```shell-session
 $ idris -o Echo Echo.idr
 $ ./Echo
 echooooo

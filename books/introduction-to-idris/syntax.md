@@ -12,7 +12,7 @@ title: "基本文法"
 
 例：
 
-``` idris
+```idris
 -- これはコメントです
 ```
 
@@ -22,7 +22,7 @@ title: "基本文法"
 
 例：
 
-``` idris
+```idris
 {-
 複数行で
 コメントが
@@ -44,7 +44,7 @@ title: "基本文法"
 
 変数は以下の構文で定義します。
 
-``` idris
+```idris
 名前 : 型
 名前 = 式
 ```
@@ -60,7 +60,7 @@ version = 100
 
 関数は以下の構文で定義します。
 
-``` idris
+```idris
 名前 : 型
 名前 引数1 引数2 .. 引数n = 式
 ```
@@ -83,7 +83,7 @@ add x y = x + y
 
 例： `x` と `y` の和にローカル変数 `tmp` を束縛したあと `tmp` と `z` の和を計算するコード
 
-``` idris
+```idris
 add3 : Integer -> Integer -> Integer -> Integer
 add3 x y z = let tmp = x + y in
              tmp + z
@@ -94,7 +94,7 @@ add3 x y z = let tmp = x + y in
 例： `where` を使って `x` と `y` の和にローカル変数 `tmp` を束縛したあと `tmp` と `z` の和を計算するコード
 
 
-``` idris
+```idris
 add3 : Integer -> Integer -> Integer -> Integer
 add3 x y z = tmp + z
 where
@@ -112,7 +112,7 @@ Idrisは [オフサイドルール](https://ja.wikipedia.org/wiki/オフサイ�
 
 例： `where` を使って3つのローカル関数 `isM4` 、 `isM100` 、 `isM400` を定義し、それらでうるう年を判定するコード
 
-``` idris
+```idris
 isLeapYear : Integer -> Bool
 isLeapYear y = isM4 y && not (isM100 y) && isM400 y
 where
@@ -134,7 +134,7 @@ where
 
 例： `double` を値を2倍にする無名関数に束縛し、それを2回適用することで値を4倍にするコード
 
-``` idris
+```idris
 quatro: Integer -> Integer
 quatro n = let double = \i => i * 2 in
            double (double n)
@@ -147,7 +147,7 @@ quatro n = let double = \i => i * 2 in
 
 例：
 
-``` idris
+```idris
 if n == 0
 then "Zero"
 else "Not zero"
@@ -157,7 +157,7 @@ Idrisは式指向言語なので `if` も値を返します（なので `if` 「
 
 例： `if` が式であることを使って `if` の返り値をそのまま別の関数に渡すコード
 
-``` idris
+```idris
 main : IO ()
 main =
   putStrLn (if 1 == 0 then "Zero" else "Not zero")
@@ -171,7 +171,7 @@ main =
 
 例：
 
-``` idris
+```idris
 case n of
   1 => "one"
   2 => "two"
@@ -185,7 +185,7 @@ case n of
 
 例：リストに対してパターンマッチし、分配束縛するコード。
 
-``` idris
+```idris
 case list of
   [] => 0
   [x, y] => x + y
@@ -201,7 +201,7 @@ case list of
 
 例：$n$ 番目の[フィボナッチ数](https://ja.wikipedia.org/wiki/フィボナッチ数)を計算するコード
 
-``` idris
+```idris
 fib: Integer -> Integer
 fib 0 = 1
 fib 1 = 1
@@ -216,7 +216,7 @@ Idrisは関数型言語なのでループは関数を使います。自身を呼
 
 例： `1` から `n` までの和を求める関数
 
-``` idris
+```idris
 sumFromOne: Integer -> Integer
 sumFromOne n = loop 1 n 0
 where
@@ -238,7 +238,7 @@ Idrisには組み込みの演算子がありません。もうちょっという
 
 例： 2引数関数 `add` を `` ` `` 〜 `` ` `` で囲んで中置演算子として使うコード
 
-``` idris
+```idris
 add : Integer -> Integer -> Integer
 add x y = x + y
 
@@ -247,13 +247,13 @@ add x y = x + y
 
 逆に、中置演算子は `()` で囲って普通の関数のように使うこともできます。
 
-``` idris
+```idris
 (+) 1 2
 ```
 
 2つ目の方法が `infix` 系の構文です。 `infix` 、 `infixl` 、 `infixr` があります。 `infixl 4 +,-` のように `infixl 優先順位 シンボル1, シンボル2..` と書きます。これらの構文でinfix宣言されたシンボルは中置演算子として使えます。
 
-``` idris
+```idris
 infixl 4 -?
 prefix 2 -!
 
@@ -274,7 +274,7 @@ prefix 2 -!
 
 中置演算子を部分適用したいことがたまにあります。例えば `1 +` と書いて1を足す関数ができてほしいですよね。実際、そういう使い方ができます。
 
-``` idris
+```idris
 -- 1を足す関数(1+)を2に適用
 (1+) 2
 -- -> 3
@@ -294,7 +294,7 @@ prefix 2 -!
 
 例：引数のないコンストラクタのヴァリアントを2つ持つデータ型
 
-``` idris
+```idris
 data Bool = True | False
 ```
 
@@ -302,7 +302,7 @@ data Bool = True | False
 
 例：引数の2つあるコンストラクタのヴァリアントを1つ持つデータ型
 
-``` idris
+```idris
 data Person = MkPerson Int String
 ```
 
@@ -312,7 +312,7 @@ data Person = MkPerson Int String
 
 例： 引数のあるコンストラクタや引数のないコンストラクタのヴァリアントのあるデータ型
 
-``` idris
+```idris
 data FizzBuzz = F | B | FB | I Integer
 ```
 
@@ -327,7 +327,7 @@ Idrisの重要かつ初心者にとって役に立つ機能にHole（穴）が�
 
 例：Holeを使ったプログラム
 
-``` idris
+```idris
 awesomeFunction: String -> Integer
 awesomeFunction s = ?hole
 ```
@@ -336,7 +336,7 @@ awesomeFunction s = ?hole
 
 例：`hole` の型を処理系から取得した際の出力
 
-``` text
+```text
     s : String
 ---------------
  hole : Integer
@@ -348,7 +348,7 @@ Holeは式の途中で置くことも可能です。例えば以下のように 
 
 例：式の途中にHoleを置くコード
 
-``` idris
+```idris
 awesomeValue : Integer
 awesomeValue =
   let tmp = awesomeFunction ?arg
@@ -359,7 +359,7 @@ awesomeValue =
 
 例：`arg` の型を処理系から取得した際の出力
 
-``` text
+```text
 -------------
 arg : String
 ```
@@ -370,7 +370,7 @@ arg : String
 
 例：Holeのあるプログラムを読み込んだときの出力
 
-``` text
+```text
 Holes: Main.arg, Main.hole
 ```
 
@@ -385,7 +385,7 @@ Holeについてはまだまだ語るところがあるのですが構文の学�
 ファイルの先頭で `module <名前>` と宣言することでそのファイルのモジュール名を指定します。
 
 例：モジュール `main` を宣言するコード
-``` idris
+```idris
 module main
 ```
 
@@ -394,7 +394,7 @@ module main
 `import ディレクトリ.ファイル名` とすることでファイルをインポートできます。 `import` は `module` と コードの間に書きます。
 
 例： `hoge/fuga/piyo.idr` にあるコードをインポートするコード
-``` text
+```text
 import hoge.fuga.piyo
 Holes: Main.arg, Main.hole
 ```
@@ -404,7 +404,7 @@ Holes: Main.arg, Main.hole
 `module` はファイル単位ですが、`namespace` でファイル内にサブ名前空間を作ることができます。
 
 例：名前空間 `foo` を作るコード
-``` text
+```text
 namespace foo
   -- このブロックは `foo` 名前空間に入る
 ```

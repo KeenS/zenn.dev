@@ -34,7 +34,7 @@ Voidへの対応はアルゴリズムの修正が必要です。例えば決定�
 
 以下のパターンマッチはバックトラック法では混合則で3分割されるのでした。
 
-``` sml
+```sml
 case c of
     (Nil, _) => E1
   | (_, Nil) => E2
@@ -43,7 +43,7 @@ case c of
 
 一方、2節目と3節目をいれかえた以下のコードは2分割しかされません。
 
-``` sml
+```sml
 case c of
     (Nil, _) => E1
   | (Cons(_, _), Cons(_, _)) => E3
@@ -62,7 +62,7 @@ case c of
 
 決定木法では混合則で変数パターンの列がコピーされます。
 
-``` rust
+```rust
 fn default_patterns(...) -> ... {
     clause_with_heads
         // ...
@@ -79,7 +79,7 @@ fn default_patterns(...) -> ... {
 
 `expr` のコピーに関しては、簡単には関数にしてしまえばある程度問題を解決できます。すなわち、
 
-``` sml
+```sml
 case cond of
     pat1 => expr1
   | pat2 => expr2
@@ -89,7 +89,7 @@ case cond of
 という `case` 式を以下のように変換するのです。
 
 
-``` sml
+```sml
 let
   fun doExpr1 () = expr1
   fun doExpr2 () = expr2
@@ -106,7 +106,7 @@ end
 
 これは簡単な解決方法をもたらしてくれる一方で、 `pat => expr` の `pat` の部分がコピーされる問題は解決していません。 `pat => expr` の部分は何度コンパイルしても結果は一緒なので可能なら一度だけコンパイルして、以降はその結果を使い回したいです。それっぽい言い方をすると、決定木の部分木どうしが **極大共有（maximal sharing）** するようにしたいです。極大共有な木を生成する方法がいくつか考案されています。
 
-``` rust
+```rust
       .......
       /  |  \
 pat  /   |   \ pat
@@ -118,7 +118,7 @@ pat  /   |   \ pat
 
 ↓
 
-``` rust
+```rust
       .......
       /  |  \
      /   |   \
@@ -136,7 +136,7 @@ pat  /   |   \ pat
 
 決定木法の混合則では一番最初にみつかった変数ではないパターン（キー）を用いていました。
 
-``` rust
+```rust
 fn find_nonvar(&mut self, clauses: &[(Stack<case::Pattern>, simple_case::Expr)]) -> usize {
     // ベクトルをスタックの代用としているので先頭から探索するには rpositionを使う
     clauses[0].0.iter().rposition(|p| !p.is_variable()).unwrap()

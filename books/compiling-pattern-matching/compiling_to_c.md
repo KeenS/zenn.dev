@@ -404,7 +404,7 @@ switch文による変換との見た目でわかりやすい違いは、比較�
 
 また、コンストラクタが多い場合は、if文よりもswitch文のほうが高速になります。多少人工的な例ではありますが、 `isWeekend` の例で説明しましょう。
 
-``` sml
+```sml
 fun isWeekend w = case w of
                       Sunday => true
                     | Monday => false
@@ -418,7 +418,7 @@ fun isWeekend w = case w of
 
 これは、switch文を使うと以下のような変換結果になります。
 
-``` c
+```c
 switch(w) {
   case Sunday:    return SML_TRUE;
   case Monday:    return SML_FALSE;
@@ -432,7 +432,7 @@ switch(w) {
 
 一方、if文だとこうなります。
 
-``` c
+```c
 if (w == Sunday)         return SML_TRUE;
 else if (w == Monday)    return SML_FALSE;
 else if (w == Tuesday)   return SML_FALSE;

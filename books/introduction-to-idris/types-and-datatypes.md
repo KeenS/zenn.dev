@@ -29,14 +29,14 @@ Haskellに慣れている方に注意ですが、 `String` は `List Char` で�
 
 例：引数のないコンストラクタのヴァリアントを2つ持つデータ型
 
-``` idris
+```idris
 data Bool = True | False
 ```
 
 
 例：引数の2つあるコンストラクタのヴァリアントを1つ持つデータ型
 
-``` idris
+```idris
 data Person = MkPerson Integer String
 ```
 
@@ -46,7 +46,7 @@ data Person = MkPerson Integer String
 
 例： 引数のあるコンストラクタや引数のないコンストラクタのヴァリアントのあるデータ型
 
-``` idris
+```idris
 data FizzBuzz = F | B | FB | I Integer
 ```
 
@@ -64,7 +64,7 @@ Cons 1 (Cons 2 (Cons 3 Nil))
 
 以下のように単方向連結リストになっています。
 
-``` text
+```text
 Cons
 +---+---+
 | * | * |
@@ -89,7 +89,7 @@ Cons
 
 例： `Person` 型から1つ目の引数、2つ目の引数の値を取り出す関数の定義
 
-``` idris
+```idris
 age : Person -> Integer
 age (MkPerson age _) = age
 
@@ -156,7 +156,7 @@ length (Cons _ tl) = 1 + (length tl)
 
 標準ライブラリにこれとほぼほぼ同等の定義の型 `List` があります。普段はそれを使うことになるでしょう。
 
-``` text
+```text
 Idris> 1 :: 2 :: 3 :: Nil
 [1, 2, 3] : List Integer
 Idris> ['a', 'b', 'c']
@@ -188,7 +188,7 @@ name (MkPerson _ name) = name
 
 例： `MkPerson` をレコードで定義するコード
 
-``` idris
+```idris
 record Person where
   constructor MkPerson
   age: Int
@@ -201,7 +201,7 @@ record Person where
 例： `MkPerson` をレコードで定義するコードを展開したイメージ
 
 
-``` idris
+```idris
 data Person = MkPerson Int String
 
 age : Person -> Int
@@ -226,7 +226,7 @@ set_name name (MkPerson age _) = MkPerson age name
 例： レコードの関数型更新構文のいくつか
 
 
-``` idris
+```idris
 -- フィールド = 値
 record { age = 29 }
 
@@ -244,7 +244,7 @@ record { age $= (+ 1), name = "anonymous" }
 
 例：関数型更新構文が関数として振る舞うことがわかる例
 
-``` idris
+```idris
 incAge: Person -> Person
 incAge = record { age $= $(+ 1) }
 ```
@@ -268,7 +268,7 @@ Idrisの関数の型は `引数の型 -> 返り値の型` のみです。じゃ�
 
 例： `add` を関数定義構文やラムダ式やその組み合わせで定義するコード
 
-``` idris
+```idris
 -- 関数定義構文による定義
 add: Integer -> Integer -> Integer
 add x y = x + y
@@ -290,7 +290,7 @@ add = \x, y => x + y
 
 ところで `Integer -> (Integer -> Integer)` は「 `Integer` を与えると `Integer -> Integer` を返す関数」 です。試してみましょう。 `add` に引数を1つだけ与えてみます。
 
-``` idris
+```idris
 inc: Integer -> Integer
 inc = add 1
 ```
@@ -327,7 +327,7 @@ inc = add 1
 
 例：ユニットを使うコード
 
-``` idris
+```idris
 unit : ()
 unit = ()
 ```
@@ -342,7 +342,7 @@ unit = ()
 
 例：タプルの値と型
 
-``` idris
+```idris
 triple : (Int, String, Bool)
 triple = (1, "string", True)
 ```
@@ -366,7 +366,7 @@ triple = (1, "string", True)
 ブール型です。以下のように定義されています。
 
 
-``` idris
+```idris
 ||| Boolean Data Type
 data Bool = False | True
 ```
@@ -377,7 +377,7 @@ Idrisはかなり色々な機能をもつのでブール値をライブラリで
 
 「どちらか」 を表わす型です。おおむね以下のように定義されています。
 
-``` idris
+```idris
 ||| A sum type
 data Either a b =
   ||| One possibility of the sum, conventionally used to represent errors
@@ -390,7 +390,7 @@ data Either a b =
 
 例： `Either` を使ってエラーを表わすコード
 
-``` idris
+```idris
 divide: Integer -> Integer -> Either String Integer
 divide _ 0 = Left "division by zero"
 divide m n = Right (m `div` n)
@@ -402,7 +402,7 @@ divide m n = Right (m `div` n)
 
 `Maybe` は「値があるか、あるいはない」を表わす型です。おおむね以下のように定義されています。
 
-``` idris
+```idris
 ||| An optional value. This can be used to represent the possibility of
 ||| failure, where a function may return a value, or not.
 data Maybe a =
@@ -414,7 +414,7 @@ data Maybe a =
 
 `Just x` のとき値があり、 `Nothing` のとき値がないことを表わします。例えばリストの先頭を取り出す関数 `head'` は以下のように定義されています。
 
-``` idris
+```idris
 head' : (l : List a) -> Maybe a
 head' []      = Nothing
 head' (x::xs) = Just x
@@ -432,7 +432,7 @@ head' (x::xs) = Just x
 
 おおむね以下のように定義されています。
 
-``` idris
+```idris
 infixr 7 ::
 
 ||| Generic lists
@@ -451,7 +451,7 @@ data List elem =
 例： `List` 型のパターンマッチと構築を行うコード
 
 
-``` idris
+```idris
 addAll : Int -> List Int -> List Int
 addAll _ Nil     = Nil
 addAll a (x::xs) = (a + x) :: (addAll a xs)
@@ -470,7 +470,7 @@ addAll a (x::xs) = (a + x) :: (addAll a xs)
 例：1, 2, 3のリストの構築
 
 
-``` idris
+```idris
 [1..3]
 ```
 
@@ -478,7 +478,7 @@ addAll a (x::xs) = (a + x) :: (addAll a xs)
 
 例：1から2つ飛ばしで10以下の値、1, 3, 5, 7, 9を含むリストの構築
 
-``` idris
+```idris
 [1, 3..10]
 ```
 
@@ -487,7 +487,7 @@ addAll a (x::xs) = (a + x) :: (addAll a xs)
 
 例：1×1〜9×9までの結果を生成するリスト内包表記
 
-``` idris
+```idris
 [ i * j | i <- [1..9], j <- [1..9]]
 ```
 
@@ -495,7 +495,7 @@ addAll a (x::xs) = (a + x) :: (addAll a xs)
 
 例：2, 4, 6, 8, 10のリストを生成するリスト内包表記
 
-``` idris
+```idris
 [n | n <- [1..10], n `mod` 2 == 0]
 ```
 
@@ -503,7 +503,7 @@ addAll a (x::xs) = (a + x) :: (addAll a xs)
 
 ちょっとここで紹介するか迷いましたが、よく出てくるので先に紹介しておきましょう。 `Nat` は自然数を表わす型です。0からはじまり無限に続きます。以下のように定義されています。
 
-``` idris
+```idris
 ||| Natural numbers: unbounded, unsigned integers which can be pattern
 ||| matched.
 data Nat =
@@ -529,7 +529,7 @@ data Nat =
 
 例： `S` と `Z` を使って `Nat` の3を構築
 
-``` idris
+```idris
 three : Nat
 three = S (S (S Z))
 ```
@@ -538,14 +538,14 @@ three = S (S (S Z))
 
 例：数値リテラルを使って`Nat` の3を構築
 
-``` idris
+```idris
 three : Nat
 three = 3
 ```
 
 自然数はインデックスや長さとして使われたりします。例えばリストの長さを求める関数 `length` は以下のように定義されています。
 
-``` idris
+```idris
 length : List a -> Nat
 length []      = Z
 length (x::xs) = S (length xs)
@@ -565,7 +565,7 @@ length (x::xs) = S (length xs)
 
 例：型を変数に束縛して型エイリアスとして使うコード
 
-``` idris
+```idris
 IntList : Type
 IntList = List Int
 ```
@@ -576,7 +576,7 @@ IntList = List Int
 
 型アノテーションは関数として書けてしまいます。プレリュードで `the` という関数として定義されています。
 
-``` idris
+```idris
 ||| Manually assign a type to an expression.
 ||| @ a the type to assign
 ||| @ value the element to get the type

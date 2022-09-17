@@ -281,7 +281,7 @@ onePlusNEqualNPlusOne : 1 + n = n + 1
 onePlusNEqualNPlusOne = Refl
 ```
 
-``` text
+```text
 - + Errors (1)
  `-- proving.idr line 31 col 24:
      When checking right hand side of onePlusNEqualNPlusOne with expected type
@@ -306,7 +306,7 @@ $1 + n = n + 1$ を証明します。
 
 まず、命題を少しいじります。 `n` をプログラム内で扱いたいので関数の引数で受け取ることにします。
 
-``` idris
+```idris
 onePlusNEqualNPlusOne : (n: Nat) -> 1 + n = n + 1
 ```
 
@@ -320,7 +320,7 @@ onePlusNEqualNPlusOne : (n: Nat) -> 1 + n = n + 1
 まず `n = Z` の場合は `1 + 0 = 0 + 1` で、全て定数なのでIdrisが計算してくれて、 `Refl` で済みます。
 
 
-``` idris
+```idris
 onePlusNEqualNPlusOne Z = Refl
 ```
 
@@ -329,13 +329,13 @@ onePlusNEqualNPlusOne Z = Refl
 
 次に $n = k$ で成立する、つまり `onePlusNEqualNPlusOne k` の呼出はできると仮定して `n = S k` の場合を証明します。
 
-``` idris
+```idris
 onePlusNEqualNPlusOne (S k) = …
 ```
 
  `n = S k` の場合は `1 + (S k) = (S k) + 1` となります。ここで、自然数同士の足し算 `n + m` はプレリュードで定義された `plus` 関数を用いて `plus n m` で定義されていることと、 `plus` の定義から、 `S (S k) = S (plus k 1)` へと自動で計算されます。Idrisは関数呼出も多少は計算してくれるようです。
 
-``` idris
+```idris
 -- S (S k) = S (plus k 1) を返す
 onePlusNEqualNPlusOne (S k) = …
 ```
@@ -344,7 +344,7 @@ onePlusNEqualNPlusOne (S k) = …
 
 実際、等式を使って型を書き換える構文があります。 `rewrite 等式 in 値` の構文です。これを使うと `S k` の節はこう書けます。
 
-``` idris
+```idris
 onePlusNEqualNPlusOne (S k) =
   rewrite onePlusNEqualNPlusOne k
   in Refl
@@ -352,7 +352,7 @@ onePlusNEqualNPlusOne (S k) =
 
 これで証明完了です。プログラム全体は以下のようになります。
 
-``` idris
+```idris
 onePlusNEqualNPlusOne : (n: Nat) -> 1 + n = n + 1
 onePlusNEqualNPlusOne Z = Refl
 onePlusNEqualNPlusOne (S k) =
@@ -380,7 +380,7 @@ onePlusNEqualNPlusOne (S k) =
 
 もう1つ、現実的な理由があります。依存型を使ったコードを書くときに型を合わせるために証明が必要になるケースがあるのです。例えば以下のコードを見てみましょう。 `Vect` の先頭の値を末尾に移動するコードです。
 
-``` idris
+```idris
 rotateVec : Vect n a -> Vect n a
 rotateVec [] = []
 rotateVec (x::xs) = xs ++ [x]
@@ -388,7 +388,7 @@ rotateVec (x::xs) = xs ++ [x]
 
 一見問題ないように見えます。しかしこれをコンパイルするとエラーになります。
 
-``` text
+```text
 - + Errors (1)
  `-- proving.idr line 40 col 20:
      When checking right hand side of rotateVec with expected type
@@ -408,7 +408,7 @@ rotateVec (x::xs) = xs ++ [x]
 
 `x::xs` のパターンマッチで `n = 1 + k` であることが分かった一方で `xs ++ [x]` は `k + 1` になります。Idrisは `1 + k` と `k + 1` が等しいことを分からないので型の不一致でエラーになっています。まさしく先程証明した `1 + n = n + 1` が必要になるのです。実際、 `onePlusNEqualNPlusOne` を使って `rewrite` してあげればコンパイルは通ります。
 
-``` idris
+```idris
 rotateVec : Vect n a -> Vect n a
 rotateVec [] = []
 rotateVec {n = S k} (x::xs) =
@@ -424,7 +424,7 @@ rotateVec {n = S k} (x::xs) =
 
 フィボナッチ数列を求める関数を例に採りましょう。n番目のフィボナッチ数列を求めるナイーブな実装はこうですね？
 
-``` idris
+```idris
 fib1 : Nat -> Nat
 fib1 Z         = 1
 fib1 (S Z)     = 1
@@ -433,7 +433,7 @@ fib1 (S (S k)) = fib1 (S k) + fib1 (k)
 
 これは定義に従っていて正しさが目で見て分かりやすい一方でとても効率が悪いです。そこで先頭から順番に計算していく別の実装を与えたくなります。
 
-``` idris
+```idris
 loop : Nat -> Nat -> Nat -> Nat
 loop prev2 prev Z     = prev
 loop prev2 prev (S k) = loop prev (prev + prev2) k
@@ -444,13 +444,13 @@ fib2 n = loop 0 1 n
 
 すると今度はこの実装が正しいか（fib1と同じ挙動をするか）パッとは自信がもてません。ですがIdrisなら「100%正しい」と言える方法がありますよね。以下の命題を証明すればいいのです。
 
-``` idris
+```idris
 twoFibEq : (n: Nat) -> fib2 n = fib1 n
 ```
 
 実際、これは以下のようにして証明できます。
 
-``` idris
+```idris
 -- 補題
 loopIsLikeFib : (i, j, n: Nat) -> loop (i + j) (i + j + j) n = (loop j (i + j) n) + (loop i j n)
 loopIsLikeFib i j Z     = Refl

@@ -24,19 +24,19 @@ IdrisはIdris 1とIdris 2があります。
 
 まずcabalをインストールするところは変わりません。
 
-``` shell-session
+```shell-session
 $ sudo apt install cabal-install make
 ```
 
 ついでに `libffi` もインストールしておくと便利です。
 
-``` shell-session
+```shell-session
 $ sudo apt install libffi-dev
 ```
 
 cabalのバージョンはこうです。
 
-``` shell-session
+```shell-session
 $ cabal --version
 cabal-install version 3.0.0.0
 compiled using version 3.0.1.0 of the Cabal library
@@ -44,14 +44,14 @@ compiled using version 3.0.1.0 of the Cabal library
 
 cabalは色々と問題が指摘されてきて、CLIが刷新されています。Idrisのwikiとは違い、3系ならば `new-` 系コマンドを使うとよさそうです。
 
-``` shell-session
+```shell-session
 $ cabal new-update
 $ cabal new-install idris
 ```
 
 さきほど `libffi` をインストールした方はFFIを有効にしてビルドしましょう。
 
-``` shell-session
+```shell-session
 $ cabal new-install -f FFI idris
 ```
 
@@ -59,14 +59,14 @@ $ cabal new-install -f FFI idris
 
 完了すれば `~/.cabal/bin/` にidris系コマンドがイントールされます。
 
-``` shell-session
+```shell-session
 $ ls ~/.cabal/bin
 idris  idris-codegen-c  idris-codegen-javascript  idris-codegen-node
 ```
 
 `~/.caba/bin` にパスを通しておきましょう。Bashユーザなら
 
-``` shell-session
+```shell-session
 $ echo 'export PATH=~/.cabal/bin:$PATH' >> ~/.bashrc
 $ source ~/.bashrc
 ```
@@ -84,7 +84,7 @@ $ source ~/.bashrc
 
 前章ではコンパイルコマンドを紹介しました。今一度Hello Worldをコンパイル、実行してみましょう。
 
-``` shell-session
+```shell-session
 $ cat <<'EOF' > HelloWorld.idr
 main : IO ()
 main = putStrLn "Hello World"
@@ -98,7 +98,7 @@ IdrisのコンパイラはデフォルトではCを生成し、裏でそのま�
 
 Idrisには対話環境もあります。こちらはHaskellで実装されています。引数を何も与えずに起動すると対話環境が起動します。
 
-``` shell-session
+```shell-session
 $ idris
      ____    __     _
     /  _/___/ /____(_)____
@@ -121,7 +121,7 @@ Idris> 1 + 1
 
 IO系のものは `:exec` で実行できます。
 
-``` text
+```text
 Idris> :exec putStrLn "Hello REPL"
 Hello REPL
 ```

@@ -75,7 +75,7 @@ Show Result where
 
 こう書けるでしょう。
 
-``` idris:Product.idr
+```idris:Product.idr
 solve : Integer -> Integer -> Result
 solve a b =
   if a * b `mod` 2 == 0
@@ -85,7 +85,7 @@ solve a b =
 
 これを一旦REPLにロードして動作を確認してみましょう。
 
-``` text
+```text
 Idris> solve 3 4
 Even : Result
 Idris> solve 1 21
@@ -97,7 +97,7 @@ Even : Result
 
 よさそうです。それでは出入力を担当するコードを書いてみます。いくつか新要素が出てきます。
 
-``` idris:Product.idr
+```idris:Product.idr
 main : IO ()
 main = do
   line <- getLine
@@ -113,7 +113,7 @@ main = do
 ### `words` 関数
 `words` は文字列を空白で分解する関数です。
 
-``` text
+```text
 Idris> :doc words
 Prelude.Strings.words : String -> List String
     Splits a string into a list of whitespace separated strings.
@@ -129,7 +129,7 @@ Idris> words "1 2 3"
 この関数は `String -> List String` で `:search` すると2番目に出てきます。
 
 
-``` text
+```text
 Idris> :search String -> List String
 = Prelude.Strings.lines : String -> List String
 Splits a string into a list of newline separated strings.
@@ -146,7 +146,7 @@ Splits a string into a list of whitespace separated strings.
 
 `do` 記法内の `let` は普通の `let` と同様に変数を束縛します。ただし末尾の `in` が不要です。
 
-``` idris
+```idris
 do
   l1 <- getLine
   l2 <- getLine
@@ -166,13 +166,13 @@ do
 
 最終行は以下のようになっています。
 
-``` idris:Product.idr
+```idris:Product.idr
  printLn (solve (cast a) (cast b))
 ```
 
 文字列から数値に変換するには `Cast` インタフェースの `cast` 関数が使えます。
 
-``` text
+```text
 Idris> the Integer (cast "1")
 1 : Integer
 Idris> the Integer (cast "-1")
@@ -187,7 +187,7 @@ Idris> the Integer (cast "hoge")
 
 全体の解説が終わったのでプログラムをコンパイル・実行してみましょう。
 
-``` shell-session
+```shell-session
 $ idris -o Product Product.idr
 $ ./Product
 1 2
@@ -204,7 +204,7 @@ Odd
 
 正しくない入力を与えたらどうなるか見てみましょう。
 
-``` shell-session
+```shell-session
 $ ./Product
 1
 *** Product.idr:17:16-25:unmatched case in Main.case block in main at Product.idr:17:16-25 ***
@@ -235,13 +235,13 @@ $ ./Product
 
 例えば入力が以下の場合
 
-``` text
+```text
 101
 ```
 
 1が2つあるので出力は2です。
 
-``` text
+```text
 2
 ```
 
@@ -251,7 +251,7 @@ $ ./Product
 
 すると `solve` は文字のリストを受け取って、 `1` が含まれている数をカウントする関数ということになります。実装は1行です。
 
-``` idris:PlacingMarbles.idr
+```idris:PlacingMarbles.idr
 solve: List Char -> Integer
 solve ss = cast (length (filter (== '1') ss))
 ```
@@ -262,7 +262,7 @@ solve ss = cast (length (filter (== '1') ss))
 
 `length` のあとに `cast` がついているのは `length` の返り値が `Nat` だからです。
 
-``` text
+```text
 Idris> :t length
 Prelude.List.length : List a -> Nat
 ```
@@ -271,7 +271,7 @@ Prelude.List.length : List a -> Nat
 
 ところで、今回の `solve` は括弧が多いですね。括弧を減らせる便利演算子 `$` を紹介しておきます。 `func $ arg` は `func arg` と同じ意味なのですが、 `$` の優先順位が低いので事実上 `$` から式の末尾までの括弧のように振舞います。例えば先程の `solve` は以下のように書き換えられます。
 
-``` idris:PlacingMarbles.idr
+```idris:PlacingMarbles.idr
 solve: List Char -> Integer
 solve ss = cast $ length $ filter (== '1') ss
 ```
@@ -279,7 +279,7 @@ solve ss = cast $ length $ filter (== '1') ss
 
 出入力の部分は以下です。
 
-``` idris:PlacingMarbles.idr
+```idris:PlacingMarbles.idr
 main : IO ()
 main = do
   line <- getLine
@@ -291,14 +291,14 @@ main = do
 
 `unpack: String -> List Char` は文字列を1文字ずつに分解する関数です。
 
-``` text
+```text
 Idris> unpack "101"
 ['1', '0', '1'] : List Char
 ```
 
 それではこのプログラムをコンパイル・実行してみましょう。
 
-``` shell-session
+```shell-session
 $ idris -o PlacingMarbles PlacingMarbles.idr
 $ ./PlacingMarbles
 101
@@ -339,14 +339,14 @@ $ ./PlacingMarbles
 
 例えば以下の入力が与えられたとき
 
-``` text
+```text
 3
 8 12 40
 ```
 
 結果は以下です。
 
-``` text
+```text
 2
 ```
 
@@ -356,7 +356,7 @@ $ ./PlacingMarbles
 
 素因数に2が何個含まれるかはビット操作に強い言語ならCTZ（count trailing zeros）で一発で出せたりするんですが、Idrisにはないのでまずは素因数に2が何個含まれるか数える関数を作るところからはじめましょう。
 
-``` idris:ShiftOnly.idr
+```idris:ShiftOnly.idr
 isEven: Integer -> Bool
 isEven n = n `mod` 2 == 0
 
@@ -371,7 +371,7 @@ countTwos n =
 
 これを使って `solve` は以下のように一気に書けます。
 
-``` idris:ShiftOnly.idr
+```idris:ShiftOnly.idr
 solve: List Integer -> Integer
 solve l = cast $ foldl min 100 $ map countTwos l
 ```
@@ -383,13 +383,13 @@ solve l = cast $ foldl min 100 $ map countTwos l
 
 `foldl` を思い出してもらうと畳み込みをする関数なのでした。例えば `[1, 2, 3]` があったときに `foldl (+) 0 [1, 2, 3]` は以下の計算をします。
 
-``` idris
+```idris
 (((0 + 1) + 2) + 3)
 ```
 
 その結果6を返します。
 
-``` text
+```text
 Idris> foldl (+) 0 [1, 2, 3]
 6 : Integer
 ```
@@ -398,7 +398,7 @@ Idris> foldl (+) 0 [1, 2, 3]
 
 同様のことを `min` で行ったのが `solve` です。 `foldl min 100 [1, 2, 3]` は ``(((100 `min` 1) `min` 2) `min` 3)`` を計算するので結果1が返ります。
 
-``` text
+```text
 Idris> foldl min 100 [1, 2, 3]
 1 : Integer
 ```
@@ -409,7 +409,7 @@ Idris> foldl min 100 [1, 2, 3]
 
 さてさて、 `solve` が定義できたので一旦REPLで試してみましょう。
 
-``` text
+```text
 Idris> solve [8, 12, 40]
 2 : Integer
 Idris> solve [5, 6, 8, 10]
@@ -436,7 +436,7 @@ main = do
 
 それではこれをコンパイル・実行してみましょう。
 
-``` shell-session
+```shell-session
 $ ./ShiftOnly
 3
 8 12 40
@@ -494,7 +494,7 @@ $ ./ShiftOnly
 
 集合は `empty` と `insert` と `contains` があれば十分です。
 
-``` idris:Trained.idr
+```idris:Trained.idr
 -- Set
 
 Set : Type -> Type
@@ -514,7 +514,7 @@ Idrisは純粋関数型言語なので値が変更されることはありませ
 
 キーバリューマップは `fromList` と `lookup` があれば十分です。
 
-``` idris:Trained.idr
+```idris:Trained.idr
 -- Map
 Map : Type -> Type -> Type
 Map k v = List (k, v)
@@ -530,7 +530,7 @@ lookup : Eq k => k -> Map k v -> Maybe v
 
 では `solve` を定義していきましょう。まずは `List a` から `List (Integer, a)` を作る `indexed` 関数です。
 
-``` idris:Trained.idr
+```idris:Trained.idr
 indexed : List a -> List (Integer, a)
 indexed l = loop l 1
 where
@@ -544,7 +544,7 @@ Idrisではループは再帰関数で表わすのでした。ループで持ち
 
 `solve` も `indexed` と同じようにループをするローカル関数を定義して、そちらで実行します。
 
-``` idris:Trained.idr
+```idris:Trained.idr
 solve : List Integer -> Integer
 solve l =
   let map = fromList $ indexed l in
@@ -568,26 +568,26 @@ where
 
 `map` は入力から最初に作ってしまって以後特に増減しません。
 
-``` idris
+```idris
   let map = fromList $ indexed l in
 ```
 
 `set` は初期値は空集合です。
 
-``` idris
+```idris
   let set = empty in
 ```
 
 `cur` は問題文にあるとおり1が入ります。ボタンを押した回数は最初は0です。
 
-``` idris
+```idris
 loop map set 1 0
 ```
 
 
 今まで書いた `solve` は解説したのでそれでは `loop` の実装を見ていきましょう
 
-``` idris:Trained.idr
+```idris:Trained.idr
 where
   loop : Map Integer Integer -> Set Integer -> Integer -> Integer -> Maybe Integer
   loop _    _  2   count = Just count
@@ -603,26 +603,26 @@ where
 
 まず、現在光っているボタンが2なら今までにボタンを押した回数を返して終了です。
 
-``` idris
+```idris
   loop _    _  2   count = Just count
 ```
 
 それ以外の場合はボタンを押します。
 
-``` idris
+```idris
   loop map set cur count =
   -- ...
 ```
 
 押したボタンを記録しましょう。
 
-``` idris
+```idris
     let set = insert cur set in
 ```
 
 すると次のボタンが光るはずです。それを `next` とします。
 
-``` idris
+```idris
     let Just next = lookup cur map | _ => Nothing in
 ```
 
@@ -630,7 +630,7 @@ where
 
 全体として、上記の式は以下のように読み替えられます。
 
-``` idris
+```idris
 case lookup cur map of
   Just next => ....
   _         => Nothing
@@ -640,7 +640,7 @@ case lookup cur map of
 
 さて、プログラムの続きをみていきましょう。もし次に光ったランプが今までに光ったことのあるランプだったらループに突入するのでボタン2に到達することはなく、 `Nothing` です。それ以外の場合は次のボタンを調べるため、ループを回します。
 
-``` idris
+```idris
     if contains next set
     then Nothing
     else loop map set next (count + 1)
@@ -650,7 +650,7 @@ case lookup cur map of
 
 `loop` が終わったので `solve` に戻ります。最終的に、2に到達すればそのときの操作数を、到達できなければ-1を返します。
 
-``` idris
+```idris
   case loop map set 1 0 of
     Just i  => i
     Nothing => -1
@@ -658,7 +658,7 @@ case lookup cur map of
 
 REPLで動作を確認してみましょう。
 
-``` text
+```text
 Idris> solve [3, 1, 2]
 2 : Integer
 Idris> solve [3, 4, 1, 2]
@@ -671,7 +671,7 @@ Idris> solve [3, 3, 4, 2, 4]
 
 それでは入力を受け取る部分を書きます。
 
-``` idris:Trained.idr
+```idris:Trained.idr
 main : IO ()
 main = do
   n <- getLine
@@ -690,7 +690,7 @@ where
 
 `getNIntegers` について少し深堀しましょう。 `getNIntegers` は自然数を受け取って `IO (List Integer)` を返します。
 
-``` idris
+```idris
   getNIntegers : Nat -> IO (List Integer)
 ```
 
@@ -699,13 +699,13 @@ where
 `Z` の場合は 0 要素のリストを返します。 `IO` モナドに入れるために `pure` を使っています。
 
 
-``` idris
+```idris
   getNIntegers Z     = pure []
 ```
 
 `Z` でない場合は `S n` にマッチします。
 
-``` idris
+```idris
   getNIntegers (S n) = do
 ```
 
@@ -713,19 +713,19 @@ where
 
 まずは1行読み込みます。
 
-``` idris
+```idris
     i  <- getLine
 ```
 
 残り `n` 個の自然数を読めばいいので再帰呼び出しします。
 
-``` idris
+```idris
     is <- getNIntegers n
 ```
 
 あとは結合して返すだけです。
 
-``` idris
+```idris
     pure $ (cast i) :: is
 ```
 
@@ -734,7 +734,7 @@ where
 
 それではプログラムが完成したのでコンパイル・実行してみましょう。
 
-``` shell-session
+```shell-session
 $ idris -o Trained Trained.idr
 $ ./Trained
 3

@@ -6,7 +6,7 @@ title: case言語からsimple_case言語へのコンパイル
 
 先にパターンマッチのコンパイルのインターフェースだけ決めてそれ以外の部分を作りましょう。パターンのコンパイルにはスタックを使うので以下のようなインターフェースになります。
 
-``` rust
+```rust
 // Rustの標準ライブラリにスタック型がないので `Vec<T>` で代用する
 type Stack<T> = Vec<T>;
 
@@ -24,7 +24,7 @@ trait PatternCompiler {
 これを用いて、コンパイラは以下のように定義します。
 
 
-``` rust
+```rust
 struct CaseToSimple<PC> {
     symbol_generator: SymbolGenerator,
     pattern_compiler: PC,
@@ -48,7 +48,7 @@ where
 
 コンパイルは、 `case` 式以外は何も難しいことはしません。ただ内容を詰め替えているだけです。
 
-``` rust
+```rust
 impl<PC> CaseToSimple<PC>
 where
     PC: PatternCompiler,
@@ -89,20 +89,20 @@ where
 
 以下のような式を考えます。
 
-``` sml
+```sml
 case <cond> of <pattern> => <arm> | ...
 ```
 
 これを以下のように書き換えます。
 
-``` sml
+```sml
 let tmp = <cond> in
 case tmp of <pattern> => <arm> | ...
 ```
 
 それを実装するとこうなります。
 
-``` rust
+```rust
 impl<PC> CaseToSimple<PC>
 where
     PC: PatternCompiler,

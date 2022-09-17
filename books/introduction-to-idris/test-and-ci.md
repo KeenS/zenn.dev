@@ -43,7 +43,7 @@ assertTrue : Bool -> IO Bool
 
 REPLで動作を確認してみましょう。例えば `assertTrue` であれば以下のように動作します。
 
-``` text
+```text
 *Test/Unit> :exec assertTrue True
 Test: Assert True
 True
@@ -67,7 +67,7 @@ ipkgにもテストのサポートがあります。.ipkgファイルの `tests 
 
 例えばipkgに以下を書いたとします。
 
-``` text
+```text
 tests = Tests.Hoge.test
       , Tests.Fuga.test
 ```
@@ -75,7 +75,7 @@ tests = Tests.Hoge.test
 
 すると裏で以下のようなファイルを生成、実行します。
 
-``` idris
+```idris
 module Test_______
 
 -- 必要ならばここにimportが並ぶ
@@ -93,7 +93,7 @@ namespace Main
 
 パッケージの章で書いたanagramにテストを書いてみましょう。anagramパッケージは以下のようなディレクトリ構成なのでした。
 
-``` shell-session
+```shell-session
 $ tree
 .
 ├── anagram.ipkg
@@ -104,7 +104,7 @@ $ tree
 
 そして `anagram.ipkg` は以下のような内容なのでした。
 
-``` text
+```text
 package anagram
 
 version = "0.1.0"
@@ -124,7 +124,7 @@ pkgs = contrib
 
 まずは失敗するテストを書いてみます。anagram.ipkgを以下のように書き換えます。
 
-``` diff text:anagram.ipkg
+```diff text:anagram.ipkg
  package anagram
  
  version = "0.1.0"
@@ -147,7 +147,7 @@ pkgs = contrib
 
 これに対応して `src/Tests/Anagram.idr` に以下の内容を書きます。
 
-``` idris:src/Tests/Anagram.idr
+```idris:src/Tests/Anagram.idr
 module Tests.Anagram
 
 import Test.Unit
@@ -160,7 +160,7 @@ test = runTests [ assertTrue False ]
 
 ここで `runTests` という関数が出てきました。REPLでドキュメントを読んでみましょう。
 
-``` text
+```text
 *Test/Unit> :doc runTests
 Test.Unit.Runners.NonReporting.runTests : List (IO Bool) -> IO ()
     Run the given set of tests, but don't return the results.
@@ -168,7 +168,7 @@ Test.Unit.Runners.NonReporting.runTests : List (IO Bool) -> IO ()
 
 これを走らせてみましょう。コマンドは `idris --testpkg` です。
 
-``` shell-session
+```shell-session
 $ idris --testpkg anagram.ipkg
 Entering directory `./src'
 Type checking /tmp/idris192645-0.idr
@@ -194,7 +194,7 @@ $ echo $?
 
 実は `runTests` にはもう1つの（オーバーロードされた）実装があります。REPLでドキュメントを確認します。
 
-``` text
+```text
 *Test/Unit> :doc runTests
 Test.Unit.Runners.Reporting.runTests : List (IO Bool) -> IO (List Bool)
     Run the given set of tests and return the results.
@@ -205,7 +205,7 @@ Test.Unit.Runners.Reporting.runTests : List (IO Bool) -> IO (List Bool)
 
 まずはこのようなヘルパ関数を用意します。
 
-``` idris:src/Tests/Anagram.idr
+```idris:src/Tests/Anagram.idr
 -- exitをインポートする
 import System
 
@@ -221,7 +221,7 @@ exitIfFail action = do
 
 `test` 側もこれを使うようにしましょう。
 
-``` diff idris:src/Tests/Anagram.idr
+```diff idris:src/Tests/Anagram.idr
  export
  test : IO ()
 -test = runTests [ assertTrue False ]
@@ -230,7 +230,7 @@ exitIfFail action = do
 
 再度これで走らせてみます。
 
-``` shell-session
+```shell-session
 $ idris --testpkg anagram.ipkg
 Entering directory `./src'
 Type checking ./Tests/Anagram.idr
@@ -257,7 +257,7 @@ $ echo $?
 
 準備が整ったのでテストを書いていきましょう。こんな感じになるんじゃないでしょうか。
 
-``` idris:src/Tests/Anagram.idr
+```idris:src/Tests/Anagram.idr
 import Data.SortedSet
 
 testEmptyQuery : IO Bool
@@ -283,7 +283,7 @@ ipkgの `tests` に書くのは1ファイル1テストにして1ファイル内�
 
 テストを走らせてみましょう。
 
-``` shell-session
+```shell-session
 $ idris --testpkg anagram.ipkg
 Entering directory `./src'
 Type checking ./Tests/Anagram.idr
@@ -313,7 +313,7 @@ CIでテストを走らせつつmasterにpushするときはIdrisdocで生成し
 
 こんな感じで初期化します。
 
-``` shell-session
+```shell-session
 $ git init .
 $ cat <<EOF > .gitignore
 *.ibc
@@ -339,7 +339,7 @@ GitLab CIは `.gitlab-ci.yml` に設定ファイルを置くだけで勝手に�
 
 `.gitlab-ci.yml` に以下のファイルを置きます。
 
-``` yaml:.gitlab-ci.yml
+```yaml:.gitlab-ci.yml
 # インターネットに転がっていたイメージ
 # 気にする人は自分でイメージを作ると良い
 image: mmhelloworld/idris:1.3.2
@@ -377,7 +377,7 @@ Actionsではテストとドキュメントの生成でファイルが分かれ�
 
 まずはテストの方。名前はなんでもいいんですが、 `ci.yml` という名前で作りました。
 
-``` yaml:.github/workflows/ci.yml
+```yaml:.github/workflows/ci.yml
 name: Run tests
 
 on:
@@ -396,7 +396,7 @@ jobs:
 
 次はドキュメントの方。`doc.yml` という名前で作りました。
 
-``` yaml:.github/workflows/doc.yml
+```yaml:.github/workflows/doc.yml
 name: Generate doc
 
 on:

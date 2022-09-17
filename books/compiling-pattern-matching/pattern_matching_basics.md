@@ -152,7 +152,7 @@ fun isWeekend w = case w of
 
 この `isWeekend` に `Sunday` を与えると、一番最初の節にマッチするので `true` が返ります。 `Friday` を与えると6番めの節にマッチするので、 `false` が返ります。
 
-``` console
+```console
 # isWeekend Sunday; ⏎
 val it = true : bool
 # isWeekend Friday; ⏎
@@ -196,19 +196,19 @@ val name = case p1 of MkPerson (name, age) => name
 
 ところで、case式は変数を導入するのでスコープを作ります。つまり、外にある変数と同じ名前の変数を導入すると、外にあるものをシャドーイングします。たとえば、以下のように `case` の中で外にあるのと同じ `x` という変数を導入した場合、腕の式では `case` で導入されたほうの `x` が使われます。
 
-``` sml
+```sml
 fun first x = case x of
                   (x, y) => x
 ```
 
 同じ節の中であれば導入に順番はありません。たとえば、以下のようにパターン内で同じ名前の変数を導入した場合はコンパイルエラーになります。
 
-``` sml
+```sml
 fun first' x = case x of
                   (x, x) => x
 ```
 
-``` console
+```console
 algebraic_data_types.sml:77.22-77.22 Error:
   (name evaluation "201v") duplicate variable name: x
 ```
@@ -227,7 +227,7 @@ fun isSequence s = case s of
 
 値だけでなくパターンも閉じているので、ここで`stone`型の定義に存在しない `Mentos` に対するパターンを混入させるとコンパイルエラーになります。
 
-``` sml
+```sml
 fun badIsSequence s = case s of
                        (Full Black, Full Black, Full Black) => true
                     |  (Full White, Full White, Full White) => true
@@ -236,7 +236,7 @@ fun badIsSequence s = case s of
                     | other => false
 ```
 
-``` console
+```console
 (interactive):35.24-35.27 Error:
   (type inference 050) operator and operand don't agree
   operator domain: stone
@@ -272,7 +272,7 @@ fun printPathname prefix e =
 
 受け取った`entry`型の値が`File name`というパターンにマッチするときは、マッチした値が`name`変数に入っているので、それに文字列結合のための`^`演算子を使ってプレフィクスと改行を付け、`print`関数で表示してます（4行め）。`Directory (name, entries)`というパターンにマッチするときは、`name`変数の値に「`"/"`」を付けたものを新しいプレフィクスとし、`entries`の各エントリに対してライブラリ関数の`app`で再帰的に`printPathname`を繰り返し適用しています。
 
-``` console
+```console
 # printPathname "" fs; ⏎
 ./src/main.rs
 ./src/lib.rs
@@ -286,7 +286,7 @@ val it = () : unit
 
 ここでリスト4.8の `isWeekend` に再登場してもらいます。
 
-``` sml
+```sml
 fun isWeekend w = case w of
                       Sunday => true
                     | Tuesday => false
@@ -298,7 +298,7 @@ fun isWeekend w = case w of
 
 もし月曜日のことをすっかり忘れて以下のように書いたらどうなるでしょう。
 
-``` sml
+```sml
 fun isWeekend w = case w of
                       Sunday => true
                     | Tuesday => false
@@ -310,7 +310,7 @@ fun isWeekend w = case w of
 
 これは警告が出ます。
 
-``` console
+```console
 (interactive):119.18-125.37 Warning: match nonexhaustive
 (interactive):119.18-125.37 Warning: match nonexhaustive
       Sunday  => ...
@@ -325,7 +325,7 @@ fun isWeekend w = case w of
 
 もし警告を無視して、この間違った `isWeekend` に `Monday` を渡すと、次のように例外 `Match` が出ます。
 
-``` console
+```console
 # isWeekend Monday; ⏎
 uncaught exception Match at (interactive):119
 ```
@@ -343,7 +343,7 @@ fun zip xs ys = case (xs, ys) of
 
 リスト4.14の定義は、一見すると良さそうですが、このコードをコンパイルすると次のような警告が出ます。リスト4.14のパターンマッチでは `([], y::ys)` や `(x::xs, [])` の場合が考慮できていないからです。
 
-``` console
+```console
 algebraic_data_types.sml:103.16-105.56 Warning: match nonexhaustive
       (nil , nil ) => ...
       (:: (x, xs), :: (y, ys)) => ...
@@ -353,7 +353,7 @@ algebraic_data_types.sml:103.16-105.56 Warning: match nonexhaustive
 #### リストと代数的データ型
 リストに対して `::` と `nil` でパターンマッチできることからお気づきかもしれませんが、リストも代数的データ型の1つです。SMLの規格では `::` や `nil` が再定義不能になっているので、実際にこのように書いてコンパイルすることはできませんが、概ね以下のような定義になります。リストに対してパターンマッチするときに意識してみると、コードの見通しが良くなるかもしれません。
 
-``` sml
+```sml
 datatype 'a list = :: of 'a * 'a list | nil
 
 infixr 5 ::
@@ -381,7 +381,7 @@ fun isWeekend w = case w of
 
 [^matchredundant]: エラーを出すのはSML♯での挙動です。SMLの仕様ではエラーでも警告でもよいとされています。網羅性も同様の扱いです。
 
-``` console
+```console
 (interactive):132.18-140.35 Error: match redundant
       Sunday  => ...
       Monday  => ...
@@ -453,7 +453,7 @@ fun isWeekend' Sunday = true
 
 パターンマッチは引数のどこででもできるので、 `printPathname` のように第2引数でパターンマッチする関数もこの構文で書けます。
 
-``` sml
+```sml
 fun printPathname prefix (File name) = print (prefix ^ name ^ "\n")
   | printPathname prefix Directory (name, entries) =
     let val prefix = prefix ^ name ^ "/"
@@ -462,7 +462,7 @@ fun printPathname prefix (File name) = print (prefix ^ name ^ "\n")
 
 あるいは `zip` のように複数個の引数でパターンマッチする関数も書けます。
 
-``` sml
+```sml
 fun zip _ [] = []
   | zip [] _ = []
   | zip (x::xs) (y::ys) = (x, y) :: zip xs ys
@@ -470,13 +470,13 @@ fun zip _ [] = []
 
 また、引数でのパターンマッチがあるので、タプルを使って次のような見た目の関数定義も書けます。他の言語において複数の引数を取る関数を定義するときのような見た目ですね。
 
-``` sml
+```sml
 fun add(x, y) = x + y
 ```
 
 `val` による変数束縛の導入でもパターンマッチが使えます。実は本記事の冒頭で説明した`val`は、変数パターンへのマッチだったのです。
 
-``` sml
+```sml
 val (x, y, z) = (1, 2, 3)
 ```
 
@@ -487,7 +487,7 @@ val Sunday = Sunday
 ```
 *SundayパターンにSundayをマッチ*
 
-``` console
+```console
 (interactive):149.4-149.18 Warning: binding not exhaustive
       Sunday  => ...
 ```
@@ -500,7 +500,7 @@ val Sunday = Monday
 *SundayパターンにMondayをマッチ*
 
 
-``` console
+```console
 (interactive):152.4-152.18 Warning: binding not exhaustive
       Sunday  => ...
 uncaught exception Bind at (interactive):152

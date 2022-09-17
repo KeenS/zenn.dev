@@ -51,7 +51,7 @@ BITMAPFILEHEADERは以下の構造をしています。
 
 今回の形式だとカラーパレットがないのでオフセットが固定値になります。
 
-``` text
+```text
        0      1      2      3      4      5      6      7
      +-------------+---------------------------+-------------+
 0x00 | 0x42   0x4d |           size            | 0x00   0x00 |
@@ -84,7 +84,7 @@ BITMAPINFOHEADERは以下の構造をしています。
 
 すると残るパラメータはビットマップの横幅、ビットマップの縦幅、画像データサイズです。
 
-``` text
+```text
        0      1      2      3      4      5      6      7
                                                +--------------
 0x08                                      ...  | 0x00   0x00
@@ -161,7 +161,7 @@ Idris> :module Data.Vect
 
 …とその前に色を表わす型、 `Color` を定義しておきます。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 public export
 Color : Type
 Color = (Bits8, Bits8, Bits8)
@@ -173,7 +173,7 @@ Color = (Bits8, Bits8, Bits8)
 
 さて、色も定義し終わって `BitMap` レコードを定義します。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 -- importはファイルの先頭に書かないといけないので注意。 `Color` より前に置く。
 import Data.Vect
 
@@ -193,7 +193,7 @@ where
 
 `BitMap` の定義から直ちに `fromData` のような関数は書けますね。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 export
 fromData : Vect y (Vect x Color) -> BitMap x y
 fromData img = MkBitMap img
@@ -203,7 +203,7 @@ fromData img = MkBitMap img
 
 ところで、Idrisは関数型言語なので関数は一級市民です。上記の関数は仮引数を取らずに以下のようにも書けます。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 export
 fromData : Vect y (Vect x Color) -> BitMap x y
 fromData = MkBitMap
@@ -227,7 +227,7 @@ fromData = MkBitMap
 
 正確な用語は分からないのですが、Idrisでは型を実行時に取り出すことができます。これをひとまずtype reificationと呼ぶことにします。どういうことかというと、普通の言語で上記 `BitMap x y` から縦幅を取り出そうとすると以下のようなコードを書くことになるかと思います。
 
-``` idris
+```idris
 getY : BitMap x y -> Int
 getY b = cast $ length $ imgData b
 ```
@@ -238,7 +238,7 @@ getY b = cast $ length $ imgData b
 
 以下のようなコードで取り出せます。
 
-``` idris
+```idris
 getY : BitMap x y -> Int
 getY {y} _ = cast y
 ```
@@ -249,7 +249,7 @@ getY {y} _ = cast y
 
 まず、 `{y}` と書いてあるのは `{y = y}` の省略形です。 `{パラメータ名 = 変数名}` の構文です。型にある変数 `y` を値にある変数 `length` に束縛するには以下のように書きます。
 
-``` idris
+```idris
 getY : BitMap x y -> Int
 getY {y = length} _ = cast length
 ```
@@ -258,21 +258,21 @@ getY {y = length} _ = cast length
 
 暗黙のパラメータを省略せずに書くとこうなります。
 
-``` idris
+```idris
 getY : {x: Nat} -> {y: Nat} -> BitMap x y -> Int
 getY {y = length} _ = cast length
 ```
 
 暗黙のパラメータは `{変数名: 型}` の構文で定義します。複数ある場合は上記のように1つづつ書くか、型が同じなら `{変数名1, 変数名2...: 型}` とカンマで区切って書いてもよいです。
 
-``` idris
+```idris
 getY : {x, y: Nat} -> BitMap x y -> Int
 getY {y = length} _ = cast length
 ```
 
 暗黙のパラメータは普段はコンパイラが勝手に埋めてくれるので気にしなくていいんですが、手で与えることもできます。
 
-``` text
+```text
 Idris> :t getY
 getY : BitMap x y -> Int
 Idris> :t getY {x = 1} {y = 1}
@@ -281,7 +281,7 @@ getY : BitMap 1 1 -> Int
 
 さて、ちょっと色々情報を詰め込みすぎましたかね。さしあたっては `getX` と `getY` は以下のように定義できるとだけ了解しておいて下さい。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 getX : {x: Nat} -> BitMap x y -> Int
 getX {x} _ = cast x
 
@@ -299,7 +299,7 @@ getY {y} _ = cast y
 
 まず、切り上げるときのパディングサイズの計算はこうできますね。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 padSize: Nat -> Int
 padSize x = (4 - ((cast $ x * 3) `mod` 4)) `mod` 4
 ```
@@ -308,7 +308,7 @@ padSize x = (4 - ((cast $ x * 3) `mod` 4)) `mod` 4
 
 これを使って `BitMap x y` からデータサイズを計算する関数は以下のように書けます。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 dataSize : {x, y: Nat} -> BitMap x y-> Int
 dataSize {x} {y} _ =
   let rowSize = (cast $ x * 3) + (padSize x) in
@@ -319,7 +319,7 @@ dataSize {x} {y} _ =
 
 ファイルサイズは簡単に計算できます。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 offset : Int
 offset = 14 + 40
 
@@ -339,7 +339,7 @@ fileSize bitmap = offset + (dataSize bitmap)
 ファイルに書き出せるバッファは [`Data.Buffer`](https://www.idris-lang.org/docs/current/base_doc/docs/Data.Buffer.html) に定義されているのでインポートします。
 
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 import Data.Buffer
 ```
 
@@ -347,7 +347,7 @@ import Data.Buffer
 
 さて、 `Buffer` のAPIなんですが、主に使うのは `setByte : Buffer -> Int -> Bits8 -> IO ()` と `setInt : Buffer -> Int -> Int -> IO ()` です。これらは書き込む場所を引数にとりますね。我々の用途では1バイトずつずらしながら書き込んでいくので `loc` を持って回らないといけません。それはちょっと面倒なので `Buffer` と `loc` をまとめたデータ型を定義しておきましょう。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 data Output = MkOutput Buffer Int
 ```
 
@@ -369,7 +369,7 @@ writeInt (MkOutput buffer loc) int = do
 
 複数のバイトを受け取って書き出す `writeBytes` も定義しましょう。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 writeBytes : Output -> List Bits8 -> IO Output
 writeBytes o []            = pure o
 writeBytes (MkOutput buffer loc) (b::bs) = do
@@ -396,7 +396,7 @@ writeBytes (MkOutput buffer loc) (b::bs) = do
 これに対応して、画像フォーマットを書き出すAPIは以下のような見た目になります。
 
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 export
 writeBitMap : File -> BitMap x y -> IO ()
 writeBitMap f bitmap = do
@@ -415,7 +415,7 @@ writeBitMap f bitmap = do
 `writeHeader` はパラメータはファイルサイズしかなかったので直線的なコードになります。
 
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 writeHeader : Output -> BitMap x y -> IO Output
 writeHeader o bitmap = do
   -- file type
@@ -437,7 +437,7 @@ writeHeader o bitmap = do
 
 `writeInfoHeader` も `writeHeader` に続いて直線的なコードです。パラメータが横幅、高さ、データサイズだけです。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 writeInfoHeader : Output -> BitMap x y -> IO Output
 writeInfoHeader o bitmap = do
   -- header size
@@ -474,7 +474,7 @@ writeInfoHeader o bitmap = do
 1行を（パディングをせずに）書き出す処理はこう書けます。
 
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 writeRow : Output -> Vect m Color -> IO Output
 writeRow o []      = pure o
 writeRow o ((r, g, b)::ds) = do
@@ -487,7 +487,7 @@ writeRow o ((r, g, b)::ds) = do
 `writeRow` を使って全ての画像データを書き出す処理はこう書けます。
 
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 writeImgData : Output -> BitMap x y -> IO Output
 writeImgData o bitmap = loop o $ imgData bitmap
 where
@@ -503,7 +503,7 @@ where
 
 ここで使った `replicate: Nat -> a -> List a` は [`Prelude.List`](https://www.idris-lang.org/docs/current/base_doc/docs/Prelude.List.html)で定義されている関数で、`x` が `n` 個あるリストを作ります。
 
-``` text
+```text
 Idris> :t replicate
 replicate : Nat -> a -> List a
 Idris> :doc replicate
@@ -528,7 +528,7 @@ Idris> replicate 3 "hoge"
 
 一気に全体を載せてしまうとこうなります。
 
-``` idris:EasyBitMap.idr
+```idris:EasyBitMap.idr
 export
 writeBitMap : File -> BitMap x y -> IO ()
 writeBitMap f bitmap = do
@@ -550,7 +550,7 @@ writeBitMap f bitmap = do
 
 先程のコードを `EasyBitMap.idr` に保存していたとします。`EasyBitMapMain.idr` を作成して呼び出してみましょう。
 
-``` idris:EasyBitMapMain.idr
+```idris:EasyBitMapMain.idr
 module Main
 
 import Data.Vect
@@ -561,7 +561,7 @@ import EasyBitMap
 
 画像データは手書きします。
 
-``` idris:EasyBitMapMain.idr
+```idris:EasyBitMapMain.idr
 bitMapData : Vect 16 (Vect 16 Color)
 bitMapData = [
     [w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w],
@@ -592,7 +592,7 @@ where
 
 さて、データはこれを使うとして、 `main` はこう書きます。
 
-``` idris:EasyBitMapMain.idr
+```idris:EasyBitMapMain.idr
 main : IO ()
 main = do
   [_, file] <- getArgs
@@ -608,7 +608,7 @@ main = do
 
 それではこれをコンパイル・実行してみましょう。
 
-``` shell-session
+```shell-session
 $ idris -o EasyBitMapMain EasyBitMapMain.idr
 $ ./EasyBitMapMain test.bmp
 ```
@@ -647,7 +647,7 @@ https://gitlab.com/-/snippets/2050741
 
 デバッグ用途にどうぞ
 
-``` text
+```text
 00000000: 424d 3603 0000 0000 0000 3600 0000 2800  BM6.......6...(.
 00000010: 0000 1000 0000 1000 0000 0100 1800 0000  ................
 00000020: 0000 0003 0000 0000 0000 0000 0000 0000  ................

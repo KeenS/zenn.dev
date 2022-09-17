@@ -4,7 +4,7 @@ title: コンパイルの動作例
 
 せっかく動くコンパイラを構築したのでいくつか入力をあたえて動かしてみましょう。全体としては、以下のような流れで、型情報や式を用意したあと `case` -> `simple_case` 、 `simple_case` -> `case` のコンパイルと進みます。
 
-``` rust
+```rust
 let mut type_db = case::TypeDb::new();
 // 型情報の登録
 
@@ -116,7 +116,7 @@ let s = compiler.compile(sc);
 
 次に、差分の出る `zip` の（ような）例を見てみましょう。元のSMLの式は以下のようなものです。
 
-``` sml
+```sml
 datatype list = Nil | Cons () * List
 case (Nil, Nil) of
     (Nil, _) => ()
@@ -126,7 +126,7 @@ case (Nil, Nil) of
 
 このデータ型を表現するのは少し労力が必要です。タプルにも名前が必要な設計なので、ここで登場する3種類のタプルもそれぞれ定義してあげないといけないからです。
 
-``` rust
+```rust
 // ()
 type_db.register_tuple(TypeId::new("unit"), vec![]);
 // Consの引数
@@ -160,7 +160,7 @@ type_db.register_adt(
 
 これを元に `zip` （のようなもの）を記述します。
 
-``` rust
+```rust
 let expr = {
     use case::*;
     use Expr::*;

@@ -80,7 +80,7 @@ showTime t with (toTime t)
 
 これからViewという面白い機能に触れるんですが、その前に依存パターンマッチを紹介しましょう。Idrisでは型パラメータなども `{}` で取り出せることは説明しましたね？例えば `Vect n a` の `n` は以下のように取り出せます。
 
-``` idris
+```idris
 length : Vect n a -> Nat
 length {n = n} _ = n
 ```
@@ -97,7 +97,7 @@ append {n=S k} (x :: xs) ys = append (x :: xs) ys
 
 証拠に例えば `n = S k` かつ `Vect` が `[]` のパターンを追加するとエラーになります。
 
-``` idris
+```idris
 append : Vect n a -> Vect m a -> Vect (n + m) a
 append {n=Z}   []        ys = ys
 append {n=S k} []        ys = append (x :: xs) ys
@@ -106,7 +106,7 @@ append {n=S k} (x :: xs) ys = append (x :: xs) ys
 
 これをコンパイルすると以下のエラーが出ます。
 
-``` text
+```text
 - + Errors (1)
  `-- withAndView.idr line 48 col 0:
      When checking left hand side of append:
@@ -131,7 +131,7 @@ append {n=S k} (x :: xs) ys = append (x :: xs) ys
 
 `Data.List.Views` には `List` 型に対するViewがいくつかあります。その中でも `Split` Viewを使ってみましょう。 `Split` は `List` に対するViewで、型の引数に `List` 型の値をとります。
 
-``` text
+```text
 Data type Data.List.Views.Split : List a -> Type
     View for splitting a list in half, non-recursively
     
@@ -156,7 +156,7 @@ Constructors:
 コンストラクタが `SplitNil` 、 `SplitOne` 、`SplitPair` の3つあって、それぞれの型が `Split []` 、 `Split [x]` 、 `Split (x :: xs ++ y :: ys)` ですね。特に3つ目の型 `Split (x :: xs ++ y :: ys)` に注目して下さい。引数のリストが `(x :: xs ++ y :: ys)` と計算式になっていますね。この型に連動して値の方も変わります。実際に使ってみた方が分かりやすいでしょうか。`Split` の値は `split` 関数で作れます。使ってみましょう。
 
 
-``` idris
+```idris
 splitView : List a -> List a
 splitView l with (split l)
   splitView []                   | SplitNil  = []
@@ -168,7 +168,7 @@ splitView l with (split l)
 
 例えばこれを使ってマージソートが書けるでしょう。
 
-``` idris
+```idris
 mergeSort : Ord a => List a -> List a
 mergeSort l with (split l)
   mergeSort []               | SplitNil = []
@@ -185,7 +185,7 @@ Viewの中には再帰的に定義されるものがあります。例えば `Sn
 
 `snocList` で `SnocList` のViewを作れます。Viewは今までの知識で書くとこうなりますよね？
 
-``` idris
+```idris
 reverseList : List a -> List a
 reverseList l with (snocList l)
   reverseList []          | Empty    = []
@@ -198,7 +198,7 @@ reverseList l with (snocList l)
 
 1つの方法は補助関数を作ることです。 `with` 構文を使わずに関数の引数で渡してあげれば再帰関数として `Snoc` の残りの値もs再利用できます。
 
-``` idris
+```idris
 reverseList : List a -> List a
 reverseList l = helper l (snocList l)
 where
@@ -209,7 +209,7 @@ where
 
 これでもいいんですが、ちょっと野暮ったいですよね？Idrisには `with` で使うViewを外から差し込む構文があります。`関数 引数 | view` という構文です。
 
-``` idris
+```idris
 reverseList : List a -> List a
 reverseList l with (snocList l)
   reverseList []          | Empty    = []
@@ -225,7 +225,7 @@ reverseList l with (snocList l)
 `with` 使ってる途中で追加の `with` をはじめることもできます。
 
 
-``` idris
+```idris
 isSuffix : Eq a => List a -> List a -> Bool
 isSuffix l1 l2 with (snocList l1)
   isSuffix []          _  | Empty = True

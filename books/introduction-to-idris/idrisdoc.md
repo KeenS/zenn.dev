@@ -58,7 +58,7 @@ Docs.appendV : (xs : Vect n a) -> (ys : Vect m a) -> Vect (add n m) a
 ドキュメントコメントではマークダウン記法が使えます。
 
 例：ドキュメントコメントにマークダウンを使うコード
-``` idris
+```idris
 ||| 数値を足す
 |||
 ||| 足し算はめちゃくちゃすごいよね。この段落はOverviewに含まれない。
@@ -113,7 +113,7 @@ Docs.add : (n : Nat) -> (m : Nat) -> Nat
 
 ドキュメント内にOverviewという用語が登場していますが、これは `:apropos` や `:search` で検索したときに表示されるドキュメントのことです。
 
-``` text
+```text
 Idris> :apropos add
 ...
 
@@ -128,7 +128,7 @@ Docs.add : Nat -> Nat -> Nat
 さて、ドキュメントを書けるのはトップレベルの宣言以外にもデータ型のコンストラクタなどもあります。
 
 
-``` idris
+```idris
 ||| シンプルなデータ型
 data Ty =
   ||| Unit型
@@ -139,7 +139,7 @@ data Ty =
 
 GADTを使うと名前付きパラメータが使えるのでコンストラクタの引数のドキュメントも書けるようになります。
 
-``` idris
+```idris
 ||| 型文脈での場所を指す
 data Elem : Vect n Ty -> Ty -> Type where
   Here : {ts : Vect n Ty} -> Docs.Elem (t::ts) t
@@ -172,7 +172,7 @@ data Term : (ctxt : Vect n Ty) -> (ty : Ty) -> Type where
 
 もちろん、レコードにもドキュメントコメントが書けます。
 
-``` idris
+```idris
 ||| フィールドやコンストラクタを含めてレコードにもドキュメントが書けるよ
 record Yummy where
   ||| Yummyを作る
@@ -186,7 +186,7 @@ record Yummy where
 
 それぞれ以下のように表示されます。
 
-``` text
+```text
 Idris> :doc Term
 Data type Docs.Term : (ctxt : Vect n Ty) -> (ty : Ty) -> Type
     もうちょっと面白いデータ型
@@ -255,7 +255,7 @@ REPLからは `:mkdoc` コマンドでHTMLを生成できます。その際、 `
 
 例えば `Docs.idr` を読み込みつつREPLを開き、 `:mkdoc Docs` でHTMLを生成するとこうなります。
 
-``` shell-session
+```shell-session
 $ idris Docs.idr
      ____    __     _
     /  _/___/ /____(_)____
@@ -291,7 +291,7 @@ $ tree
 
 そして `Docs.ipkg` には以下の記述をします。
 
-``` text
+```text
 package Docs
 
 version = "0.1.0"
@@ -303,7 +303,7 @@ modules = Docs
 
 あとは `idris --mkdoc Docs.ipkg` を打つだけです。
 
-``` shell-session
+```shell-session
 $ idris --mkdoc Docs.ipkg
 Type checking src/Docs.idr
 $ ls
@@ -316,13 +316,13 @@ Docs.ipkg  docs_doc  src
 
 ちょっと何に使うのか分かってないのですが、ドキュメントをインストールすることもできます。 `--installdoc IPKG` のコマンドです。
 
-``` shell-session
+```shell-session
 $ idris --installdoc Docs.ipkg
 ```
 
 これは `idris --docdir` で表示される場所にドキュメントをインストールします。
 
-``` shell-session
+```shell-session
 $ ls $(idris --docdir)
 base  contrib  docs  effects  prelude  pruviloj
 ```
@@ -331,7 +331,7 @@ base  contrib  docs  effects  prelude  pruviloj
 
 強いていうなら以下のようにワンライナーサーバを立てるくらいでしょうか。
 
-``` shell-session
+```shell-session
 $ ruby -run  -e httpd $(idris --docdir)
 ```
 

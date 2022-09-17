@@ -157,6 +157,10 @@ take : (n : Nat) -> Vect (n + m) elem -> Vect n elem
 
 他には定理証明支援系とプログラミング言語の違いとして停止するか分からないプログラムを書ける、コンパイラが普通にバイナリを吐くことを想定して作られている、FFIなどが比較的楽に行えるなどが挙げられます。
 
+他には以下のサイトも参考資料として紹介しておきます。
+
+* [Agda vs. Coq vs. Idris | Meta-cedille blog](https://whatisrt.github.io/dependent-types/2020/02/18/agda-vs-coq-vs-idris.html)
+
 ## Haskellとの違い
 
 一番の違いは型システムです。文法もちょくちょく違いますし、 `String` と `List Char` が別の型だったりします。また、評価戦略がHaskellでは非正格なのに対してIdrisでは正格です。非正格だと `_|_`（`undefined`）を上手く扱えるメリットがありますが、定理証明もやるIdrisではそもそも `_|_` を排除する方向に言語が設計されています（ない訳ではないですが）。であれば実行方法がシンプルな正格評価の方が嬉しいですよね。

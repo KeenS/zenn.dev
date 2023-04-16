@@ -335,7 +335,7 @@ map f (Just x) = Just (f x)
 ```
 
 この `map` を使えば `Just` の方の値を制御できます。
-つ
+
 次は `fromMaybe` です。 `fromMaybe` は `Maybe a` が `Just x` なら `x` を、 `Nothing` なら引数で与えた `a` の値を返します。
 
 例： `fromMaybe` の動作例

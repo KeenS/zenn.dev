@@ -41,7 +41,7 @@ Idris> if Nothing then (+1) else -1
 
 # `do` 記法
 
-`do` 記法もシンタックシュガーです。
+`do` 記法もシンタックスシュガーです。
 以下の `do` 式は
 
 ```idris
@@ -105,8 +105,8 @@ addDo xs ys = do
 例えば `Maybe` に対しても使えます。
 
 ```idris
-addComplehensions : Maybe Int -> Maybe Int -> Maybe Int
-addComplehensions xs ys = [x + y | x <- xs, y <- ys]
+addComprehensions : Maybe Int -> Maybe Int -> Maybe Int
+addComprehensions xs ys = [x + y | x <- xs, y <- ys]
 ```
 
 ガード式も書けるんですが、Alternativeに触れないといけなくなるのでここでは流します。

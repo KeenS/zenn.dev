@@ -198,7 +198,7 @@ transposeMat: (matrix: Vect n (Vect m a)) -> Vect m (Vect n a)
 ```
 
 
-Define: `addclase` と `casesplit` を適用します。
+Define: `addclause` と `casesplit` を適用します。
 
 ```idris
 transposeMat: (matrix: Vect n (Vect m a)) -> Vect m (Vect n a)

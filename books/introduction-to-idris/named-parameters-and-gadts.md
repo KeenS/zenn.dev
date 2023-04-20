@@ -75,7 +75,7 @@ data Vect : (len : Nat) -> (elem : Type) -> Type where
   (::) : (x : elem) -> (xs : Vect len elem) -> Vect (S len) elem
 ```
 
-`Nil` は `Vect Z elem` と長さ0であることが指定されています。`(::)` は `(x : elem) -> (xs : Vect len elem) -> Vect (S len) elem` と長さ `len` の `xs` に `x` を加えて長さ `S len` になることが指定されています。こうやってGADTで長さを制限することで `Vect` は長さを正確に表現するデータ型となっているのっです。
+`Nil` は `Vect Z elem` と長さ0であることが指定されています。`(::)` は `(x : elem) -> (xs : Vect len elem) -> Vect (S len) elem` と長さ `len` の `xs` に `x` を加えて長さ `S len` になることが指定されています。こうやってGADTで長さを制限することで `Vect` は長さを正確に表現するデータ型となっているのです。
 
 ようやくIdrisらしさが出てきましたね。
 

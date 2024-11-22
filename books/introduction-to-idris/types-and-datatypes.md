@@ -246,7 +246,7 @@ record { age $= (+ 1), name = "anonymous" }
 
 ```idris
 incAge: Person -> Person
-incAge = record { age $= $(+ 1) }
+incAge = record { age $= (+ 1) }
 ```
 
 なので実際に使うときは `record { age $= (+ 1) } p` のようにレコード `p` を引数として渡すことになります。
